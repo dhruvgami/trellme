@@ -1,0 +1,32 @@
+{
+  "name": "trellme",
+  "version": "1.0.0",
+  "description": "Trello info mailer",
+  "keywords": [
+    "trello",
+    "mailer"
+  ],
+  "author": "Yoshikazu Noda <noda.yoshikazu@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dhruvgami/trellme.git"
+  },
+  "dependencies": {
+    "express": "3.x",
+    "should": "~1.2.2",
+    "underscore": "~1.4.4",
+    "coffee-script": "~1.6.2",
+    "passport": "~0.1.16",
+    "passport-local": "~0.1.6"
+  },
+  "devDependencies": {
+    "should": ">= 0.0.1"
+  },
+  "main": "lib/app.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "engines": {
+    "node": ">= 0.8.x"
+  }
+}
