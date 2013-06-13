@@ -11,7 +11,7 @@ module.exports = class dbconnection
     @dbopts:
         host:     "127.0.0.1",
         port:     27017,
-        db:       "trello-mailer",
+        db:       "trellme",
 
     #
     # Creates Db instance and save it as a class variable.

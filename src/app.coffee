@@ -13,12 +13,14 @@ fs               = require("fs")
 dbconnection     = require("./models/dbconnection")
 Users            = require("./models/users")
 Tokens           = require("./models/tokens")
-Positions        = require("./models/positions")
 http             = require("http")
 path             = require("path")
 passport         = require("passport")
 LocalStrategy    = require("passport-local").Strategy
 TrelloOAuth      = require("./helpers/trello-oauth")
+TrelloApi        = require("./helpers/trello-api")
+
+
 
 # Database objects
 db_users = new Users()
@@ -243,15 +245,41 @@ app.get "/app/auths/trello_callback", (req, res) ->
                 if err
                     res.status 500; res.send '<script>window.close();</script>'
                 else
-                    res.status 200; res.send '<script>window.close();</script>'
+                    res.status 200; res.send '<script>window.close();</script>' # All good!!
 
     else if typeof req.query.denied isnt 'undefined'
         res.status 200; res.send '<script>window.close();</script>'
     else
         res.status 404; res.send '<script>window.close();</script>'
 
+#
+# Revoke Trello oauth - Remove access_token from user.
+# 
+app.delete '/app/auths/delete', (req, res)->
+    null
 
 
+
+#
+# Trello API access test APIs
+#
+
+# Get Trello stuff of a user
+#   First param: boards, lists, cards
+#   Second param: username (email)
+# 
+app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+    db_users.findByEmail {username: req.params[1]}, (err, user)=>    
+        if err
+            res.status 404; res.send "No such user"
+        else
+            (new TrelloApi()).request req.params[0], user, {}, (err, result) =>
+                if err
+                    res.status err
+                    res.send result
+                else
+                    res.status 200
+                    res.send result  # Already JSON
 
 #=================================================
 #

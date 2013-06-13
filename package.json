@@ -17,7 +17,8 @@
     "underscore": "~1.4.4",
     "coffee-script": "~1.6.2",
     "passport": "~0.1.16",
-    "passport-local": "~0.1.6"
+    "passport-local": "~0.1.6",
+    "oauth": "~0.9.10"
   },
   "devDependencies": {
     "should": ">= 0.0.1"

@@ -45,7 +45,7 @@ module.exports = class Tokens extends dbconnection
         hash = crypto.createHash('sha512');
         hash.update(user._id.toString())
         hash.update(((new Date()).getTime()).toString())
-        hash.digest('base64')
+        hash.digest('hex')
         #user._id.toString()+((new Date()).getTime()).toString()
 
     #
@@ -74,4 +74,5 @@ module.exports = class Tokens extends dbconnection
                 now = new Date()
                 col.findOne {'token': token, 'expire': {'$gt': now }}, (err, wtf)=>
                     p_client.close()
+                    #console.log(wtf)
                     fn(err, wtf)  # null or a token record

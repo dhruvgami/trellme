@@ -7,22 +7,19 @@ fs    = require("fs")
 http = require('http')
 Users = require('../models/users')
 
-
-
-
-
+config = JSON.parse(fs.readFileSync("config/config.json"))
+    # These are in the config.json
+    #requestURL:    "https://trello.com/1/OAuthGetRequestToken"
+    #accessURL:     "https://trello.com/1/OAuthGetAccessToken"
+    #authorizeURL:  "https://trello.com/1/OAuthAuthorizeToken"
+    #appName:       "Trellme"
+    #key:           "80e7f11a72d431dee0e0db0a52631180"
+    #secret:        "33c1455220cd7d821bdac09dc8891fc66086359f8936169de2a4d3d56ea2f583"
 
 module.exports = class TrelloOAuth
     oauth: null     # OAuth object
     oauth_token: null
     oauth_token_secret: null
-
-    requestURL:    "https://trello.com/1/OAuthGetRequestToken"
-    accessURL:     "https://trello.com/1/OAuthGetAccessToken"
-    authorizeURL:  "https://trello.com/1/OAuthAuthorizeToken"
-    appName:       "My Trello OAuth Example"
-    key:           "80e7f11a72d431dee0e0db0a52631180"
-    secret:        "33c1455220cd7d821bdac09dc8891fc66086359f8936169de2a4d3d56ea2f583"
     user_id: null
     
     #
@@ -36,7 +33,7 @@ module.exports = class TrelloOAuth
     #
     createOAuth: (fn)->
         callback = "http://localhost:3000/app/auths/trello_callback?state=#{@user_id}"
-        @oauth = new OAuth(@requestURL, @accessURL, @key, @secret, "1.0", callback, "HMAC-SHA1")
+        @oauth = new OAuth(config.trello.requestURL, config.trello.accessURL, config.trello.key, config.trello.secret, "1.0", callback, "HMAC-SHA1")
         console.log("createOAuth success")
         fn(null, @oauth)
 
@@ -58,7 +55,7 @@ module.exports = class TrelloOAuth
                 @oauth_token_secret = tokenSecret
                 (new Users()).save_token_secret @user_id, tokenSecret, (err)=>
                     if not err
-                        fn(null, "#{@authorizeURL}?oauth_token=#{token}&name=#{@appName}")
+                        fn(null, "#{config.trello.authorizeURL}?oauth_token=#{token}&name=#{config.trello.appName}")
                     else
                         console.log('save_token_secret failed')
                     

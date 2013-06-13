@@ -22,17 +22,14 @@ module.exports = class Users extends dbconnection
     # Looks up a user data from email (username)
     # 
     findByEmail: (obj, fn) ->
-        #console.log obj
         client = dbconnection.get_client()
         client.open (err, p_client) =>
             client.collection 'users', (err, col) =>
                 if err
-                    console.log(err)
                     client.close()
                     return fn(err, null)
                 col.findOne {"email": obj.username}, (err, user) =>
                     client.close()
-                    #console.log(user)
                     fn(err, user)
 
     #
@@ -40,7 +37,6 @@ module.exports = class Users extends dbconnection
     # 
     verifyPassword: (user, password) ->
         r = user.password is password
-        console.log(r)
         r
 
     #
@@ -51,12 +47,10 @@ module.exports = class Users extends dbconnection
         client.open (err, p_client) =>
             client.collection 'users', (err, col) =>
                 if err
-                    console.log(err)
                     client.close()                    
                     return fn(err, null)
                 col.find {}, (err, cursor) =>
                     if err
-                        console.log(err)
                         client.close()
                         return fn(err, null)                        
                     cursor.toArray (err, items) =>
@@ -72,13 +66,11 @@ module.exports = class Users extends dbconnection
         client.open (err, p_client) =>
             client.collection 'users', (err, col) =>
                 if err
-                    console.log(err)
                     client.close()                    
                     return fn(err, null)
                 col.update { _id: user_id }, { $set: { token_secret: value } }, (err) =>
                     client.close()
                     if err
-                        console.log(err)
                         return fn(err, null)
                     else
                         fn(null, "update success")
@@ -91,13 +83,11 @@ module.exports = class Users extends dbconnection
         client.open (err, p_client) =>
             client.collection 'users', (err, col) =>
                 if err
-                    console.log(err)
                     client.close()                    
                     return fn(err, null)
                 col.update { _id:  new ObjectID user_id }, { $set: values }, (err) =>
                     client.close()
                     if err
-                        console.log(err)
                         return fn(err, null)
                     else
                         fn(null, "update success")
@@ -111,13 +101,10 @@ module.exports = class Users extends dbconnection
             client.collection 'users', (err, col) =>
                 if err
                     client.close()
-                    console.log(err)
                     fn(err, null)
                     return
                 col.findOne {_id: new ObjectID user_id}, (err, user) =>
                     client.close()
-                    console.log("users.get success #{user_id}")
-                    console.log(user)
                     fn(null, user)
 
     #
