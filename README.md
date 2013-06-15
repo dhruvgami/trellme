@@ -5,8 +5,6 @@ trellme
 
 ### Installation
 
-No need to follow the following steps at the moment. You can just run it!
-
     > make init
     > make build
 
@@ -14,7 +12,7 @@ No need to follow the following steps at the moment. You can just run it!
 
 [1] Please start "mongod" before you start this app. 
 
-[2] Please create the trellme database if you haven't done so:
+[2] Please create the trellme database if you haven't done so - one time only.
 
      $ mongo
      mongo> use node-mongo-loginskel
@@ -25,7 +23,7 @@ No need to follow the following steps at the moment. You can just run it!
 
     > node ./lib/app.js
 
-### Punngin the front-end
+### Punning the front-end
 
 Currently "Signup" is not put in the front-end html yet. If you haven't done so, please sign up and create a user.
 
@@ -33,7 +31,7 @@ Currently "Signup" is not put in the front-end html yet. If you haven't done so,
 
 [2] If you haven't signed up: open your browser and access this url http://localhost:3000/app/signup and create a user. Please be sure to enter a correct Trello username.
 
-[3] Open a Finder and go to the trellme directory. Double click on the frontend/trellme.html. 
+[3] Open a Finder (Mac) and go to the trellme directory. Double click on the frontend/trellme.html. 
 
 [4] Login and then click "Auth Trello" button to authorize this app to access your Trello account. You can authorize as many times as you like but usually once is enough - access key will be stored in the database.
 
