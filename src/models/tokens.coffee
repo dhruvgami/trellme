@@ -6,8 +6,8 @@
 # 
 mongodb = require 'mongodb'
 dbconnection = require './dbconnection'
-should = require('should')
-crypto = require('crypto')
+should = require 'should'
+crypto = require 'crypto'
 
 
 module.exports = class Tokens extends dbconnection
@@ -25,15 +25,12 @@ module.exports = class Tokens extends dbconnection
     create: (user, fn) ->
         should.exist(user)
         should.exist(fn)        
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
+        dbconnection.get_client (err, p_client) =>
             p_client.collection 'tokens', (err, col) =>
                 token = @_createToken user  # Create a new token
                 now = new Date()
-                exp = new Date(now.getTime() + 86400000)  # + 1 day
-                #expire = exp.toString('yyyy-MM-dd HH:mm:ss')
-                col.insert {'token': token, 'user_id': user._id, 'expire': exp}, (err, docs)=>
-                    p_client.close()
+                exp = new Date(now.getTime() + 86400000)  # + 1 day means token is valid for 24 hours
+                col.insert {token: token, user_id: user._id, expire: exp}, (err, docs)=>
                     fn(err, docs)
 
     #
@@ -46,7 +43,6 @@ module.exports = class Tokens extends dbconnection
         hash.update(user._id.toString())
         hash.update(((new Date()).getTime()).toString())
         hash.digest('hex')
-        #user._id.toString()+((new Date()).getTime()).toString()
 
     #
     # Delete a token = logout
@@ -54,11 +50,9 @@ module.exports = class Tokens extends dbconnection
     "delete": (token, fn) ->
         should.exist(token)
         should.exist(fn)        
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
+        dbconnection.get_client (err, p_client) =>
             p_client.collection 'tokens', (err, col) =>
-                col.remove {'token': token}, (err, wtf)=>
-                    p_client.close()
+                col.remove {token: token}, (err, wtf)=>
                     fn(err, wtf)
 
     #
@@ -68,11 +62,9 @@ module.exports = class Tokens extends dbconnection
         if typeof token is 'undefined'
             fn(401, "Missing token")
             return
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
+        dbconnection.get_client (err, p_client) =>
             p_client.collection 'tokens', (err, col) =>
                 now = new Date()
-                col.findOne {'token': token, 'expire': {'$gt': now }}, (err, wtf)=>
-                    p_client.close()
+                col.findOne {token: token, expire: {'$gt': now }}, (err, wtf)=>
                     #console.log(wtf)
                     fn(err, wtf)  # null or a token record

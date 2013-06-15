@@ -5,9 +5,9 @@
 #   { "_id" : ObjectId("518b37d647f1af1b31be73f4"), "email" : "test255@gmail.com", "password" : "password" }
 #
 mongodb = require 'mongodb'
-ObjectID = require('mongodb').ObjectID;
+ObjectID = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
-should = require('should')
+should = require 'should'
 
 
 module.exports = class Users extends dbconnection
@@ -22,14 +22,11 @@ module.exports = class Users extends dbconnection
     # Looks up a user data from email (username)
     # 
     findByEmail: (obj, fn) ->
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
-            client.collection 'users', (err, col) =>
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'users', (err, col) =>
                 if err
-                    client.close()
                     return fn(err, null)
-                col.findOne {"email": obj.username}, (err, user) =>
-                    client.close()
+                col.findOne {email: obj.username}, (err, user) =>
                     fn(err, user)
 
     #
@@ -43,50 +40,40 @@ module.exports = class Users extends dbconnection
     # Get all users - mongodb.find() example only
     # 
     findAll: (fn) ->
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
-            client.collection 'users', (err, col) =>
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'users', (err, col) =>
                 if err
-                    client.close()                    
                     return fn(err, null)
                 col.find {}, (err, cursor) =>
                     if err
-                        client.close()
                         return fn(err, null)                        
                     cursor.toArray (err, items) =>
                         items.length.should.be.above(0)
-                        client.close()
                         fn(err, items)
 
     #
-    # Update user document token_secret
+    # Update user document - store token_secret
     # 
     save_token_secret: (user_id, value, fn) ->
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
-            client.collection 'users', (err, col) =>
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'users', (err, col) =>
                 if err
-                    client.close()                    
                     return fn(err, null)
-                col.update { _id: user_id }, { $set: { token_secret: value } }, (err) =>
-                    client.close()
+                col.update { _id: new ObjectID user_id }, { $set: { token_secret: value } }, (err) =>
                     if err
                         return fn(err, null)
                     else
                         fn(null, "update success")
 
     #
-    # Save access token
+    # Update user document - store access token
     # 
     save_access_token: (user_id, values, fn) ->
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
-            client.collection 'users', (err, col) =>
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'users', (err, col) =>
                 if err
-                    client.close()                    
                     return fn(err, null)
                 col.update { _id:  new ObjectID user_id }, { $set: values }, (err) =>
-                    client.close()
                     if err
                         return fn(err, null)
                     else
@@ -96,15 +83,12 @@ module.exports = class Users extends dbconnection
     # Get user documemt by _id
     # 
     get: (user_id, fn) ->
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
-            client.collection 'users', (err, col) =>
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'users', (err, col) =>
                 if err
-                    client.close()
                     fn(err, null)
                     return
                 col.findOne {_id: new ObjectID user_id}, (err, user) =>
-                    client.close()
                     fn(null, user)
 
     #
@@ -124,11 +108,9 @@ module.exports = class Users extends dbconnection
             fn(500, "Invalid Trello username")
             return
         # Values are good
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
+        dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
                 if err
-                    p_client.close()
                     fn(500, "Failed to insert a user")
                     return
                 values = {
@@ -138,7 +120,6 @@ module.exports = class Users extends dbconnection
                     created: new Date()
                 }
                 col.insert values, (err, docs)=>
-                    p_client.close()
                     fn(null, "Add user suceess")
 
     #
@@ -146,13 +127,10 @@ module.exports = class Users extends dbconnection
     # 
     remove: (user_id, fn) ->
         should.exist(user_id)
-        client = dbconnection.get_client()
-        client.open (err, p_client) =>
+        dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
                 if err
-                    p_client.close()
                     fn(500, "Failed to insert a user")
                     return
                 col.remove {_id: new ObjectID user_id}, (err, docs)=>
-                    p_client.close()
                     fn(null, "Remove user suceess")        
