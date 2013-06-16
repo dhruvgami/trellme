@@ -1,0 +1,7 @@
+
+1. This app is a reporting tool only, not a management tool for Trello boards. However, if a user has multiple boards, the user should be able to get a comprehensive report that covers all her boards, or just selected boards.
+
+2. Yes, the user should get a screen to sign-in with her Trello ID, and explicitly grant access.
+
+3. The "snapshot" i mentioned is a list of all cards on a board organized by Lists, along with their additional parameters like Assignment, Due Date, Tags etc. (not comments). It'll also include the Activity for that board.
+

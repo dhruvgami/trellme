@@ -264,6 +264,21 @@ app.delete '/app/auths/delete', (req, res)->
 # Trello API access test APIs
 #
 
+
+app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+        if err
+            res.status 404; res.send "No such user"
+        else
+            console.log(user)
+            (new TrelloApi()).collect_data user, (err, result) =>
+                if err
+                    res.status err
+                    res.send result
+                else
+                    res.status 200
+                    res.send result  # Already JSON
+
 # Get Trello stuff of a user
 #   First param: boards, lists, cards
 #   Second param: username (email)
@@ -273,14 +288,13 @@ app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
         if err
             res.status 404; res.send "No such user"
         else
-            (new TrelloApi()).request req.params[0], user, {}, (err, result) =>
+             (new TrelloApi()).request req.params[0], user, {}, (err, result) =>
                 if err
                     res.status err
                     res.send result
                 else
                     res.status 200
                     res.send result  # Already JSON
-
 #=================================================
 #
 # Server with Cluster

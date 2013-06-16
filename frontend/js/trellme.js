@@ -69,7 +69,7 @@ function controller($scope, $http) {
 	delete $http.defaults.headers.common['X-Requested-With'];
 
 	// Call /app/trello/{action}/{username}
-	var action = "allboards";
+	var action = "all_boards";
 	$http.get($scope.host+'/app/trello/'+action+'/'+$scope.user.username, {}).
 	    success(function(data, status, headers, config) {
 		$scope.allboards = data;
