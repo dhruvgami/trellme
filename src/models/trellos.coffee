@@ -1,18 +1,6 @@
 #
 # trellos.coffee
 #
-# We store data as we read from the API. The reason for it is that on memory
-# data will explode when multiple users accessed the site at the same time 
-#
-# boards: {user_id: user-id, boards: [boards data]}
-# lists:  {user_id: user-id, board_id: board-id, lists: [lists data]}
-#         {user_id: user-id, board_id: board-id, lists: [lists data]}..
-# cards:  {user_id: user-id, board_id: board-id, list_id: list-id, cards: [cards data]}
-#         {user_id: user-id, board_id: board-id, list_id: list-id, cards: [cards data]}
-#         {user_id: user-id, board_id: board-id, list_id: list-id, cards: [cards data]}
-# checklists: {user_id: user-id, board_id: board-id, list_id: list-id, card_id: card-id, checklists: [checklist data]}
-#         {user_id: user-id, board_id: board-id, list_id: list-id, card_id: card-id, checklists: [checklist data]}
-#         {user_id: user-id, board_id: board-id, list_id: list-id, card_id: card-id, checklists: [checklist data]}
 #
 # 
 mongodb = require 'mongodb'
@@ -33,7 +21,7 @@ module.exports = class Trellos extends dbconnection
     #
     # Clear all data belongs to the arg user
     #
-    # uid: user id in string
+    # uid: user id in ObjetID
     # 
     clear_all: (uid, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -113,7 +101,7 @@ module.exports = class Trellos extends dbconnection
                         fn(null, "save checklists success")
 
     #
-    # Get board
+    # Get all boards
     # 
     get_boards: (user_id, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -121,25 +109,53 @@ module.exports = class Trellos extends dbconnection
                 if err
                     fn(err, null)
                     return
-                col.findOne {user_id: user_id}, (err, result) =>
-                    fn(err, result)
+                col.find {user_id: user_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Boards not found")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)
 
     #
+    # Get lists of a board
+    # 
     get_lists_of_board: (user_id, board_id, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'lists', (err, col) =>
                 if err
                     fn(err, null)
                     return
-                col.findOne {user_id: user_id, board_id: board_id}, (err, result) =>
-                    fn(err, result)
+                col.find {user_id: user_id, board_id: board_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Lists not found")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)
 
     #
+    # Get all cards of a list
+    # 
     get_cards_of_list: (user_id, list_id, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'cards', (err, col) =>
                 if err
                     fn(err, null)
                     return
-                col.findOne {user_id: user_id, list_id: list_id}, (err, result) =>
-                    fn(err, result)
+                col.find {user_id: user_id, list_id: list_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Cards not found")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)
+
+    #
+    # Get all checklists of a card
+    # 
+    get_cards_of_list: (user_id, list_id, card_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'cards', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find {user_id: user_id, list_id: list_id, card_id: card_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Checklists not found")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)

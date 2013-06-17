@@ -223,7 +223,7 @@ app.get "/app/auths/request", (req, res) ->
         else unless result
             res.status 401; res.json "Invalid token."
         else
-            toa = new TrelloOAuth(result.user_id)
+            toa = new TrelloOAuth(result.user_id.toString())
             toa.createOAuth (err, oauth) =>
                 if err
                     res.status err; res.send oauth   # message
@@ -264,7 +264,9 @@ app.delete '/app/auths/delete', (req, res)->
 # Trello API access test APIs
 #
 
-
+#
+# Collect all data test execution API
+# 
 app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
     db_users.findByEmail {username: req.params[0]}, (err, user)=>    
         if err

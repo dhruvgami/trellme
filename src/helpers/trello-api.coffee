@@ -98,7 +98,8 @@ module.exports = class TrelloApi
 
     #
     # Collect all Trello data for a user
-    #
+    #  testurl http://localhost:3000/app/trello/collect/test1@yahoo.com
+    # 
     # Scenario
     #
     #  Get all boards 
@@ -114,7 +115,7 @@ module.exports = class TrelloApi
     # 
     collect_data: (userObj, fn)->
         db_trellos = new Trellos()
-        uid = new ObjectID userObj._id.toString()
+        uid = new ObjectID(userObj._id.toString())
         db_trellos.clear_all uid, (err, wtf)=>
             if err
                 return fn(500, wtf)
