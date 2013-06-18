@@ -7,7 +7,8 @@ function controller($scope, $http) {
     $scope.host = "http://127.0.0.1:3000";
     $scope.token = "";
     $scope.user = {}
-    $scope.allboards = "";
+    $scope.allboards = "";  // JSON
+    $scope.report = "";  // HTML
 
     /*
      * Login button handler
@@ -59,6 +60,24 @@ function controller($scope, $http) {
 	// Call GET /app/auths/request API
 	var popup = window.open('', 'OAuth Popup', "height=800,width=800")
 	popup.location = $scope.host+'/app/auths/request?token='+$scope.token;
+    };
+
+    /*
+     * get Trello Report
+     */
+    $scope.getReport = function() {
+	// Workaround to circumvent an strange error
+	delete $http.defaults.headers.common['X-Requested-With'];
+
+	// Call /app/trello/report/useremail
+	$http.get($scope.host+'/app/trello/report/'+$scope.user.username, {}).
+	    success(function(data, status, headers, config) {
+		$scope.report = data;
+		$("#report-html").append(data);
+	    }).
+	    error(function(data, status, headers, config) {
+		alert('Error '+status);
+	    });
     };
 
     /*

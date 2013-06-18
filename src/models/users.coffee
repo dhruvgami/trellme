@@ -53,6 +53,8 @@ module.exports = class Users extends dbconnection
 
     #
     # Update user document - store token_secret
+    # user_id: user ID in string
+    # value: token_secret string
     # 
     save_token_secret: (user_id, value, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -67,6 +69,8 @@ module.exports = class Users extends dbconnection
 
     #
     # Update user document - store access token
+    # user_id: user ID in string
+    # values: user data - must match users document key-value pairs
     # 
     save_access_token: (user_id, values, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -81,6 +85,7 @@ module.exports = class Users extends dbconnection
 
     #
     # Get user documemt by _id
+    # user_id: user ID in string
     # 
     get: (user_id, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -93,6 +98,7 @@ module.exports = class Users extends dbconnection
 
     #
     # Add a new user
+    # params: email, password, trello_username
     # 
     add: (params, fn) ->
         # These must exist
@@ -124,6 +130,7 @@ module.exports = class Users extends dbconnection
 
     #
     # Remove a user
+    # user_id: user ID in string
     # 
     remove: (user_id, fn) ->
         should.exist(user_id)

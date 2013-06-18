@@ -9,6 +9,7 @@ dbconnection = require './dbconnection'
 should = require 'should'
 
 
+
 module.exports = class Trellos extends dbconnection
 
     #
@@ -44,7 +45,7 @@ module.exports = class Trellos extends dbconnection
                                             fn(null, "Cleared everything")
     #
     # Save boards 
-    #   user_id is a ObjectID
+    # user_id: user ID in ObjectID type
     # 
     save_boards: (user_id, boards, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -59,6 +60,7 @@ module.exports = class Trellos extends dbconnection
 
     #
     # Save lists data for a board
+    # user_id: user ID in ObjectID type
     # 
     save_lists: (user_id, board_id, lists, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -74,8 +76,11 @@ module.exports = class Trellos extends dbconnection
 
     #
     # Save cards data for a list
+    # user_id: user ID in ObjectID type
     # 
     save_cards: (user_id, board_id, list_id, cards, fn) ->
+        if cards.length is 0
+            return fn(null, "nothing to save")
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'cards', (err, col) =>
                 if err
@@ -88,6 +93,7 @@ module.exports = class Trellos extends dbconnection
 
     #
     # Save checklists
+    # user_id: user ID in ObjectID type
     # 
     save_checklists: (user_id, board_id, list_id, card_id, checklists, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -102,6 +108,7 @@ module.exports = class Trellos extends dbconnection
 
     #
     # Get all boards
+    # user_id: user ID in ObjectID type
     # 
     get_boards: (user_id, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -113,10 +120,59 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Boards not found")
                     cursor.toArray (err, items) =>
+                        #console.log(items)
+                        fn(err, items[0])
+
+    #
+    # Get all lists for a user
+    # user_id: user ID in ObjectID type
+    # 
+    get_all_lists: (user_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'lists', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find {user_id: user_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Lists not found")
+                    cursor.toArray (err, items) =>
                         fn(err, items)
+
+    # user_id: user ID in ObjectID type
+    # 
+    get_all_cards: (user_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'cards', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find {user_id: user_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Cards not found")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)
+
+   #
+    # Get all checklists of a card
+    # user_id: user ID in ObjectID type
+    # 
+    get_all_checklists: (user_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'checklists', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find {user_id: user_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "Checklists not found")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)
+
 
     #
     # Get lists of a board
+    # user_id: user ID in ObjectID type
     # 
     get_lists_of_board: (user_id, board_id, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -128,10 +184,11 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Lists not found")
                     cursor.toArray (err, items) =>
-                        fn(err, items)
+                        fn(err, items[0])
 
     #
     # Get all cards of a list
+    # user_id: user ID in ObjectID type
     # 
     get_cards_of_list: (user_id, list_id, fn) ->
         dbconnection.get_client (err, p_client) =>
@@ -143,14 +200,15 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Cards not found")
                     cursor.toArray (err, items) =>
-                        fn(err, items)
+                        fn(err, items[0])
 
     #
     # Get all checklists of a card
+    # user_id: user ID in ObjectID type
     # 
-    get_cards_of_list: (user_id, list_id, card_id, fn) ->
+    get_checklists_of_list: (user_id, list_id, card_id, fn) ->
         dbconnection.get_client (err, p_client) =>
-            p_client.collection 'cards', (err, col) =>
+            p_client.collection 'checklists', (err, col) =>
                 if err
                     fn(err, null)
                     return
@@ -158,4 +216,5 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Checklists not found")
                     cursor.toArray (err, items) =>
-                        fn(err, items)
+                        fn(err, items[0])
+

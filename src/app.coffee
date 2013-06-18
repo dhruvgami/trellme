@@ -19,7 +19,7 @@ passport         = require("passport")
 LocalStrategy    = require("passport-local").Strategy
 TrelloOAuth      = require("./helpers/trello-oauth")
 TrelloApi        = require("./helpers/trello-api")
-
+TrelloView       = require("./views/trello-view")
 
 
 # Database objects
@@ -267,6 +267,28 @@ app.delete '/app/auths/delete', (req, res)->
 #
 # Collect all data test execution API
 # 
+app.get "/app/trello/report/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+        if err
+            res.status 404; res.send "No such user"
+        else
+            console.log(user)
+            (new TrelloApi()).collect_data user, (err, result) =>
+                if err
+                    res.status err
+                    res.send result
+                else
+                    (new TrelloView()).getSummary user, (err, result) =>
+                        if err
+                            res.status 500
+                            res.send "getSummary failed"
+                        else
+                            res.status 200
+                            res.send result  # html
+
+#
+# 
+# 
 app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
     db_users.findByEmail {username: req.params[0]}, (err, user)=>    
         if err
@@ -279,7 +301,24 @@ app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                     res.send result
                 else
                     res.status 200
-                    res.send result  # Already JSON
+                    res.send result
+
+#
+#
+# 
+app.get "/app/trello/view/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+        if err
+            res.status 404; res.send "No such user"
+        else
+            console.log(user)
+            (new TrelloView()).getSummary user, (err, result) =>
+                if err
+                    res.status err
+                    res.send result
+                else
+                    res.status 200
+                    res.send result  # HTML
 
 # Get Trello stuff of a user
 #   First param: boards, lists, cards

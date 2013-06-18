@@ -34,10 +34,10 @@
       </div>
 
       <div id="allboards">
-	<h3>All of My Boards</h3>
-	<button id="allboards" ng-click="allboards()" >Get My Boards</button>
+	<h3>My Trello Report</h3>
+	<button id="report" ng-click="getReport()" >Get Report</button>
       </div>
-      <br><pre>{{allboards|json}}</pre>
+      <br><div id="report-html"></div>
 
     </div> <!--container-->
   </body>

@@ -25,12 +25,15 @@ module.exports = class TrelloApi
 
     # Abstractified API names
     @endpoints : {
-        'all_boards' :          { method: 'GET',  path: '/1/members/{username}/boards?key={key}&token={token}' }
+        'public_boards' :       { method: 'GET',  path: '/1/members/{username}/boards?key={key}&token={token}' }
+        'organizations' :       { method: 'GET',  path: '/1/members/{username}/organizations?key={key}&token={token}' }
+        'org_boards' :          { method: 'GET',  path: '/1/organizations/mindsburgh1/boards?key={key}&token={token}' }
+        #'org_boards' :          { method: 'GET',  path: '/1/organizations/{orgname}/boards?key={key}&token={token}' }                
         'all_lists_of_board' :  { method: 'GET',  path: '/1/boards/{board_id}/lists?key={key}&token={token}' }
         'all_cards_of_list' :   { method: 'GET',  path: '/1/lists/{list_id}/cards?key={key}&token={token}' }
         'checklist_of_card':    { method: 'GET',  path: '/1/checklists/{checklist_id}?key={key}&token={token}' }
     }
-
+    
     #
     # Initialize
     # 
@@ -71,7 +74,7 @@ module.exports = class TrelloApi
             path:  path
             method: TrelloApi.endpoints[action].method
             headers:
-                'User-Agent': 'My-First-Trade-Bot'
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.75 Safari/535.7'
                 'Accept': 'application/json, text/javascript, */*; q=0.01'
                 'Content-Type': 'application/x-www-form-urlencoded'
                 'Content-Length': length
@@ -95,6 +98,14 @@ module.exports = class TrelloApi
         request.write(pstr)
         request.end()
 
+    #
+    _parse: (json) ->
+        try
+            obj = JSON.parse(json)
+        catch err
+            console.log('JSON Parse Error '+json)
+            obj = {}
+        obj
 
     #
     # Collect all Trello data for a user
@@ -119,56 +130,60 @@ module.exports = class TrelloApi
         db_trellos.clear_all uid, (err, wtf)=>
             if err
                 return fn(500, wtf)
-            # Get all boards
-            console.log('I am here')
-            @request 'all_boards', userObj, {}, (err, json) =>
+            # Get all BOARDS
+            @request 'public_boards', userObj, {}, (err, json) =>
                 if err
                     return fn(500, json)
-                # Save boards data
-                boards = JSON.parse(json)
+                # Save BOARDS data
+                boards = @_parse(json)
                 db_trellos.save_boards uid, boards, (err, wtf)=>
                     if err
                         return fn(500,wtf)
 
-                    # Get all lists
+                    # Get all LISTS
                     _.each boards, (board) =>
                         @request 'all_lists_of_board', userObj, {board_id: board.id}, (err, json) =>
                             if err
                                 return fn(500, json)
-                            # Save lists of a board data
-                            lists = JSON.parse(json)
+                            # Save LISTS of a board data
+                            lists = @_parse(json)
                             db_trellos.save_lists uid, board.id, lists, (err, wtf)=>
                                 if err
                                     return fn(500,wtf)
-                                # Get all cards
+                                # Get all CARDS
                                 _.each lists, (list)=>
                                     @request 'all_cards_of_list', userObj, {list_id: list.id}, (err, json) =>
                                         if err
                                             return fn(500, json)
-                                        # Save cards of a list data
-                                        #console.log json
-                                        cards = JSON.parse(json)
-                                        if 0 < cards.length
-                                            db_trellos.save_cards uid, board.id, list.id, cards, (err, wtf)=>
-                                                if err
-                                                    return fn(500,wtf)
-                                            # Now save the checklist data
+                                        # Save CARDS of a list data
+                                        cards = @_parse(json)
+                                        db_trellos.save_cards uid, board.id, list.id, cards, (err, wtf)=>
+                                            if err
+                                                return fn(500, wtf)
+                                            # Now save the CHECKLIST data
                                             _.each cards, (card)=>
                                                 _.each card.idChecklists, (checklistid) =>
                                                     @request 'checklist_of_card', userObj, {checklist_id: checklistid}, (err, json) =>
                                                         if err
                                                             return fn(500, json)
-                                                        checklists = JSON.parse(json)
+                                                        checklists = @_parse(json)
                                                         db_trellos.save_checklists uid, board.id, list.id, card.id, checklists, (err, wtf)=>
                                                             if err
                                                                 return fn(500,wtf)
-                    fn(null, 'all good')
+                    # This make this function leave while its running to get data
+                    fn(null, 'all good')  # at the end of each boards loop
+
 
 
 
 
 
 ###
+#
+# Organizations
+https://trello.com/1/members/justincase2/organizations?key=80e7f11a72d431dee0e0db0a52631180&token=992ca020fe40cb9321cd95e988cd0d43d86ec3a8e78d139d39ce053c464245f4
+#
+# 
 # Users database entry
 { "_id" : ObjectId("51b7e5ebfe8ae46384314ad2"), "access_token" : "7ec5ebd613019a6e5483c88a7eb176382a087e1fe806cd6be94dac29f1e7cbb5", "access_token_secret" : "b40765b097e0669e8673cfe1f7936b2f", "email" : "test1@gmail.com", "password" : "123456", "token_secret" : "48439721d88765dc37373f72d9a06cfb" }
 
