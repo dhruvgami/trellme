@@ -1,0 +1,44 @@
+<!doctype html>
+<html ng-app>
+  <head>
+    <link rel="stylesheet" href="css/bootstrap.min.css">    
+    <link rel="stylesheet" href="css/bitcoin.css">
+    <!-- The client library requires jQuery  -->
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+    <script src="http://cdn.jsdelivr.net/underscorejs/1.4.3/underscore-min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/trellme-server.js"></script>
+  </head>
+  <body>
+    <div class="container-fluid" id="container" np-app="myApp" ng-controller="controller">
+      <div id="login">
+	<h3>Login (need this first!)</h3>
+	<form id="loginForm" name="login" ng-submit="mylogin()" >
+	  <label>Email:</label>
+	  <input type="text" name="email" ng-model="user.username" placeholder="Enter your email address" required>
+	  <label>Password:</label>
+	  <input type="password" name="password" ng-model="user.password" placeholder="Enter your password" required>
+	  <div><button id="submit" type="submit">Submit</button></div>
+	</form>
+      </div>
+      <div id="logout" class="invisible">
+	<h3>Logout</h3>
+	<button id="logout" ng-click="mylogout()" >Logout</button>
+      </div>
+      <br><pre>{{user|json}}{{token}}</pre>
+
+      <div id="auth">
+	<h3>OAuth</h3>
+	<button id="auth" ng-click="oAuth()">Auth Trello</button>
+      </div>
+
+      <div id="allboards">
+	<h3>My Trello Report</h3>
+	<button id="report" ng-click="getReport()" >Get Report</button>
+      </div>
+      <br><div id="report-html"></div>
+
+    </div> <!--container-->
+  </body>
+</html>

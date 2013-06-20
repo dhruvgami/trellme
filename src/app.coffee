@@ -13,6 +13,7 @@ fs               = require("fs")
 dbconnection     = require("./models/dbconnection")
 Users            = require("./models/users")
 Tokens           = require("./models/tokens")
+Trellos          = require('./models/trellos')
 http             = require("http")
 path             = require("path")
 passport         = require("passport")
@@ -273,7 +274,7 @@ app.get "/app/trello/report/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
             res.status 404; res.send "No such user"
         else
             console.log(user)
-            (new TrelloApi()).collect_data user, (err, result) =>
+            (new TrelloApi()).collect_data_sync user, (err, result) =>
                 if err
                     res.status err
                     res.send result
@@ -295,7 +296,7 @@ app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
             res.status 404; res.send "No such user"
         else
             console.log(user)
-            (new TrelloApi()).collect_data user, (err, result) =>
+            (new TrelloApi()).collect_data_sync user, (err, result) =>
                 if err
                     res.status err
                     res.send result
@@ -319,6 +320,27 @@ app.get "/app/trello/view/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                 else
                     res.status 200
                     res.send result  # HTML
+
+#
+# For Debugging only
+# 
+app.get "/app/trello/orgboards/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+        if err
+            res.status 404; res.send "No such user"
+        else
+            console.log(user)
+            (new TrelloApi()).get_all_boards (new Trellos()), user, (err, result) =>
+                if err
+                    res.status err
+                    res.send result
+                else
+                    res.status 200
+                    res.send result  # HTML
+
+
+
+                    
 
 # Get Trello stuff of a user
 #   First param: boards, lists, cards

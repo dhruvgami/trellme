@@ -50,13 +50,16 @@ module.exports = class TrelloView
             trellos.get_all_lists user_id, (err, mylists) =>
                 trellos.get_all_cards user_id, (err, mycards) =>
                     trellos.get_all_checklists user_id, (err, mychecklists) =>                    
-                   
+
                         htmls = []
                         # For all boards
-                        _.each myboards.boards, (board)=>
+                        _.each myboards, (boardx)=>
+                            board = boardx.boards # Real data is one deep down
                             list = _.find mylists, (list)=>
                                 list.board_id is board.id   # Find the lists for this board
                             listhtmls = []
+                            if not list
+                                list = []
                             # Render all lists for this board
                             _.each list.lists, (ll)=>
                                 # Find the cards for this list

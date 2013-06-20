@@ -20,7 +20,9 @@
     "passport-local": "~0.1.6",
     "oauth": "~0.9.10",
     "mongodb": "~1.3.9",
-    "handlebars": "~1.0.12"
+    "handlebars": "~1.0.12",
+    "async": "~0.2.9",
+    "finish": "~0.4.0"
   },
   "devDependencies": {
     "should": ">= 0.0.1"

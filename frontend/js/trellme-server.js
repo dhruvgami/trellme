@@ -4,7 +4,7 @@
  *
  */
 function controller($scope, $http) {
-    $scope.host = "http://127.0.0.1:3000";
+    $scope.host = "http://dev.trellme.com:3000";
     $scope.token = "";
     $scope.user = {}
     $scope.allboards = "";  // JSON
@@ -43,7 +43,6 @@ function controller($scope, $http) {
 		$('div#logout').addClass('invisible');
 		$scope.user = {}
 		$scope.token = "";
-		$("#report-html").empty();
 	    }).
 	    error(function(data, status, headers, config) {
 		alert('Logout failed '+status);

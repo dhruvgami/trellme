@@ -3,11 +3,11 @@
 #
 #
 # 
-mongodb = require 'mongodb'
-ObjectID = require('mongodb').ObjectID
+mongodb   = require 'mongodb'
+ObjectID  = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
-should = require 'should'
-
+should    = require 'should'
+_         = require 'underscore'
 
 
 module.exports = class Trellos extends dbconnection
@@ -46,17 +46,24 @@ module.exports = class Trellos extends dbconnection
     #
     # Save boards 
     # user_id: user ID in ObjectID type
+    # org_name: name of organization or 'public'
     # 
-    save_boards: (user_id, boards, fn) ->
+    save_boards: (user_id, org_name, boards, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'boards', (err, col) =>
                 if err
                     return fn(500, null)
-                col.insert { user_id: user_id, boards: boards}, (err) =>
-                    if err
-                        return fn(500, "Insert failed")
-                    else
-                        fn(null, "save board success")
+                # Save individually
+                _.each boards, (board) =>
+                    # Check if there is the same board data already. If there is one, they don't insert
+                    col.find { user_id: user_id, 'boards.id': board.id }, (err, cursor) =>
+                        cursor.count (err, count) =>
+                            #console.log('count='+count)
+                            if count is 0
+                                col.insert { user_id: user_id, org_name: org_name, boards: board}, (err) =>
+                                    if err
+                                        return fn(500, "Insert failed")
+                fn(null, "save board success")
 
     #
     # Save lists data for a board
@@ -120,8 +127,7 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Boards not found")
                     cursor.toArray (err, items) =>
-                        #console.log(items)
-                        fn(err, items[0])
+                        fn(err, items)
 
     #
     # Get all lists for a user

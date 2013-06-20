@@ -104,8 +104,6 @@ module.exports = class TrelloApi
         request.end()
 
     #
-    # Parse JSON text
-    # 
     _parse: (json) ->
         try
             obj = JSON.parse(json)
@@ -115,10 +113,74 @@ module.exports = class TrelloApi
         obj
 
     #
+    # Collect all Trello data for a user
+    #  testurl http://localhost:3000/app/trello/collect/test1@yahoo.com
+    # 
+    # Scenario
+    #
+    #  Get all boards 
+    #   -> list of board IDs
+    #      foreach board in boards 
+    #         get lists
+    #         foreach list in lists
+    #            get cards
+    #            foreach card in cards
+    #               get checklists
+    # Data will be saved in the database
+    # colection : boards, lists, cards, checklists
+    # 
+    collect_data_async: (userObj, fn)->
+        db_trellos = new Trellos()
+        uid = new ObjectID(userObj._id.toString())
+        db_trellos.clear_all uid, (err, wtf)=>
+            if err
+                return fn(500, wtf)
+            # Get all BOARDS
+            @request 'public_boards', userObj, {}, (err, json) =>
+                if err
+                    return fn(500, json)
+                # Save BOARDS data
+                boards = @_parse(json)
+                db_trellos.save_boards uid, boards, (err, wtf)=>
+                    if err
+                        return fn(500,wtf)
+
+                    # Get all LISTS
+                    _.each boards, (board) =>
+                        @request 'all_lists_of_board', userObj, {board_id: board.id}, (err, json) =>
+                            if err
+                                return fn(500, json)
+                            # Save LISTS of a board data
+                            lists = @_parse(json)
+                            db_trellos.save_lists uid, board.id, lists, (err, wtf)=>
+                                if err
+                                    return fn(500,wtf)
+                                # Get all CARDS
+                                _.each lists, (list)=>
+                                    @request 'all_cards_of_list', userObj, {list_id: list.id}, (err, json) =>
+                                        if err
+                                            return fn(500, json)
+                                        # Save CARDS of a list data
+                                        cards = @_parse(json)
+                                        db_trellos.save_cards uid, board.id, list.id, cards, (err, wtf)=>
+                                            if err
+                                                return fn(500, wtf)
+                                            # Now save the CHECKLIST data
+                                            _.each cards, (card)=>
+                                                _.each card.idChecklists, (checklistid) =>
+                                                    @request 'checklist_of_card', userObj, {checklist_id: checklistid}, (err, json) =>
+                                                        if err
+                                                            return fn(500, json)
+                                                        checklists = @_parse(json)
+                                                       db_trellos.save_checklists uid, board.id, list.id, card.id, checklists, (err, wtf)=>
+                                                            if err
+                                                                return fn(500,wtf)
+                    # This make this function leave while its running to get data
+                    fn(null, 'all good')  # at the end of each boards loop
+
+    #
     # Read organization boards and public boards for the user 
-    # db: Trellos instance
-    # userObj: user document
-    # Returns: array of board data
+    # 
     # 
     get_all_boards: (db, userObj, fn)->
         #
@@ -139,12 +201,10 @@ module.exports = class TrelloApi
                     # boards is an array.
                     # Store boards individually
                     async.each( boards, (board, cb1) =>
-                        # No board redundancy
                         bb = _.find allboards, (bd) =>
                             board.id is bd.id
                         if typeof bb is 'undefined'
-                            allboards.push board  # Push only one that isn't already there
-                         
+                            allboards.push board
                         cb1(null)
                     , (err)=>
                         # Save data into db. Pass org name
@@ -163,11 +223,10 @@ module.exports = class TrelloApi
                     boards = @_parse(json)
                     # Store boards individually
                     async.each( boards, (board, cb2) =>
-                        # No board redundancy
                         bb = _.find allboards, (bd) =>
                             board.id is bd.id
                         if typeof bb is 'undefined'
-                            allboards.push board  # Push only one that isn't already there
+                            allboards.push board
                         cb2(null)
                     , (err) =>
                         db.save_boards uid, "public", boards, (err, wtf)=>
@@ -178,11 +237,6 @@ module.exports = class TrelloApi
                     )
             )
 
-    #
-    # read public boards only
-    # db: Trellos instance
-    # userObj: user document
-    # Returns: array of public board data
     #
     get_public_boards: (db, userObj, fn)->
         @request 'public_boards', userObj, {}, (err, json) =>
@@ -196,12 +250,6 @@ module.exports = class TrelloApi
                 fn(null, boards)
 
     #
-    # read all lists for the arg board
-    # db: Trellos instance
-    # userObj: user document
-    # board: parent board of lists
-    # Returns: array of list
-    # 
     get_all_lists_of_board: (db,userObj, board, fn)->
         @request 'all_lists_of_board', userObj, {board_id: board.id}, (err, json) =>
             if err
@@ -213,13 +261,6 @@ module.exports = class TrelloApi
                     return fn(500,wtf)            
                 fn(null, lists)
 
-    #
-    # read all cards for the arg list
-    # db: Trellos instance
-    # userObj: user document
-    # board_id: parent board ID
-    # list: parent list
-    # Returns: array of cards
     #
     get_all_cards_of_list: (db, userObj, board_id, list, fn) ->
         @request 'all_cards_of_list', userObj, {list_id: list.id}, (err, json) =>
@@ -233,14 +274,6 @@ module.exports = class TrelloApi
                 fn(null, cards)
 
     #
-    # read all checklists for the arg card
-    # db: Trellos instance
-    # userObj: user document
-    # board_id: parent board ID
-    # list_id: parent list ID
-    # card_id: parent card ID
-    # Returns: array of checklists
-    #
     get_checklist_of_card: (db, userObj, board_id, list_id, card_id, checklistid, fn) ->
         @request 'checklist_of_card', userObj, {checklist_id: checklistid}, (err, json) =>
             if err
@@ -253,14 +286,7 @@ module.exports = class TrelloApi
                 fn(null, checklists)
 
     #
-    # Collect all trello data for the arg user and store the data in database.
-    # The callback fn is called only after every reading and saving is over.
-    # This is kind of sync function. I made it that way because rendering can not
-    # happen when data collection is immature.
-    # Nested async construct is really nasty but I couldn't find any other way now.
-    #
-    # userObj: user document
-    # fn: callback function to be called after done
+    # async used
     # 
     collect_data_sync: (userObj, fn)->
         db = new Trellos()
@@ -283,24 +309,42 @@ module.exports = class TrelloApi
                             @get_all_cards_of_list db, userObj, board.id, list, (err, cards) =>
                                 #
                                 # Now save the CHECKLIST data
-                                #
-                                async.eachSeries( cards, (card, cb3)=>
+                                # 
+                                _.each cards, (card) =>
                                     #
+                                    # Forther loop for checklists
+                                    # 
                                     async.each( card.idChecklists, (checklistid, cb4) =>
                                         @get_checklist_of_card db, userObj, "0", "0", card.id, checklistid, (err, checklist) =>
                                             cb4(null)
-                                    ,(err)=>
-                                        cb3(null)
+                                            console.log("Done 4")                                            
+                                    , (err) =>
+                                        console.log("Done 3")                                        
                                     )
-                                ,(err)=>
-                                    cb2(null)
-                                )
-                        ,(err)=>
-                            cb1(null)
+                                cb2(null)
+                                console.log("Done 2")
                         )
+                        cb1(null)
+                        console.log("Done 1")
                 ,(err)=>
+                    console.log('All done. ');
                     fn(null, 'all good')  # at the end of each boards loop
                 )
 
+    #
+    test: (userObj, alldata, fn)->
+        a = [1,2,3,4,5,6,7,8,9,10]
+        sent = ""
+        async.each(a, (i, callback)->
+            setTimeout( ()->
+                console.log 'hello world: ' + i
+                callback()
+            , 1000)
+        , (err)->
+            if err
+                throw err
+            console.log('done')
+            fn(null, 'wtf')
+        )
 
 

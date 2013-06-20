@@ -139,12 +139,10 @@ module.exports = class TrelloApi
                     # boards is an array.
                     # Store boards individually
                     async.each( boards, (board, cb1) =>
-                        # No board redundancy
                         bb = _.find allboards, (bd) =>
                             board.id is bd.id
                         if typeof bb is 'undefined'
-                            allboards.push board  # Push only one that isn't already there
-                         
+                            allboards.push board
                         cb1(null)
                     , (err)=>
                         # Save data into db. Pass org name
@@ -163,11 +161,10 @@ module.exports = class TrelloApi
                     boards = @_parse(json)
                     # Store boards individually
                     async.each( boards, (board, cb2) =>
-                        # No board redundancy
                         bb = _.find allboards, (bd) =>
                             board.id is bd.id
                         if typeof bb is 'undefined'
-                            allboards.push board  # Push only one that isn't already there
+                            allboards.push board
                         cb2(null)
                     , (err) =>
                         db.save_boards uid, "public", boards, (err, wtf)=>
@@ -253,14 +250,8 @@ module.exports = class TrelloApi
                 fn(null, checklists)
 
     #
-    # Collect all trello data for the arg user and store the data in database.
-    # The callback fn is called only after every reading and saving is over.
-    # This is kind of sync function. I made it that way because rendering can not
-    # happen when data collection is immature.
-    # Nested async construct is really nasty but I couldn't find any other way now.
-    #
-    # userObj: user document
-    # fn: callback function to be called after done
+    # Collect all trello data for the arg user and store the data in database
+    # async used
     # 
     collect_data_sync: (userObj, fn)->
         db = new Trellos()
@@ -283,22 +274,25 @@ module.exports = class TrelloApi
                             @get_all_cards_of_list db, userObj, board.id, list, (err, cards) =>
                                 #
                                 # Now save the CHECKLIST data
-                                #
-                                async.eachSeries( cards, (card, cb3)=>
+                                # 
+                                _.each cards, (card) =>
                                     #
+                                    # Forther loop for checklists
+                                    # 
                                     async.each( card.idChecklists, (checklistid, cb4) =>
                                         @get_checklist_of_card db, userObj, "0", "0", card.id, checklistid, (err, checklist) =>
                                             cb4(null)
-                                    ,(err)=>
-                                        cb3(null)
+                                            console.log("Done 4")                                            
+                                    , (err) =>
+                                        console.log("Done 3")                                        
                                     )
-                                ,(err)=>
-                                    cb2(null)
-                                )
-                        ,(err)=>
-                            cb1(null)
+                                cb2(null)
+                                console.log("Done 2")
                         )
+                        cb1(null)
+                        console.log("Done 1")
                 ,(err)=>
+                    console.log('All done. ');
                     fn(null, 'all good')  # at the end of each boards loop
                 )
 
