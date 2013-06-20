@@ -6,7 +6,8 @@
 function controller($scope, $http) {
     $scope.host = "http://127.0.0.1:3000";
     $scope.token = "";
-    $scope.user = {}
+    $scope.user = {};
+    $scope.signupu = {};   // Signup email, password, trello_username
     $scope.allboards = "";  // JSON
     $scope.report = "";  // HTML
 
@@ -47,6 +48,24 @@ function controller($scope, $http) {
 	    }).
 	    error(function(data, status, headers, config) {
 		alert('Logout failed '+status);
+	    });
+
+    };
+
+    /*
+     * Signup
+     */
+    $scope.mysignup = function() {
+	// Workaround to circumvent an strange error
+	delete $http.defaults.headers.common['X-Requested-With'];
+
+	// Call /app/tokens DELETE API
+	$http.post($scope.host+'/app/users', $scope.signupu, {}).
+	    success(function(data, status, headers, config) {
+		alert('Added user '+$scope.email);
+	    }).
+	    error(function(data, status, headers, config) {
+		alert('Signup failed '+status);
 	    });
 
     };
