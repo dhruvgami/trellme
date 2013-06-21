@@ -29,11 +29,11 @@ module.exports = class TrelloApi
     @endpoints : {
         'public_boards' :       { method: 'GET',  path: '/1/members/{username}/boards?key={key}&token={token}' }
         'organizations' :       { method: 'GET',  path: '/1/members/{username}/organizations?key={key}&token={token}' }
-        #'org_boards' :          { method: 'GET',  path: '/1/organizations/mindsburgh1/boards?key={key}&token={token}' }
         'org_boards' :          { method: 'GET',  path: '/1/organizations/{orgname}/boards?key={key}&token={token}' }                
         'all_lists_of_board' :  { method: 'GET',  path: '/1/boards/{board_id}/lists?key={key}&token={token}' }
         'all_cards_of_list' :   { method: 'GET',  path: '/1/lists/{list_id}/cards?key={key}&token={token}' }
         'checklist_of_card':    { method: 'GET',  path: '/1/checklists/{checklist_id}?key={key}&token={token}' }
+        'member_name' :         { method: 'GET',  path: '/1/member/{member_id}/fullName?key={key}&token={token}' }
     }
     
     #
@@ -253,6 +253,24 @@ module.exports = class TrelloApi
                 fn(null, checklists)
 
     #
+    # Get member full name from ID
+    # db: Trellos instance
+    # userObj: user document
+    # member_id: member ID
+    # 
+    get_member_name: (db, userObj, member_id, fn) ->
+        should.exist(member_id)
+        @request 'member_name', userObj, {member_id: member_id}, (err, json) =>
+            if err
+                return fn(500, json)
+            name = @_parse(json)  # will be like {"_value":"Yoshikazu Noda"} 
+            uid = new ObjectID(userObj._id.toString())
+            db.save_member uid, member_id, name, (err, wtf)=>
+                if err
+                    return fn(500,wtf)
+                fn(null, name)
+
+    #
     # Collect all trello data for the arg user and store the data in database.
     # The callback fn is called only after every reading and saving is over.
     # This is kind of sync function. I made it that way because rendering can not
@@ -289,6 +307,12 @@ module.exports = class TrelloApi
                                     async.each( card.idChecklists, (checklistid, cb4) =>
                                         @get_checklist_of_card db, userObj, "0", "0", card.id, checklistid, (err, checklist) =>
                                             cb4(null)
+                                    ,(err)=>
+                                        #cb3(null)
+                                    )
+                                    async.each( card.idMembers, (member_id, cb5)=>
+                                        @get_member_name db, userObj, member_id, (err, name) =>
+                                            cb5(null)
                                     ,(err)=>
                                         cb3(null)
                                     )

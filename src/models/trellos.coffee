@@ -18,7 +18,28 @@ module.exports = class Trellos extends dbconnection
     constructor: ->
         super()
 
-
+    #
+    # Save member data related to a user
+    # user_id: user ID in ObjectID type
+    # 
+    save_member: (user_id, member_id, name, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'members', (err, col) =>
+                if err
+                    return fn(500, null)
+                # Check if same ID exists. If so don't insert
+                col.findOne { user_id: user_id, member_id: member_id}, (err, wtf) =>
+                    if err
+                        return fn(500, null)
+                    else if wtf isnt null
+                        return fn(null, "Already there")
+                    else
+                        col.insert { user_id: user_id, member_id: member_id, name: name._value}, (err) =>
+                            if err
+                                return fn(500, null)
+                            else
+                                fn(null, "save member success")
+                        
     #
     # Clear all data belongs to the arg user
     #
@@ -190,7 +211,7 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Lists not found")
                     cursor.toArray (err, items) =>
-                        fn(err, items[0])
+                        fn(err, items)
 
     #
     # Get all cards of a list
@@ -206,7 +227,7 @@ module.exports = class Trellos extends dbconnection
                     if err
                         return fn(500, "Cards not found")
                     cursor.toArray (err, items) =>
-                        fn(err, items[0])
+                        fn(err, items)
 
     #
     # Get all checklists of a card
@@ -220,7 +241,37 @@ module.exports = class Trellos extends dbconnection
                     return
                 col.find {user_id: user_id, list_id: list_id, card_id: card_id}, (err, cursor) =>
                     if err
-                        return fn(500, "Checklists not found")
+                        return fn(500, "get_checklists_of_list error")
                     cursor.toArray (err, items) =>
-                        fn(err, items[0])
+                        fn(err, items)
 
+    #
+    # Find the member of ID
+    #  {user_id, member_id, name}
+    # 
+    get_member: (user_id, member_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'members', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.findOne {user_id: user_id, member_id: member_id}, (err, wtf) =>
+                    if err
+                        return fn(500, "get_member error")
+                    fn(err, wtf)
+
+    #
+    # Find all members related to user
+    #  {user_id, member_id, name}
+    # 
+    get_all_members: (user_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'members', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find {user_id: user_id}, (err, cursor) =>
+                    if err
+                        return fn(500, "get_all_members error")
+                    cursor.toArray (err, items) =>
+                        fn(err, items)
