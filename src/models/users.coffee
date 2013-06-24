@@ -8,16 +8,19 @@ mongodb = require 'mongodb'
 ObjectID = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
 should = require 'should'
+GenPassword = require '../helpers/genpassword'
 
 
 module.exports = class Users extends dbconnection
-
+    genpass: null
+    
     #
     # Constructor
     # 
     constructor: ->
         super()
-
+        @genpass = new GenPassword()
+        
     #
     # Looks up a user data from email (username)
     # 
@@ -33,7 +36,7 @@ module.exports = class Users extends dbconnection
     # Checks if password matches the user.password
     # 
     verifyPassword: (user, password) ->
-        r = user.password is password
+        r = @genpass.validateHash(user.password, password)
         r
 
     #
@@ -97,6 +100,22 @@ module.exports = class Users extends dbconnection
                     fn(null, user)
 
     #
+    # Get user documemt by _id
+    # user_id: user ID in ObjectDI
+    # 
+    get2: (user_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'users', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.findOne {_id: user_id}, (err, user) =>
+                    if err
+                        fn(500, null)
+                    else
+                        fn(null, user)
+
+    #
     # Add a new user
     # params: email, password, trello_username
     # 
@@ -119,9 +138,11 @@ module.exports = class Users extends dbconnection
                 if err
                     fn(500, "Failed to insert a user")
                     return
+                # Hash password
+                pwd = @genpass.createHash(params.password)
                 values = {
                     email: params.email
-                    password: params.password
+                    password: pwd
                     trello_username: params.trello_username
                     created: new Date()
                 }

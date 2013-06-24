@@ -62,7 +62,7 @@ function controller($scope, $http) {
 	// Call /app/tokens DELETE API
 	$http.post($scope.host+'/app/users', $scope.signupu, {}).
 	    success(function(data, status, headers, config) {
-		alert('Added user '+$scope.email);
+		alert('Added user '+$scope.user.email);
 	    }).
 	    error(function(data, status, headers, config) {
 		alert('Signup failed '+status);
@@ -90,11 +90,12 @@ function controller($scope, $http) {
 	delete $http.defaults.headers.common['X-Requested-With'];
 
 	// Call /app/trello/report/useremail
-	$http.get($scope.host+'/app/trello/collect/'+$scope.user.username, {}).
+	$http.get($scope.host+'/app/trello/collect/'+$scope.token, {}).
 	    success(function(data, status, headers, config) {
-		$http.get($scope.host+'/app/trello/view/'+$scope.user.username, {}).
+		$http.get($scope.host+'/app/trello/view/'+$scope.token, {}).
 		    success(function(data, status, headers, config) {
 			$scope.report = data;
+			$("#report-html").empty();
 			$("#report-html").append(data);
 		    }).
 		    error(function(data, status, headers, config) {

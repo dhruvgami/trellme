@@ -1,0 +1,232 @@
+#
+# trello-view.coffee
+#
+#
+#
+fs       = require 'fs'
+#process  = require 'process'
+_        = require 'underscore'
+ObjectID = require('mongodb').ObjectID
+should   = require 'should'
+handlebars = require 'handlebars'
+Trellos  = require '../models/trellos'
+sugar    = require 'sugar'
+
+
+
+module.exports = class TrelloView
+    @templates: {
+        board:     { path: 'templates/boards.tmpl', template: null}
+        list:      { path: 'templates/lists.tmpl',  template: null}
+        card:      { path: 'templates/cards.tmpl',   template: null}
+        checklist: { path: 'templates/checklists.tmpl', template: null}
+        checkitem: { path: 'templates/checkitems.tmpl', template: null}
+        duecard:   { path: 'templates/duecard.tmpl', template: null}
+    }
+    @template_compiled: false
+    
+    #
+    # Constructor
+    # 
+    constructor: ->
+        if TrelloView.template_compiled isnt yes
+            keys = _.keys TrelloView.templates
+            _.each keys, (key) =>
+                tmpl = fs.readFileSync(__dirname + '/' + TrelloView.templates[key].path)
+                TrelloView.templates[key].template = handlebars.compile(tmpl.toString())
+            TrelloView.template_compiled = yes
+
+    #
+    # Collect card IDs in an object {past:[], today:[], soon:[]}
+    # 
+    # 
+    collect_cards_per_due: (all_cards) ->
+        cardids = {past:[], today:[], soon:[]}
+
+        _.each all_cards, (cards) =>
+            _.each cards.cards, (card) =>
+                if card.due # If due is null, not need categorization
+                    due = new Date(card.due)
+                    now = new Date()
+                    days_diff = (due - now) / 86400000
+                    #
+                    # days_diff < 0 : past due
+                    # days_diff >= 0: due not past
+                    # days_diff >= 0 and days_diff < 1: due today (less than one day)
+                    # days_diff >= 1 and days_diff < 7: due soon
+                    #
+                    if days_diff < 0
+                        cardids.past.push card.id  # this id is not mongo ObjectId
+                    else
+                        if days_diff < 1
+                            cardids.today.push card.id  # this id is not mongo ObjectId
+                        else if days_diff < 7
+                            cardids.soon.push card.id  # this id is not mongo ObjectId
+        cardids
+
+    #
+    lookup_card_by_id: (alldata, card_id) ->
+        cr = null
+        cards = _.find alldata.cards, (cards) =>
+            cr = _.find cards.cards, (card) =>
+                card.id is card_id
+            not _.isUndefined(cr)
+        [cards, cr]
+
+    lookup_board_by_id: (alldata, board_id) ->
+        #console.log alldata.boards
+        bd = _.find alldata.boards, (board) ->
+            board.boards.id is board_id
+        bd
+
+    lookup_list_by_id: (alldata, board_id, list_id) ->
+        lst = null
+        lists = _.find alldata.lists, (list) =>
+            lst = null
+            if list.board_id is board_id
+                lst = _.find list.lists, (lst) =>
+                    lst.id is list_id
+            lst isnt null and not _.isUndefined(lst)
+        [lists, lst]
+
+    #
+    # cards: one of past, today, soon from the ret object from collect_cards_per_due
+    #
+    list_cards: (alldata, cardids, fn) ->
+        htmls = []
+        _.each cardids, (card_id) =>
+            acard = @lookup_card_by_id alldata, card_id
+            # [cards, card]
+            aboard = @lookup_board_by_id alldata, acard[0].board_id
+            # board
+            alist = @lookup_list_by_id alldata, acard[0].board_id, acard[0].list_id
+            # [lists, list]
+
+            # Assigned To names
+            members = null
+            if 0 < acard[1].idMembers.length
+                member_names = []
+                _.each acard[1].idMembers, (mem_id) =>
+                    m = _.find alldata.members, (mem) =>
+                        mem_id is mem.member_id
+                    member_names.push m.name
+                members = member_names.join(',')  # member names            
+
+            duedate = Date.create(acard[1].due).format "{mon} {d}, {yyyy} at {h}:{mm} {tt} UCT{tz}"
+            context = {
+                board_name:  aboard.boards.name
+                board_url:   aboard.boards.url
+                org_name:    aboard.org_name
+                list_name:   alist[1].name
+                list_url: ""
+                card_name:   acard[1].name
+                card_url:    acard[1].url
+                due:         duedate
+                assigned_to: members
+            }
+            htmls.push TrelloView.templates.duecard.template(context)
+        htmls.join('<br>\n')
+        
+    #
+    # Reads all data from DB and render (create) HTML for the data
+    #
+    # trellos: Trellos object
+    # user_id: user_id in ObjectID type
+    # fn: callback fn(err, html)
+    # 
+    renderHtml: (trellos, user_id, fn) ->
+        trellos.get_all_data user_id, (err, all) =>
+            if err
+                fn(500, all)
+            else
+                htmls = []
+
+                wtf = @collect_cards_per_due all.cards  # DEBUG
+                console.log(wtf)
+                htmls.push '<h5><i>Due Today</i></H5>'
+                htmls.push @list_cards all, wtf.today
+                htmls.push '<h5><i>Due Soon</i></H5>'
+                htmls.push @list_cards all, wtf.soon
+                htmls.push '<h5><i>Past Due</i></H5>'
+                htmls.push @list_cards all, wtf.past
+
+                # For all boards
+                _.each all.boards, (boardx)=>
+                    board = boardx.boards # Real data is one deep down
+                    list = _.find all.lists, (list)=>
+                        list.board_id is board.id   # Find the lists for this board
+                    listhtmls = []
+                    if not list
+                        list = []
+                    # Render all lists for this board
+                    _.each list.lists, (ll)=>
+                        # Find the cards for this list
+                        cards1 = _.find all.cards, (cards)=>
+                            cards.list_id is ll.id
+                        # cards1 can be null
+                        if cards1
+                            cardhtmls = []
+                            # And cards for this list
+                            _.each cards1.cards, (cccard)=>
+                                # "labels" : [ 	{ 	"color" : "green", 	"name" : "Task" },
+                                # 	{ 	"color" : "yellow", 	"name" : "WTF" },
+                                # 	{ 	"color" : "orange", 	"name" : "OMG" },
+                                # 	{ 	"color" : "red", 	"name" : "LOL" } ]
+                                labels = []
+                                _.each cccard.labels, (label) =>
+                                    labels.push label.name
+                                cccard.labels = labels.join ', '  # labels
+
+                                # member names if any
+                                if 0 < cccard.idMembers.length
+                                    member_names = []
+                                    _.each cccard.idMembers, (mem_id) =>
+                                        m = _.find all.members, (mem) =>
+                                            mem_id is mem.member_id
+                                        member_names.push m.name
+                                    cccard.members = member_names.join(',')  # member names
+
+                                # Find checklists for this card -  there may be multiple cls
+                                cls = _.filter all.checklists, (cl)=>
+                                    cl.card_id is cccard.id
+                                clhtmls = []
+                                # Loop over each checklist
+                                _.each cls, (cl)->
+                                    # And loop over each checkitems
+                                    cihtmls = []
+                                    _.each cl.checklists.checkItems, (ci)=>
+                                        # Render checkitem
+                                        cihtml = TrelloView.templates.checkitem.template(ci)
+                                        cihtmls.push cihtml
+                                    cihtml = cihtmls.join("\n")
+                                    cl.checklists.checkItems = cihtml  # Insert checkitems into checklist
+
+                                    # Render checklist
+                                    clhtml = TrelloView.templates.checklist.template(cl.checklists)
+                                    clhtmls.push clhtml
+                                cccard.closed = if cccard.closed is false then 'NO' else 'YES'
+                                cccard.checklists = clhtmls.join("\n") # Insert checklists into card
+                                
+                                # Render card
+                                cardhtml = TrelloView.templates.card.template(cccard)
+                                cardhtmls.push cardhtml
+                            ll.cards = cardhtmls.join("\n")  # Insert cards into list
+                        # Render list
+                        listhtml = TrelloView.templates.list.template(ll)
+                        listhtmls.push listhtml
+                    board.lists = listhtmls.join("\n")  # Insert list into board
+                    # Render board
+                    htmls.push TrelloView.templates.board.template(board)
+                ret = htmls.join "\n"
+                #console.log(ret)
+                fn(null, ret)
+
+    #
+    # get the summary of all Trello board data.
+    # Returns HTML
+    # user: user object
+    # 
+    getSummary: (user, fn) ->
+        trellos = new Trellos()
+        @renderHtml trellos, new ObjectID(user._id.toString()), fn
+        

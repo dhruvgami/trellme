@@ -34,6 +34,9 @@ module.exports = class TrelloApi
         'all_cards_of_list' :   { method: 'GET',  path: '/1/lists/{list_id}/cards?key={key}&token={token}' }
         'checklist_of_card':    { method: 'GET',  path: '/1/checklists/{checklist_id}?key={key}&token={token}' }
         'member_name' :         { method: 'GET',  path: '/1/member/{member_id}/fullName?key={key}&token={token}' }
+        'board_actions':        { method: 'GET',  path: '/1/boards/{board_id}/actions?key={key}&token={token}' }
+        'member_notifications': { method: 'GET',  path: '/1/members/{username}/notifications?key={key}&token={token}' }
+        'member_actions':       { method: 'GET',  path: '/1/members/{username}/actions?key={key}&token={token}' }
     }
     
     #
@@ -271,6 +274,24 @@ module.exports = class TrelloApi
                 fn(null, name)
 
     #
+    # Get actions pertaining to the board of arg board_id
+    # db: Trellos instance
+    # userObj: user document
+    # board_id: board ID
+    # 
+    get_board_actions: (db, userObj, board_id, fn) ->
+        should.exist(board_id)
+        @request 'board_actions', userObj, {board_id: board_id}, (err, json) =>
+            if err
+                return fn(500, json)
+            actions = @_parse(json)  # will be like {"_value":"Yoshikazu Noda"} 
+            uid = new ObjectID(userObj._id.toString())
+            db.save_actions uid, actions, (err, wtf)=>
+                if err
+                    return fn(500,wtf)
+                fn(null, actions)
+
+    #
     # Collect all trello data for the arg user and store the data in database.
     # The callback fn is called only after every reading and saving is over.
     # This is kind of sync function. I made it that way because rendering can not
@@ -280,6 +301,49 @@ module.exports = class TrelloApi
     # userObj: user document
     # fn: callback function to be called after done
     # 
+    collect_data_sync: (userObj, fn)->
+        db = new Trellos()
+        uid = new ObjectID(userObj._id.toString())
+
+        db.clear_all uid, (err, wtf)=>
+            if err
+                return fn(500, wtf)
+            # Get all BOARDS
+            @get_all_boards db, userObj, (err, boards)=>
+
+                # Loop over each board
+                async.each( boards, (board, cb1)=>
+                    # Load all board actions
+                    @get_board_actions db, userObj, board.id, (err, actions) =>
+                        #console.log(actions)
+                    # Load all lists for this board
+                    @get_all_lists_of_board db, userObj, board, (err, lists)=>
+
+                        # Get all CARDS
+                        async.each( lists, (list, cb2)=>
+                            @get_all_cards_of_list db, userObj, board.id, list, (err, cards) =>
+
+                                # Now load and save the member data
+                                async.eachSeries( cards, (card, cb3)=>
+                                    #
+                                    async.each( card.idMembers, (member_id, cb5)=>
+                                        @get_member_name db, userObj, member_id, (err, name) =>
+                                            cb5(null)
+                                    ,(err)=>
+                                        cb3(null)
+                                    )
+                                ,(err)=>
+                                    cb2(null)
+                                )
+                        ,(err)=>
+                            cb1(null)
+                        )
+                ,(err)=>
+                    fn(null, 'all good')  # at the end of each boards loop
+                )
+
+
+    ###
     collect_data_sync: (userObj, fn)->
         db = new Trellos()
         uid = new ObjectID(userObj._id.toString())
@@ -325,6 +389,6 @@ module.exports = class TrelloApi
                 ,(err)=>
                     fn(null, 'all good')  # at the end of each boards loop
                 )
-
+    ###
 
 

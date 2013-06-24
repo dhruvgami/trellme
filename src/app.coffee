@@ -287,15 +287,14 @@ app.get "/app/trello/report/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                             res.status 200
                             res.send result  # html
 
-#
-# 
-# 
-app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+
+###
+# Trash these later
+app.get "/app/trello/collecttest/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
     db_users.findByEmail {username: req.params[0]}, (err, user)=>    
         if err
             res.status 404; res.send "No such user"
         else
-            console.log(user)
             (new TrelloApi()).collect_data_sync user, (err, result) =>
                 if err
                     res.status err
@@ -303,16 +302,12 @@ app.get "/app/trello/collect/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                 else
                     res.status 200
                     res.send result
-
-#
-#
-# 
-app.get "/app/trello/view/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+                    
+app.get "/app/trello/viewtest/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
     db_users.findByEmail {username: req.params[0]}, (err, user)=>    
         if err
             res.status 404; res.send "No such user"
         else
-            console.log(user)
             (new TrelloView()).getSummary user, (err, result) =>
                 if err
                     res.status err
@@ -320,8 +315,54 @@ app.get "/app/trello/view/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                 else
                     res.status 200
                     res.send result  # HTML
+###
+#
+# Collect Trello summary
+# url param = token
+# 
+app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
+    (new Tokens()).validate req.params[0], (err, tokendoc) =>
+        if err
+            res.status 401; res.json tokendoc
+        else unless tokendoc
+            res.status 401; res.json "Invalid token."
+        else
+            db_users.get2 tokendoc.user_id, (err, user)=>                
+                if err
+                    res.status 404; res.send "No such user"
+                else
+                    (new TrelloApi()).collect_data_sync user, (err, result) =>
+                        if err
+                            res.status err
+                            res.send result
+                        else
+                            res.status 200
+                            res.send result
 
 #
+# Get the view (html) of the Trello summary
+# url param is token
+# 
+app.get "/app/trello/view/(([A-Za-z0-9_]+))", (req, res) ->
+    (new Tokens()).validate req.params[0], (err, tokendoc) =>
+        if err
+            res.status 401; res.json tokendoc
+        else unless tokendoc
+            res.status 401; res.json "Invalid token."
+        else
+            db_users.get2 tokendoc.user_id, (err, user)=>
+                if err
+                    res.status 404; res.send "No such user"
+                else
+                    (new TrelloView()).getSummary user, (err, result) =>
+                        if err
+                            res.status err
+                            res.send result
+                        else
+                            res.status 200
+                            res.send result  # HTML
+
+###
 # For Debugging only
 # 
 app.get "/app/trello/orgboards/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
@@ -329,7 +370,7 @@ app.get "/app/trello/orgboards/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
         if err
             res.status 404; res.send "No such user"
         else
-            console.log(user)
+            #console.log(user)
             (new TrelloApi()).get_all_boards (new Trellos()), user, (err, result) =>
                 if err
                     res.status err
@@ -337,10 +378,7 @@ app.get "/app/trello/orgboards/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                 else
                     res.status 200
                     res.send result  # HTML
-
-
-
-                    
+###
 
 # Get Trello stuff of a user
 #   First param: boards, lists, cards

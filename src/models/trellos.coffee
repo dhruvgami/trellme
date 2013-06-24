@@ -8,6 +8,7 @@ ObjectID  = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
 should    = require 'should'
 _         = require 'underscore'
+async     = require 'async'
 
 
 module.exports = class Trellos extends dbconnection
@@ -47,10 +48,10 @@ module.exports = class Trellos extends dbconnection
     # 
     clear_all: (uid, fn) ->
         dbconnection.get_client (err, p_client) =>
-            p_client.collection 'checklists', (err, col) =>
+            p_client.collection 'actions', (err, col) =>
                 col.remove {user_id: uid}, (err, resp) =>
                     if err
-                        return fn(500, "Failed to remove checklists for user #{user_id}")
+                        return fn(500, "Failed to remove actions for user #{user_id}")
                     p_client.collection 'cards', (err, col) =>
                         col.remove {user_id: uid}, (err, resp) =>
                             if err
@@ -122,7 +123,7 @@ module.exports = class Trellos extends dbconnection
     #
     # Save checklists
     # user_id: user ID in ObjectID type
-    # 
+    ###
     save_checklists: (user_id, board_id, list_id, card_id, checklists, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'checklists', (err, col) =>
@@ -133,6 +134,22 @@ module.exports = class Trellos extends dbconnection
                         return fn(500, null)
                     else
                         fn(null, "save checklists success")
+    ###
+
+    #
+    # Save actions - saves each record individually so we can get by sorting with date
+    # 
+    save_actions: (user_id, actions, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'actions', (err, col) =>
+                if err
+                    return fn(500, null)
+                _.each actions, (action) =>
+                    action.user_id = user_id
+                    col.insert action, (err) =>
+                        if err
+                            return fn(500, null)
+                fn(null, "save actions success")
 
     #
     # Get all boards
@@ -275,3 +292,86 @@ module.exports = class Trellos extends dbconnection
                         return fn(500, "get_all_members error")
                     cursor.toArray (err, items) =>
                         fn(err, items)
+
+    #
+    # Find all actions belongs to the user
+    # 
+    get_actions: (user_id, board_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'actions', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find({user_id: user_id, 'data.board.id': board_id}).sort {date:-1}, (err, cursor) =>
+                    if err
+                        return fn(500, "get_actions error")
+                    cursor.limit 10, (err, cur) =>
+                        cursor.toArray (err, items) =>
+                            fn(err, items)  # items is an array
+
+    get_all_actions: (user_id, fn) ->
+        dbconnection.get_client (err, p_client) =>
+            p_client.collection 'actions', (err, col) =>
+                if err
+                    fn(err, null)
+                    return
+                col.find({user_id: user_id}).sort {date:-1}, (err, cursor) =>
+                    if err
+                        return fn(500, "get_actions error")
+                    cursor.limit 100, (err, cur) =>
+                        cursor.toArray (err, items) =>
+                            fn(err, items)  # items is an array
+
+
+
+
+    #
+    # Load up all data from DB. This method wait to everything is done before calling the callback.
+    # 
+    # user_id: user_id in ObjectID type
+    # fn: callback fn(err, all)  all is an object {boards, lists, cards, checklists, members}
+    #
+    get_all_data: (user_id, fn) ->
+        all = {}
+
+        # Parallel process
+        async.parallel({
+            boards: (cb) =>
+                @get_boards user_id, (err, myboards) =>
+                    if err
+                        cb(500, 'Couldnt read data')
+                    else
+                        all.boards = myboards
+                        cb(null,1)
+            lists: (cb) =>
+                @get_all_lists user_id, (err, mylists) =>
+                    if err
+                        cb(500, 'Couldnt read data')
+                    else
+                        all.lists = mylists
+                        cb(null,2)
+            cards: (cb) =>
+                @get_all_cards user_id, (err, mycards) =>
+                    if err
+                        cb(500, 'Couldnt read data')
+                    else
+                        all.cards = mycards
+                        cb(null,3)
+            actions: (cb) =>
+                @get_all_actions user_id, (err, myactions) =>
+                    if err
+                        cb(500, 'Couldnt read data')
+                    else
+                        all.actions = myactions
+                        cb(null, 4)
+            members: (cb) =>
+                @get_all_members user_id, (err, mymembers) =>
+                    if err
+                        cb(500, 'Couldnt read data')
+                    else
+                        all.members = mymembers
+                        cb(null, 5)
+        }, (err, results) =>
+            #console.log(results)
+            fn(null, all)
+        )
