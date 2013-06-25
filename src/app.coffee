@@ -248,6 +248,21 @@ app.get "/app/auths/trello_callback", (req, res) ->
         res.status 404; res.send '<script>window.close();</script>'
 
 #
+# Get OAuth result
+# 
+app.get "/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+        if err
+            res.status 401; res.send "No such user"
+        else
+            if _.isUndefined(users.access_token)
+                stat = "no"
+            else
+                stat = "yes"
+            res.status 200
+            res.send   stat
+
+#
 # Revoke Trello oauth - Remove access_token from user.
 # 
 app.delete '/app/auths/delete', (req, res)->

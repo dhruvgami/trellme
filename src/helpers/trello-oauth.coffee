@@ -51,7 +51,7 @@ module.exports = class TrelloOAuth
                 @oauth_token_secret = tokenSecret
                 (new Users()).save_token_secret @user_id, tokenSecret, (err)=>
                     if not err
-                        fn(null, "#{config.trello.authorizeURL}?oauth_token=#{token}&name=#{config.trello.appName}")
+                        fn(null, "#{config.trello.authorizeURL}?oauth_token=#{token}&name=#{config.trello.appName}&expires=never")
                     else
                         console.log('save_token_secret failed')
                     

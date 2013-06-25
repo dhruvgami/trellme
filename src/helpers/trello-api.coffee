@@ -60,9 +60,9 @@ module.exports = class TrelloApi
         _.each keys, (key) ->
             params[key] = paramObj[key]
         # Must have done OAuth authentiation
-        should.exist userObj.trello_username
-        should.exist userObj.access_token
-
+        if _.isUndefined(userObj.trello_username) or _.isUndefined(userObj.access_token)
+            fn(500, "Access token not available")
+            
         # Common params
         params.username = userObj.trello_username
         params.key      = config.trello.key
@@ -109,7 +109,7 @@ module.exports = class TrelloApi
         try
             obj = JSON.parse(json)
         catch err
-            console.log('JSON Parse Error '+json)
+            #console.log('JSON Parse Error '+json)
             obj = {}
         obj
 
@@ -125,7 +125,8 @@ module.exports = class TrelloApi
         # 
         @request 'organizations', userObj, {}, (err, json) =>
             if err
-                return fn(500, json)
+                fn(500, json)
+                return
             orgs = @_parse(json)  # organizations array
             uid = new ObjectID(userObj._id.toString())
             allboards = []
@@ -134,6 +135,9 @@ module.exports = class TrelloApi
                 # Get organization boards
                 # 
                 @request 'org_boards', userObj, {orgname:org.name}, (err, json) =>
+                    if err
+                        fn(500, json)
+                        return
                     boards = @_parse(json)  # Boards belongs to the organization
                     # boards is an array.
                     # Store boards individually
@@ -149,7 +153,8 @@ module.exports = class TrelloApi
                         # Save data into db. Pass org name
                         db.save_boards uid, org.name, boards, (err, wtf)=>
                             if err
-                                return fn(500,wtf)
+                                fn(500,wtf)
+                                return
                             cb(null)
                     )
             , (err) =>
@@ -303,27 +308,40 @@ module.exports = class TrelloApi
 
         db.clear_all uid, (err, wtf)=>
             if err
-                return fn(500, wtf)
+                fn(500, wtf)
+                return                
             # Get all BOARDS
             @get_all_boards db, userObj, (err, boards)=>
-
+                if err
+                    fn(err, boards)
+                    return
                 # Loop over each board
                 async.each( boards, (board, cb1)=>
                     # Load all board actions
                     @get_board_actions db, userObj, board.id, (err, actions) =>
+                        if err
+                            fn(err, actions)
+                            return
                         #console.log(actions)
                     # Load all lists for this board
                     @get_all_lists_of_board db, userObj, board, (err, lists)=>
-
+                        if err
+                            fn(err, lists)
+                            return
                         # Get all CARDS
                         async.each( lists, (list, cb2)=>
                             @get_all_cards_of_list db, userObj, board.id, list, (err, cards) =>
-
+                                if err
+                                    fn(err, cards)
+                                    return
                                 # Now load and save the member data
                                 async.eachSeries( cards, (card, cb3)=>
                                     #
                                     async.each( card.idMembers, (member_id, cb5)=>
                                         @get_member_name db, userObj, member_id, (err, name) =>
+                                            if err
+                                                fn(err, name)
+                                                return
                                             cb5(null)
                                     ,(err)=>
                                         cb3(null)

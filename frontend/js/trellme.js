@@ -27,7 +27,7 @@ function controller($scope, $http) {
 		$scope.getReport();
 	    }).
 	    error(function(data, status, headers, config) {
-		alert('Login failed '+status);
+		alert('Login failed '+data);
 	    });
     };
 
@@ -68,7 +68,7 @@ function controller($scope, $http) {
 		$("#report-html").empty();
 	    }).
 	    error(function(data, status, headers, config) {
-		alert('Logout failed '+status);
+		alert('Logout failed '+data);
 	    });
 
     };
@@ -87,10 +87,45 @@ function controller($scope, $http) {
 		popup.location = $scope.host+'/app/auths/request/'+$scope.signupu.email;
 	    }).
 	    error(function(data, status, headers, config) {
-		alert('Signup failed '+status);
+		alert('Signup failed '+data);
 	    });
-
     };
+
+    /* Need user already stored to OAuth to work!!!
+    $scope.mysignup = function() {
+	// Workaround to circumvent an strange error
+	delete $http.defaults.headers.common['X-Requested-With'];
+
+	// Call /app/tokens DELETE API
+	var popup = window.open('', 'OAuth Popup', "height=800,width=800")
+	popup.location = $scope.host+'/app/auths/request/'+$scope.signupu.email;
+
+	check_close = setInterval(function(){
+            if (popup != null) {
+                if (popup.closed) {
+                    popup = null
+                    clearInterval(check_close)
+		}
+	    }
+        }, 100);  // 100 milli seconds
+	// Check status
+	$http.get($scope.host+'/app/auths/status/'+$scope.signupu.email, {}).
+	    success(function(data, status, headers, config) {
+		if (data == 'yes') {
+		    $http.post($scope.host+'/app/users', $scope.signupu, {}).
+			success(function(data, status, headers, config) {
+			    alert('Welcome To TrellMe!');
+			}).
+			error(function(data, status, headers, config) {
+			    alert('Signup failed '+data);
+			});
+		}
+	    }).
+	    error(function(data, status, headers, config) {
+		alert('Error '+data);
+	    });
+    };
+    */
 
     /*
      * Trello OAuth
@@ -121,11 +156,11 @@ function controller($scope, $http) {
 			$("#report-html").append(data);
 		    }).
 		    error(function(data, status, headers, config) {
-			alert('Error view '+status);
+			alert('Error: '+data);
 		    });
 	    }).
 	    error(function(data, status, headers, config) {
-		alert('Error collect '+status);
+		alert('Error: '+data);
 	    });
     };
 
@@ -143,7 +178,7 @@ function controller($scope, $http) {
 		$scope.allboards = data;
 	    }).
 	    error(function(data, status, headers, config) {
-		alert('Error '+status);
+		alert('Error '+data);
 	    });
     };
 
