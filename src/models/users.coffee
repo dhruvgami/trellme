@@ -40,7 +40,7 @@ module.exports = class Users extends dbconnection
         r
 
     #
-    # Get all users - mongodb.find() example only
+    # Get all users
     # 
     findAll: (fn) ->
         dbconnection.get_client (err, p_client) =>

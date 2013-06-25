@@ -10,53 +10,56 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/trellme.js"></script>
   </head>
-  <body>
-    <div class="container" id="container" np-app="myApp" ng-controller="controller">
+  <body  np-app="myApp" ng-controller="controller">
 
+    <div class="navbar navbar-fixed-top">  
+      <div class="navbar-inner">  
+        <div class="container-fluid">  
+
+          <div class="nav-collapse">  
+	    <p class="navbar-text pull-right"><a ng-click="signupform()">Sign Up</a></p>
+	    <p class="navbar-text pull-right">&nbsp;&nbsp;&nbsp;&nbsp;</p>
+            <p class="navbar-text pull-right"><a ng-click="mylogout()">Sign Out</a></p>
+	    <p class="navbar-text pull-right">&nbsp;&nbsp;&nbsp;&nbsp;</p>
+            <p class="navbar-text pull-right"><a ng-click="signinform()">Sign In</a></p>
+	    <p class="navbar-text pull-left"><b style="font-size:3em;">TrellMe</b></p>
+          </div><!--/.nav-collapse -->  
+	</div>
+      </div>
+    </div><br><br>
+
+    <div class="container" id="container">
       <div class="row">
-	<div class="span6">
+	<div id="signin" class="span12 text-center" style="position:relative; top:40px;">
 	  <div id="login">
-	    <h3>Login (need this first!)</h3>
+	    <h1>Sign In</h1><br>
 	    <form id="loginForm" name="login" ng-submit="mylogin()" >
-	      <label>Email:</label>
-	      <input type="text" name="email" ng-model="user.username" placeholder="Enter your email address" required>
-	      <label>Password:</label>
-	      <input type="password" name="password" ng-model="user.password" placeholder="Enter your password" required>
-	      <div><button id="submit" type="submit">Submit</button></div>
-	    </form>
-	  </div>
-	  <div id="logout" class="invisible" style="position:relative; top:-225px;">
-	    <h3>Logout</h3>
-	    <button id="logout" ng-click="mylogout()" >Logout</button>
-	  </div>
-	</div> <!--span6-->
-	<div class="span6">
-	  <div id="signup">
-	    <h3>Signup</h3>
-	    <form id="signupForm" name="signup" ng-submit="mysignup()" >
-	      <label>Email:</label>
-	      <input type="text" name="email" ng-model="signupu.email" placeholder="Enter your email address" required>
-	      <label>Password:</label>
-	      <input type="password" name="password" ng-model="signupu.password" placeholder="Enter your password" required>
-	      <label>Trello Username:</label>
-	      <input type="text" name="trello_username" ng-model="signupu.trello_username" placeholder="Enter your Trello user name" required>
+	      <div><label for="email"><i>Email:</i></label><input id="email" type="text" name="email" ng-model="user.username" placeholder="Enter your email address" required ></div>
+	      <div><label for="password"><i>Password:</i></label><input id="password" type="password" name="password" ng-model="user.password" placeholder="Enter your password" required ></div>
 	      <div><button id="submit" type="submit">Submit</button></div>
 	    </form>
 	  </div>
 	</div>
+
+	<div id="signup" class="span12 text-center invisible" style="position:relative; top:-215px;">
+	  <div id="_signup">
+	    <h1>Sign Up</h1><br>
+	    <form id="signupForm" name="signup" ng-submit="mysignup()" >
+	      <label for="email"><i>Email:</i></label>
+	      <input id="email" type="text" name="email" ng-model="signupu.email" placeholder="Enter your email address" required>
+	      <label for="passwrod"><i>Password:</i></label>
+	      <input id="password" type="password" name="password" ng-model="signupu.password" placeholder="Enter your password" required>
+	      <label for="trello_username"><i>Trello Username:</i></label>
+	      <input id="trello_username" type="text" name="trello_username" ng-model="signupu.trello_username" placeholder="Enter your Trello user name" required>
+	      <div><button id="submit" type="submit">Submit</button></div>
+	    </form>
+	  </div>
+	</div>
+
       </div><!--row-->
       <!--<pre>{{user|json}}{{token}}{{signupu|json}}</pre>-->
 
-      <div id="auth">
-	<h3>OAuth</h3>
-	<button id="auth" ng-click="oAuth()">Auth Trello</button>
-      </div>
-
-      <div id="allboards">
-	<h3>My Trello Report</h3>
-	<button id="report" ng-click="getReport()" >Get Report</button>
-      </div>
-      <br><div id="report-html"></div>
+      <br><div id="report-html" style="position:relative; top:-550px;"></div>
 
     </div> <!--container-->
   </body>

@@ -52,6 +52,7 @@ module.exports = class TrelloApi
     #  userObj: an user entry from users collection.
     #  
     request: (action, userObj, paramObj, fn)->
+        console.log(action)
         if typeof TrelloApi.endpoints[action] is 'undefined'
             fn(500, "No such action")
 
@@ -67,10 +68,11 @@ module.exports = class TrelloApi
         params.username = userObj.trello_username
         params.key      = config.trello.key
         params.token    = userObj.access_token
+        #console.log(params)
         
         # Replace the api url variables
         path = TrelloApi.endpoints[action].path.replaceAll(params)
-        #console.log(path)
+        console.log(path)
 
         # pstr is for POST only
         pstr = ''
@@ -84,8 +86,10 @@ module.exports = class TrelloApi
                 'Accept': 'application/json, Text/javascript, */*; q=0.01'
                 'Content-Type': 'application/x-www-form-urlencoded'
                 'Content-Length': length
-        # Send request        
+        #console.log(opts)
+        
         request = https.request opts, (resp) ->
+            #console.log("statusCode: ", resp.statusCode)
             resp.setEncoding('utf8')
             data = ''
             # On data
@@ -337,4 +341,54 @@ module.exports = class TrelloApi
                 ,(err)=>
                     fn(null, 'all good')  # at the end of each boards loop
                 )
+
+
+    ###
+    collect_data_sync: (userObj, fn)->
+        db = new Trellos()
+        uid = new ObjectID(userObj._id.toString())
+
+        db.clear_all uid, (err, wtf)=>
+            if err
+                return fn(500, wtf)
+            # Get all BOARDS
+            @get_all_boards db, userObj, (err, boards)=>
+                #
+                # Get all LISTS
+                # 
+                async.each( boards, (board, cb1)=>
+                    @get_all_lists_of_board db, userObj, board, (err, lists)=>
+                        #
+                        # Get all CARDS
+                        #
+                        async.each( lists, (list, cb2)=>
+                            @get_all_cards_of_list db, userObj, board.id, list, (err, cards) =>
+                                #
+                                # Now save the CHECKLIST data
+                                #
+                                async.eachSeries( cards, (card, cb3)=>
+                                    #
+                                    async.each( card.idChecklists, (checklistid, cb4) =>
+                                        @get_checklist_of_card db, userObj, "0", "0", card.id, checklistid, (err, checklist) =>
+                                            cb4(null)
+                                    ,(err)=>
+                                        #cb3(null)
+                                    )
+                                    async.each( card.idMembers, (member_id, cb5)=>
+                                        @get_member_name db, userObj, member_id, (err, name) =>
+                                            cb5(null)
+                                    ,(err)=>
+                                        cb3(null)
+                                    )
+                                ,(err)=>
+                                    cb2(null)
+                                )
+                        ,(err)=>
+                            cb1(null)
+                        )
+                ,(err)=>
+                    fn(null, 'all good')  # at the end of each boards loop
+                )
+    ###
+
 

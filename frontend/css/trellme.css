@@ -1,4 +1,8 @@
 
+h1 {
+    font-size: 6em;
+}
+
 .table {
     boarder: 1px solid #eee;
 }

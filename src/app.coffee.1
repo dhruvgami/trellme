@@ -21,7 +21,6 @@ TrelloOAuth      = require("./helpers/trello-oauth")
 TrelloApi        = require("./helpers/trello-api")
 MailService      = require("./helpers/mailservice")
 TrelloView       = require("./views/trello-view")
-config           = JSON.parse(fs.readFileSync("config/config.json"))
 
 # Database objects
 db_users = new Users()
@@ -91,6 +90,7 @@ app.post "/app/tokens", (req, res, next) ->
         else
             # Test Email
             #(new MailService()).send("Hey what's up dude?", "noda.yoshikazu@gmail.com")
+            
             tokens = new Tokens()
             tokens.create user, (err, tk) =>
                 res.status 200
@@ -208,14 +208,16 @@ app.delete "/app/users", (req, res) ->
 #=================================================
 #
 # Trello OAuth API
-#  URL param is the user email
+# Query string : token={token}
 # 
-app.get "/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+app.get "/app/auths/request", (req, res) ->
+    (new Tokens()).validate req.query['token'], (err, result) =>
         if err
-            res.status 401; res.send "No such user"
+            res.status 401; res.json result
+        else unless result
+            res.status 401; res.json "Invalid token."
         else
-            toa = new TrelloOAuth(user._id.toString())
+            toa = new TrelloOAuth(result.user_id.toString())
             toa.createOAuth (err, oauth) =>
                 if err
                     res.status err; res.send oauth   # message
@@ -392,8 +394,9 @@ app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
 #=================================================
 
 mailLoop = () ->
-    mailservice = new MailService()
     mloop = setInterval( ()=>
+        console.log('mailLoop')    
+
         #
         # for all users in users collection
         #   do
@@ -401,13 +404,19 @@ mailLoop = () ->
         #     send report
         #     set user.lastreport = now()
         # end
-        #
-        console.log('Mailing starting')
-        db_users.findAll (err, users) =>
-            mailservice.send_report(users)
-
-    ,config.mail_interval)    # 1000*24*60*60 = Do every 24 hours???
+        # 
     
+
+
+
+    ,1000*3)    # 1000*24*60*60 = Do every 24 hours???
+    
+
+
+
+
+
+
 #
 # Server with Cluster
 # 

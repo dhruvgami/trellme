@@ -144,6 +144,8 @@ module.exports = class Trellos extends dbconnection
             p_client.collection 'actions', (err, col) =>
                 if err
                     return fn(500, null)
+                # Save only the recent 10 actions
+                actions = actions.slice(0,10)
                 _.each actions, (action) =>
                     action.user_id = user_id
                     col.insert action, (err) =>

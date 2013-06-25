@@ -23,7 +23,8 @@ function controller($scope, $http) {
 	    success(function(data, status, headers, config) {
 		$scope.token = data.token
 		$('div#login').addClass('invisible');
-		$('div#logout').removeClass('invisible');
+		// Get report
+		$scope.getReport();
 	    }).
 	    error(function(data, status, headers, config) {
 		alert('Login failed '+status);
@@ -31,9 +32,29 @@ function controller($scope, $http) {
     };
 
     /*
+     * Display sign up form
+     */
+    $scope.signupform = function() {
+	$('div#login').addClass('invisible');
+	$('div#signup').removeClass('invisible');
+    };
+
+    /*
+     * Display sign in form
+     */
+    $scope.signinform = function() {
+	$('div#login').removeClass('invisible');
+	$('div#signup').addClass('invisible');
+    };
+
+    /*
      * Logout button handler
      */
     $scope.mylogout = function() {
+	if ($scope.token == '') {
+	    alert('You are not signed in')
+	    return;
+	}
 	// Workaround to circumvent an strange error
 	delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -62,7 +83,8 @@ function controller($scope, $http) {
 	// Call /app/tokens DELETE API
 	$http.post($scope.host+'/app/users', $scope.signupu, {}).
 	    success(function(data, status, headers, config) {
-		alert('Added user '+$scope.user.email);
+		var popup = window.open('', 'OAuth Popup', "height=800,width=800")
+		popup.location = $scope.host+'/app/auths/request/'+$scope.signupu.email;
 	    }).
 	    error(function(data, status, headers, config) {
 		alert('Signup failed '+status);

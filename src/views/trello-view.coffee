@@ -158,7 +158,7 @@ module.exports = class TrelloView
             }
             htmls.push TrelloView.templates.duecard.template(context)
         if cardids.length is 0
-            htmls.push '<divNo Cards</div>'
+            htmls.push '<div>No Cards</div>'
         htmls.join('<br>\n')
 
     #
@@ -196,7 +196,7 @@ module.exports = class TrelloView
         context = {
             full_name: action.memberCreator.fullName
             action: action.type
-            date: Date.create(action.date).format "{Mon} {d}, {h}:{mm} {TT}"
+            date: Date.create(action.date).format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
         }
         TrelloView.templates.action.template(context)
 

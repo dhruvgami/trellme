@@ -7,14 +7,10 @@ fs    = require("fs")
 http = require('http')
 Users = require('../models/users')
 
+
+
 config = JSON.parse(fs.readFileSync("config/config.json"))
     # These are in the config.json
-    #requestURL:    "https://trello.com/1/OAuthGetRequestToken"
-    #accessURL:     "https://trello.com/1/OAuthGetAccessToken"
-    #authorizeURL:  "https://trello.com/1/OAuthAuthorizeToken"
-    #appName:       "Trellme"
-    #key:           "80e7f11a72d431dee0e0db0a52631180"
-    #secret:        "33c1455220cd7d821bdac09dc8891fc66086359f8936169de2a4d3d56ea2f583"
 
 module.exports = class TrelloOAuth
     oauth: null     # OAuth object
