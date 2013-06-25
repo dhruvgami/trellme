@@ -28,7 +28,7 @@ module.exports = class TrelloOAuth
     # auth.service_id -> service 
     #
     createOAuth: (fn)->
-        callback = "http://localhost:3000/app/auths/trello_callback?state=#{@user_id}"
+        callback = "http://#{config.api_host}/app/auths/trello_callback?state=#{@user_id}"
         @oauth = new OAuth(config.trello.requestURL, config.trello.accessURL, config.trello.key, config.trello.secret, "1.0", callback, "HMAC-SHA1")
         console.log("createOAuth success")
         fn(null, @oauth)

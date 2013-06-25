@@ -1,4 +1,5 @@
 {
+    "api_host":     "localhost:3000",
     "mail_interval": 86400000,
     "trello": {
         "requestURL":    "https://trello.com/1/OAuthGetRequestToken",
