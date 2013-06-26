@@ -79,11 +79,12 @@ function controller($scope, $http) {
     $scope.mysignup = function() {
 	// Workaround to circumvent an strange error
 	delete $http.defaults.headers.common['X-Requested-With'];
+	// Do this first to block the popup-block.
+	var popup = window.open('', 'OAuth Popup', "height=800,width=800")
 
 	// Call /app/tokens DELETE API
 	$http.post($scope.host+'/app/users', $scope.signupu, {}).
 	    success(function(data, status, headers, config) {
-		var popup = window.open('', 'OAuth Popup', "height=800,width=800")
 		popup.location = $scope.host+'/app/auths/request/'+$scope.signupu.email;
 	    }).
 	    error(function(data, status, headers, config) {
