@@ -86,7 +86,7 @@ app.post "/app/tokens", (req, res, next) ->
         if err
             return next(err)
         if not user
-            res.status 404
+            res.status 401
             return res.send null
         else
             # Test Email

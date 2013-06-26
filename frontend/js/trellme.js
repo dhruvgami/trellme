@@ -4,7 +4,7 @@
  *
  */
 function controller($scope, $http) {
-    $scope.host = "http://127.0.0.1:3000";
+    $scope.host = "http://api.trellme.com";  //"http://127.0.0.1:3000";
     $scope.token = "";
     $scope.user = {};
     $scope.signupu = {};   // Signup email, password, trello_username
@@ -15,7 +15,7 @@ function controller($scope, $http) {
      * Login button handler
      */
     $scope.mylogin = function() {
-	// Workaround to circumvent an strange error
+	// Workaround to circumvent a strange error
 	delete $http.defaults.headers.common['X-Requested-With'];
 	
 	// Call /app/tokens API
@@ -23,6 +23,8 @@ function controller($scope, $http) {
 	    success(function(data, status, headers, config) {
 		$scope.token = data.token
 		$('div#login').addClass('invisible');
+		$('#signup-link').addClass('invisible');
+		$('#signin-link').addClass('invisible');
 		// Get report
 		$scope.getReport();
 	    }).
@@ -63,6 +65,9 @@ function controller($scope, $http) {
 	    success(function(data, status, headers, config) {
 		$('div#login').removeClass('invisible');
 		$('div#logout').addClass('invisible');
+		$('#signup-link').removeClass('invisible');
+		$('#signin-link').removeClass('invisible');
+
 		$scope.user = {}
 		$scope.token = "";
 		$("#report-html").empty();
