@@ -69,10 +69,10 @@ app.configure "development", ->
     app.use express.errorHandler()
 
 # Sample API
-app.get "/app/users", (req, res) ->
-    db_users.findAll (err, all) ->
-        res.status 200
-        res.json all
+#app.get "/app/users", (req, res) ->
+#    db_users.findAll (err, all) ->
+#        res.status 200
+#        res.json all
 
 #
 # POST /app/tokens = Login
@@ -172,7 +172,7 @@ app.get "/app/signup", (req, res)->
 #   data: email, password, trello_username
 # 
 app.post "/app/users",  (req, res) ->
-    console.log(req.body)
+    #console.log(req.body)
     db_users.add req.body, (err, result) =>
         if err
             res.status err
