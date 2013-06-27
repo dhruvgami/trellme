@@ -117,7 +117,7 @@ module.exports = class Users extends dbconnection
 
     #
     # Add a new user
-    # params: email, password, trello_username
+    # params: email, password, trello_username, tzdiff
     # 
     add: (params, fn) ->
         # These must exist
@@ -144,6 +144,7 @@ module.exports = class Users extends dbconnection
                     email: params.email
                     password: pwd
                     trello_username: params.trello_username
+                    tzdiff: params.tzdiff
                     created: new Date()
                 }
                 col.insert values, (err, docs)=>

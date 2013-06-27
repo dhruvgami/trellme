@@ -2,14 +2,27 @@
  * trellme.js
  *  Angular.js javascript for trellme.html
  *
+ *  Author: Yoshikazu Noda
+ *  last update: June 27, 2013 
  */
 function controller($scope, $http) {
-    $scope.host = "http://api.trellme.com";  //"http://127.0.0.1:3000";
+    //$scope.host = "http://127.0.0.1:3000";
+    $scope.host = "http://api.trellme.com";  
     $scope.token = "";
     $scope.user = {};
-    $scope.signupu = {};   // Signup email, password, trello_username
+    $scope.signupu = {};   // Signup email, password, trello_username, tzdiff
     $scope.allboards = "";  // JSON
     $scope.report = "";  // HTML
+
+    /*
+     * Get difference of local time and UCT
+     */
+    function tzdiff() {
+	var d = new Date()
+	var gmtHours = -d.getTimezoneOffset()/60;
+	//alert("The local time zone is: GMT " + gmtHours);
+	return gmtHours;
+    }
 
     /*
      * Login button handler
@@ -87,6 +100,8 @@ function controller($scope, $http) {
 	// Do this first to block the popup-block.
 	var popup = window.open('', 'OAuth Popup', "height=800,width=800")
 
+	// Add timezone difference value to post data
+	$scope.signupu.tzdiff = tzdiff();
 	// Call /app/tokens DELETE API
 	$http.post($scope.host+'/app/users', $scope.signupu, {}).
 	    success(function(data, status, headers, config) {

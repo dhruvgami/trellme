@@ -169,7 +169,7 @@ app.get "/app/signup", (req, res)->
 #
 # Sign-up
 #   No token is needed for this endpoint
-#   data: email, password, trello_username
+#   data: email, password, trello_username, tzdiff
 # 
 app.post "/app/users",  (req, res) ->
     #console.log(req.body)

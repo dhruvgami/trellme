@@ -13,6 +13,9 @@ Trellos  = require '../models/trellos'
 sugar    = require 'sugar'
 
 
+Date.prototype.sameDateAs = (pDate) ->
+    ((this.getFullYear()==pDate.getFullYear())&&(this.getMonth()==pDate.getMonth())&&(this.getDate()==pDate.getDate()))
+
 
 module.exports = class TrelloView
     @templates: {
@@ -39,7 +42,7 @@ module.exports = class TrelloView
     # Collect card IDs in an object {past:[], today:[], soon:[]}
     # all_cards: all card data
     # 
-    collect_cards_per_due: (all_cards) ->
+    collect_cards_per_due: (all_cards, tzdiff) ->
         cardids = {past:[], today:[], soon:[]}
 
         _.each all_cards, (cards) =>
@@ -54,11 +57,12 @@ module.exports = class TrelloView
                     # days_diff >= 0 and days_diff < 1: due today (less than one day)
                     # days_diff >= 1 and days_diff < 7: due soon
                     #
-                    if days_diff < 0
-                        cardids.past.push card.id  # this id is not mongo ObjectId
+                    #if days_diff < 0
+                    if due.sameDateAs(now)
+                        cardids.today.push card.id  # this id is not mongo ObjectId
                     else
-                        if days_diff < 1
-                            cardids.today.push card.id  # this id is not mongo ObjectId
+                        if days_diff < 0
+                            cardids.past.push card.id  # this id is not mongo ObjectId
                         else if days_diff < 7
                             cardids.soon.push card.id  # this id is not mongo ObjectId
         cardids
@@ -131,7 +135,7 @@ module.exports = class TrelloView
     # Create a list of due information
     # cards: one of past, today, soon from collect_cards_per_due() return val.
     #
-    list_cards_dueform: (alldata, cardids, fn) ->
+    list_cards_dueform: (alldata, cardids, tzdiff, fn) ->
         htmls = []
         _.each cardids, (card_id) =>
             acard = @lookup_card_by_id alldata, card_id
@@ -144,7 +148,8 @@ module.exports = class TrelloView
             # Assigned To members
             members = @card_member(alldata, acard[1])
             # Due date format
-            duedate = Date.create(acard[1].due).format "{Mon} {d}, {yyyy} at {h}:{mm} {tt} UCT{tz}"
+            due = Date.create(acard[1].due).addHours(tzdiff)  # Change to localtime
+            duedate = due.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
             context = {
                 board_name:  aboard.boards.name
                 board_url:   aboard.boards.url
@@ -164,7 +169,7 @@ module.exports = class TrelloView
     #
     # Renders list tables
     # 
-    list_tabular: (alldata, lists) ->
+    list_tabular: (alldata, lists, tzdiff) ->
         tables = []
         rows = []
 
@@ -173,7 +178,7 @@ module.exports = class TrelloView
             if not _.isUndefined cards
                 _.each cards.cards, (card) =>
                     if card.due
-                        duedate = Date.create(card.due).format "{Mon} {d}, {h}:{mm} {TT}"
+                        duedate = (Date.create(card.due)).addHours(tzdiff).format "{Mon} {d}, {h}:{mm} {TT}"
                     else
                         duedate = "None"
                     context = {
@@ -223,7 +228,8 @@ module.exports = class TrelloView
     # user_id: user_id in ObjectID type
     # fn: callback fn(err, html)
     # 
-    renderHtml: (trellos, user_id, fn) ->
+    renderHtml: (trellos, user, fn) ->
+        user_id = new ObjectID(user._id.toString())
         trellos.get_all_data user_id, (err, all) =>
             if err
                 fn(500, all)
@@ -231,14 +237,14 @@ module.exports = class TrelloView
                 htmls = []
 
                 # Due stat
-                wtf = @collect_cards_per_due all.cards  # DEBUG
+                wtf = @collect_cards_per_due all.cards, user.tzdiff  # DEBUG
                 #console.log(wtf)
                 htmls.push '<h5><i>Due Today</i></h5>'
-                htmls.push @list_cards_dueform all, wtf.today
+                htmls.push @list_cards_dueform all, wtf.today, user.tzdiff
                 htmls.push '<h5><i>Due Soon</i></h5>'
-                htmls.push @list_cards_dueform all, wtf.soon
+                htmls.push @list_cards_dueform all, wtf.soon, user.tzdiff
                 htmls.push '<h5><i>Past Due</i></h5>'
-                htmls.push @list_cards_dueform all, wtf.past
+                htmls.push @list_cards_dueform all, wtf.past, user.tzdiff
                 ret = htmls.join "\n"
 
                 orgs = @all_org_names(all)
@@ -266,7 +272,7 @@ module.exports = class TrelloView
                         # Lists
                         ret += "<br><h4><i>Board: #{org} / #{board.boards.name}</i></h4>"  # Board name
                         _.each lists, (lists) =>
-                            ret += @list_tabular all, lists
+                            ret += @list_tabular all, lists, user.tzdiff
                 ret += "<br>"
                 fn(null, ret)
 
@@ -277,5 +283,5 @@ module.exports = class TrelloView
     # 
     getSummary: (user, fn) ->
         trellos = new Trellos()
-        @renderHtml trellos, new ObjectID(user._id.toString()), fn
+        @renderHtml trellos, user, fn
         

@@ -29,7 +29,7 @@ module.exports = class TrelloApi
     @endpoints : {
         'public_boards' :       { method: 'GET',  path: '/1/members/{username}/boards?key={key}&token={token}' }
         'organizations' :       { method: 'GET',  path: '/1/members/{username}/organizations?key={key}&token={token}' }
-        'org_boards' :          { method: 'GET',  path: '/1/organizations/{orgname}/boards?key={key}&token={token}' }                
+        'org_boards' :          { method: 'GET',  path: '/1/organizations/{orgname}/boards?key={key}&token={token}' }
         'all_lists_of_board' :  { method: 'GET',  path: '/1/boards/{board_id}/lists?key={key}&token={token}' }
         'all_cards_of_list' :   { method: 'GET',  path: '/1/lists/{list_id}/cards?key={key}&token={token}' }
         'checklist_of_card':    { method: 'GET',  path: '/1/checklists/{checklist_id}?key={key}&token={token}' }
