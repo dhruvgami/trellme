@@ -1,6 +1,6 @@
 {
     "api_host":     "api.trellme.com",
-    "mail_interval": 86400000,
+    "mail_interval": 3600000,
     "trello": {
         "requestURL":    "https://trello.com/1/OAuthGetRequestToken",
     	"accessURL":     "https://trello.com/1/OAuthGetAccessToken",
