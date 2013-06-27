@@ -23,7 +23,7 @@ trellme
 
     > node ./lib/app.js
 
-### Punning the front-end
+### Running the front-end
 
 Currently "Signup" is not put in the front-end html yet. If you haven't done so, please sign up and create a user.
 
