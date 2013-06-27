@@ -10,7 +10,7 @@
 	"secret":        "33c1455220cd7d821bdac09dc8891fc66086359f8936169de2a4d3d56ea2f583"
     },
     "mail": {
-    	"fromAddress": "info@trellme.com",
-	"subject": "Regular Board Report from TrellMe"
+    	"fromAddress": "admin@trellme.com",
+	"subject": "[TrellMe] Updates on your Trello Boards"
     }
 }
