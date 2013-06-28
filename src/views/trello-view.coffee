@@ -197,11 +197,15 @@ module.exports = class TrelloView
     #
     # Render an action and return the result html
     # 
-    render_action: (action)->
+    render_action: (action, tzdiff)->
+        # Action date format
+        adate = Date.create(action.date).addHours(tzdiff)  # Change to localtime
+        actiondate = adate.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+
         context = {
             full_name: action.memberCreator.fullName
             action: action.type
-            date: Date.create(action.date).format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
+            date: adate.format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
         }
         TrelloView.templates.action.template(context)
 
@@ -258,7 +262,7 @@ module.exports = class TrelloView
                         ret += "<br><h4><i>Board: #{org} / #{board.boards.name}</i></h4>"  # Board name
                         actions = @recent_actions(all, board.boards.id)
                         _.each actions, (a) =>
-                            ret += @render_action(a)
+                            ret += @render_action(a, user.tzdiff)
 
                 # Title - Board Snapshot
                 ret += "<br><h4>Boards Snapshot</h4>" 
