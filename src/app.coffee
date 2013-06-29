@@ -181,8 +181,9 @@ app.post "/app/users",  (req, res) ->
             res.status 200
             res.send "OK"
 
+#
 # Remove a user by username (email)
-#   post param: token
+#   query string token={token}
 # 
 app.delete "/app/users", (req, res) ->
     (new Tokens()).validate req.query['token'], (err, token_record) =>

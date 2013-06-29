@@ -185,6 +185,7 @@ module.exports = class Trellos extends dbconnection
                     cursor.toArray (err, items) =>
                         fn(err, items)
 
+    #
     # user_id: user ID in ObjectID type
     # 
     get_all_cards: (user_id, fn) ->
@@ -328,10 +329,10 @@ module.exports = class Trellos extends dbconnection
 
 
     #
-    # Load up all data from DB. This method wait to everything is done before calling the callback.
+    # Load up all data from DB. This method blocks untill everything is done.
     # 
     # user_id: user_id in ObjectID type
-    # fn: callback fn(err, all)  all is an object {boards, lists, cards, checklists, members}
+    # fn: callback fn(err, all)  all is an object {boards, lists, cards, actions, members}
     #
     get_all_data: (user_id, fn) ->
         all = {}

@@ -328,7 +328,7 @@ module.exports = class TrelloApi
                         if err
                             fn(err, lists)
                             return
-                        # Get all CARDS
+                        # Get all CARDS for the list
                         async.each( lists, (list, cb2)=>
                             @get_all_cards_of_list db, userObj, board.id, list, (err, cards) =>
                                 if err

@@ -3,7 +3,7 @@
  *  Angular.js javascript for trellme.html
  *
  *  Author: Yoshikazu Noda
- *  last update: June 27, 2013 
+ *  last update: June 29, 2013 
  */
 function controller($scope, $http) {
     //$scope.host = "http://127.0.0.1:3000";
@@ -13,6 +13,8 @@ function controller($scope, $http) {
     $scope.signupu = {};   // Signup email, password, trello_username, tzdiff
     $scope.allboards = "";  // JSON
     $scope.report = "";  // HTML
+    var welcome_message = 'Welcome to TrellMe! Please sign in to get your report.'
+
 
     /*
      * Get difference of local time and UCT
@@ -106,6 +108,15 @@ function controller($scope, $http) {
 	$http.post($scope.host+'/app/users', $scope.signupu, {}).
 	    success(function(data, status, headers, config) {
 		popup.location = $scope.host+'/app/auths/request/'+$scope.signupu.email;
+		check_close = setInterval(function(){
+		    if (popup != null) {
+			if (popup.closed) {
+			    popup = null
+			    clearInterval(check_close)
+			    alert(welcome_message)
+			}
+		    }
+		}, 100);  // 100 milli seconds
 	    }).
 	    error(function(data, status, headers, config) {
 		alert('Signup failed '+data);

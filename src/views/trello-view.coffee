@@ -189,6 +189,7 @@ module.exports = class TrelloView
                     }
                     rows.push TrelloView.templates.list_row.template(context)
                 trs = rows.join('\n')
+                rows = []
                 tables.push TrelloView.templates.list_table.template({list_name: list.name, rows: trs})
             else
                 tables.push TrelloView.templates.list_table_nocard.template({list_name: list.name})
