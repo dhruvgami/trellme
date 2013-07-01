@@ -407,6 +407,9 @@ app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                     res.send result  # Already JSON
 #=================================================
 
+#
+# mainLoop sends regular once a day report to users.
+# 
 mailLoop = () ->
     mailservice = new MailService()
     mloop = setInterval( ()=>
@@ -423,13 +426,42 @@ mailLoop = () ->
             mailservice.send_report(users)
 
     ,config.mail_interval)    # 1000*24*60*60 = Do every 24 hours???
+
+#
+# Due notification mail loop
+#
+notificationLoop = () ->
+    mailservice = new MailService()
+    trellos = new Trellos()
+    trelloView = new TrelloView()
+    
+    nloop = setInterval( () =>
+        #
+        # for all users in users
+        #   check database for cards that due is within 15 minutes from now.
+        #   if there is one
+        #      Send email notifying the card is due now.
+        #
+        # * note that this loop will not read from API. Checks only the database
+        #   contents.
+        #
+        db_users.findAll (err, users) =>
+            _.each users, (user) =>
+                trellos.get_all_data user._id, (err, all)=>
+                    result = trelloView.all_card_due_notifications(all, user)
+                    if result isnt ''
+                        mailtext = MailService.template({content: result})
+                        mailservice.send mailtext, user.email, config.mail.due_notify_subject
+                        console.log("Due notification sent to #{user.email}")
+    ,1000*10*60)    # Do every 10 minutes
+
     
 #
 # Server with Cluster
 # 
 if (cluster.isMaster) 
 
-    for i in [1..1]   # Specify the number of workers you want to create
+    for i in [1..2]   # Specify the number of workers you want to create
         cluster.fork()
     cluster.on 'exit', (worker, code, signal) ->
         exitCode = worker.process.exitCode
@@ -449,3 +481,5 @@ else if (cluster.isWorker)
     console.log("worker("+cluster.worker.id+")")
     if cluster.worker.id is 1
         mailLoop()
+    if cluster.worker.id is 2    
+        notificationLoop()

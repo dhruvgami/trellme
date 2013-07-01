@@ -33,13 +33,13 @@ module.exports = class MailService
     #
     # Send an email thru Mandrill
     # 
-    send: (text, to_address) ->
+    send: (text, to_address, subj) ->
         # send an e-mail
         mail = {
             to:         [{email: to_address}]
             from_email: MailService.from_address
             from_name:  "TrellMe"
-            subject:    MailService.subject
+            subject:    subj
             html:       text
         }
         mandrill '/messages/send', {message: mail}, (error, response) =>
@@ -63,5 +63,5 @@ module.exports = class MailService
                     vb.getSummary user, (err, result) =>
                         # result is the html
                         mailtext = MailService.template({content: result})
-                        @send mailtext, user.email
+                        @send mailtext, user.email, MailService.subject
                         console.log("report sent to #{user.email}")

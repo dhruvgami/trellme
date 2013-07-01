@@ -317,3 +317,79 @@ module.exports = class TrelloView
         trellos = new Trellos()
         @renderHtml trellos, user, fn
         
+
+    #
+    # Checks card due is within limit minutes
+    # 
+    is_due_soon: (card, limit) ->
+        if card.due is null  # If due is null, not need categorization
+            no
+        else
+            due = new Date(card.due)
+            now = new Date()
+            diff = due.getTime() - now.getTime()  # diff in milli sec
+            minutes = Math.abs(diff / 1000 / 60)
+            #console.log(card.name+" minutes diff="+minutes+" due="+due)
+            if minutes < limit
+                yes
+            else
+                no
+
+    #
+    # Get html for due now cards for arg lists
+    # 
+    card_due_notification: (alldata, lists, tzdiff) ->
+        htmls = []
+
+        _.each lists.lists, (list) =>
+            cards = @lookup_cards_by_listid(alldata, list.id)
+            if not _.isUndefined cards
+                _.each cards.cards, (card) =>
+                    if @is_due_soon(card,15)
+                        aboard = @lookup_board_by_id alldata, cards.board_id
+                        # board
+                        # Assigned To members
+                        members = @card_member(alldata, card)
+                        # Due date format
+                        due = Date.create(card.due).addHours(tzdiff)  # Change to localtime
+                        duedate = due.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+                        context = {
+                            board_name:  aboard.boards.name
+                            board_url:   aboard.boards.url
+                            org_name:    aboard.org_name
+                            list_name:   list.name
+                            list_url:    ""
+                            card_name:   card.name
+                            card_url:    card.url
+                            due:         duedate
+                            assigned_to: members
+                        }
+                        htmls.push TrelloView.templates.duecard.template(context)
+        if htmls.length > 0
+            htmls.join('\n')
+        else
+            null
+
+    #
+    # Creates html for due now cards
+    # 
+    all_card_due_notifications: (all, user, fn)->
+        ret = ''
+        orgs = @all_org_names(all)
+        _.each orgs, (org) =>
+            boards_for_org = _.filter all.boards, (bd) =>
+                bd.org_name is org  # _.filter iterator
+            _.each boards_for_org, (board) =>
+                lists = _.filter all.lists, (list) =>
+                    list.board_id is board.boards.id
+                # Lists
+                _.each lists, (lists) =>
+                    dd = @card_due_notification all, lists, user.tzdiff
+                    if dd isnt null
+                        ret += "<br><h4><i>Board: #{org} / #{board.boards.name}</i></h4>"+dd  
+        ret
+
+
+
+
+

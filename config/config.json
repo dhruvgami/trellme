@@ -11,6 +11,7 @@
     },
     "mail": {
     	"fromAddress": "admin@trellme.com",
-	"subject": "[TrellMe] Updates on your Trello Boards"
+	"subject": "[TrellMe] Updates on your Trello Boards",
+	"due_notify_subject": "[TrellMe] Trello Cards due now!"
     }
 }
