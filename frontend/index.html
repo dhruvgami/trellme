@@ -9,6 +9,7 @@
     <script src="http://cdn.jsdelivr.net/underscorejs/1.4.3/underscore-min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/trellme.js"></script>
+    <title>TrellMe - Reporting Tool for your Trello Boards</title>
   </head>
   <body  np-app="myApp" ng-controller="controller">
 
@@ -60,7 +61,28 @@
       <!--<pre>{{user|json}}{{token}}{{signupu|json}}</pre>-->
 
       <br><div id="report-html" style="position:relative; top:-550px;"></div>
+      <div id="footer">
+        TrellMe is a reporting tool to get snapshots of your Trello Boards on the web and\
+ as a daily email. You can see progress on the tool's development on our <a href="https:/\
+/trello.com/board/trellme-development/51c871f449b009200c000d39">Trello Board</a> and prov\
+ide feedback on it.
+
+<br><br>
+<span style="font-size: 10px">(c) 2013 TrellMe.com. TrellMe is an independent project and\
+ not affiliated with Trello or Fog Creek Software in any way.</span>
+      </div>
 
     </div> <!--container-->
-  </body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41970615-2', 'trellme.com');
+  ga('send', 'pageview');
+
+</script>
+
+</body>
 </html>
