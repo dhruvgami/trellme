@@ -200,45 +200,45 @@ module.exports = class TrelloView
     # 
     render_action: (action, tzdiff)->
         try
-        # Action date format
-        adate = Date.create(action.date).addHours(tzdiff)  # Change to localtime
-        actiondate = adate.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+            # Action date format
+            adate = Date.create(action.date).addHours(tzdiff)  # Change to localtime
+            actiondate = adate.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
 
-        if action.type is "updateCard"
-            actionText = "updated #{action.data.card.name}"
-        else if action.type is "createCard"
-            actionText = "added #{action.data.card.name} to #{action.data.list.name}"
-        else if action.type is "createBoard"
-            actionText = "created this board."
-        else if action.type is "commentCard"
-            actionText = "commented on #{action.data.card.name}, saying #{action.data.text}"
-        else if action.type is "addMemberToCard"
-            actionText = "added #{action.member.fullName} to #{action.data.card.name}"
-        else if action.type is "removeMemberFromCard"
-            actionText = "removed #{action.member.fullName} from #{action.data.card.name}"
-        else if action.type is "updateBoard"
-            actionText = "updated #{action.data.board.name}"
-        else if action.type is "createList"
-            actionText = "created list #{action.data.list.name}"
-        else if action.type is "moveCardToBoard"
-            actionText = "moved #{action.data.card.name} from #{action.data.boardSource.name} to #{action.data.board.name}"
-        else if action.type is "addAttachmentToCard"
-            actionText = "added an attachment to #{action.data.card.name}"
-        else if action.type is "addChecklistToCard"
-            actionText = "added a Checklist to #{action.data.card.name}"
-        else if action.type is "addMemberToBoard"
-            actionText = "added a member to #{action.data.board.name}"
-        else
-            actionText = "took an action"
+            if action.type is "updateCard"
+                actionText = "updated #{action.data.card.name}"
+            else if action.type is "createCard"
+                actionText = "added #{action.data.card.name} to #{action.data.list.name}"
+            else if action.type is "createBoard"
+                actionText = "created this board."
+            else if action.type is "commentCard"
+                actionText = "commented on #{action.data.card.name}, saying #{action.data.text}"
+            else if action.type is "addMemberToCard"
+                actionText = "added #{action.member.fullName} to #{action.data.card.name}"
+            else if action.type is "removeMemberFromCard"
+                actionText = "removed #{action.member.fullName} from #{action.data.card.name}"
+            else if action.type is "updateBoard"
+                actionText = "updated #{action.data.board.name}"
+            else if action.type is "createList"
+                actionText = "created list #{action.data.list.name}"
+            else if action.type is "moveCardToBoard"
+                actionText = "moved #{action.data.card.name} from #{action.data.boardSource.name} to #{action.data.board.name}"
+            else if action.type is "addAttachmentToCard"
+                actionText = "added an attachment to #{action.data.card.name}"
+            else if action.type is "addChecklistToCard"
+                actionText = "added a Checklist to #{action.data.card.name}"
+            else if action.type is "addMemberToBoard"
+                actionText = "added a member to #{action.data.board.name}"
+            else
+                actionText = "took an action"
 
-        context = {
-            full_name: action.memberCreator.fullName
-            action: actionText
-            date: adate.format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
-        }
-        TrelloView.templates.action.template(context)
-        catch(err)
-            console.log("Exception in TrelloView.prototype.render_action: " + err)
+            context = {
+                full_name: action.memberCreator.fullName
+                action: actionText
+                date: adate.format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
+            }
+            TrelloView.templates.action.template(context)
+        catch err 
+            console.log "Exception in TrelloView.prototype.render_action: " + err
 
     #
     # Get recent actions (max 5)
