@@ -199,6 +199,7 @@ module.exports = class TrelloView
     # Render an action and return the result html
     # 
     render_action: (action, tzdiff)->
+        try
         # Action date format
         adate = Date.create(action.date).addHours(tzdiff)  # Change to localtime
         actiondate = adate.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
@@ -226,7 +227,7 @@ module.exports = class TrelloView
         else if action.type is "addChecklistToCard"
             actionText = "added a Checklist to #{action.data.card.name}"
         else if action.type is "addMemberToBoard"
-            actionText = "added #{action.member.fullName} to #{action.data.board.name}"
+            actionText = "added a member to #{action.data.board.name}"
         else
             actionText = "took an action"
 
@@ -236,6 +237,8 @@ module.exports = class TrelloView
             date: adate.format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
         }
         TrelloView.templates.action.template(context)
+        catch(err)
+            console.log("Exception in TrelloView.prototype.render_action: " + err)
 
     #
     # Get recent actions (max 5)
