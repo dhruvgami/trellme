@@ -238,7 +238,16 @@ module.exports = class TrelloView
             }
             TrelloView.templates.action.template(context)
         catch err 
-            console.log "Exception in TrelloView.prototype.render_action: " + err
+            logtext = "Exception in TrelloView.prototype.render_actions\n"
+            if action.type
+                logtext += "Action Type = " + action.type + "\n"
+            if action.data.board.name
+                logtext += "Board Name = " + action.data.board.name + "\n"
+            if action.user_id
+                logtext += "User = " + action.user_id + "\n"
+            if action.id
+                logtext += "Action ID = " + action.id + "\n"
+            console.log logtext + err
 
     #
     # Get recent actions (max 5)
