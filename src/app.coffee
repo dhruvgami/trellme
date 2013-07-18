@@ -57,7 +57,7 @@ app = express()
 app.configure ->
     app.set "port", process.env.PORT or 3000
     app.use express.favicon()
-    app.use express.logger("dev")
+    app.use express.logger()
     app.use express.bodyParser()
     app.use express.methodOverride()
     app.use allowCrossDomain
