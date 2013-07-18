@@ -407,12 +407,31 @@ app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
                     res.send result  # Already JSON
 #=================================================
 
+# Update Board data on demand
+#
+
+app.get "/app/update", (req, res) ->
+    # updateservice = new UpdateService()
+    mailservice = new MailService()
+    console.log('Update starting...')
+    db_users.findAll (err, users) =>
+        if err
+            res.status err
+            res.send "Error updating reports"
+        else
+            # updateservice.update_report(users)
+            mailservice.send_report(users)
+            res.status 200
+    console.log('Update complete')
+    res.send "OK"
+
+
 #
 # mainLoop sends regular once a day report to users.
 # 
-mailLoop = () ->
-    mailservice = new MailService()
-    mloop = setInterval( ()=>
+# mailLoop = () ->
+#    mailservice = new MailService()
+#    mloop = setInterval( ()=>
         #
         # for all users in users collection
         #   do
@@ -421,11 +440,11 @@ mailLoop = () ->
         #     set user.lastreport = now()
         # end
         #
-        console.log('Mailing starting')
-        db_users.findAll (err, users) =>
-            mailservice.send_report(users)
+#        console.log('Mailing starting')
+#        db_users.findAll (err, users) =>
+#            mailservice.send_report(users)
 
-    ,config.mail_interval)    # 1000*24*60*60 = Do every 24 hours???
+#    ,config.mail_interval)    # 1000*24*60*60 = Do every 24 hours???
 
 #
 # Due notification mail loop
@@ -480,6 +499,6 @@ else if (cluster.isWorker)
     # Worker process
     console.log("worker("+cluster.worker.id+")")
     if cluster.worker.id is 1
-        mailLoop()
+        # mailLoop()
     if cluster.worker.id is 2    
         notificationLoop()
