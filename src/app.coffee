@@ -498,7 +498,7 @@ if (cluster.isMaster)
 else if (cluster.isWorker)
     # Worker process
     console.log("worker("+cluster.worker.id+")")
-    if cluster.worker.id is 1
-        # mailLoop()
+#    if cluster.worker.id is 1
+#         mailLoop()
     if cluster.worker.id is 2    
         notificationLoop()
