@@ -9,8 +9,21 @@
         deps = angular.module('trellme').requires;
       });
 
-      it('should not depend on anybody', function() {
-        expect(deps.length).toBe(0);
+      it('should depend on ngRoute', function() {
+        expect(_.contains(deps, 'ngRoute')).toBe(true);
+      });
+
+      it('should depend on signup', function() {
+        expect(_.contains(deps, 'signup')).toBe(true);
+      });
+    });
+
+    describe('router', function() {
+      it('should redirect to sign in route by default', function() {
+        inject(function($injector) {
+          var routes = $injector.get('$route').routes;
+          expect(routes['null'].redirectTo).toBe('/signin');
+        });
       });
     });
   });

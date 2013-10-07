@@ -1,5 +1,8 @@
 (function() {
   'use strict';
 
-  angular.module('trellme', []);
+  angular.module('trellme', ['ngRoute', 'signup']).
+    config(['$routeProvider', '$locationProvider', function($router, $location) {
+      $router.otherwise({ redirectTo : '/signin' });
+    }]);
 }());
