@@ -3,11 +3,6 @@
   <head>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/trellme.css">
-    <!-- The client library requires jQuery  -->
-    <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-    <script src="http://cdn.jsdelivr.net/underscorejs/1.4.3/underscore-min.js"></script>
-    <script src="src/app/trellme.js"></script>
     <title>TrellMe - Reporting Tool for your Trello Boards</title>
   </head>
   <body>
@@ -15,69 +10,69 @@
       <div class="navbar-inner">
         <div class="container-fluid">
           <div class="nav-collapse">
-            <p id="signup-link" class="navbar-text pull-right"><a ng-click="signupform()">Sign Up</a></p>
+            <p id="signup-link" class="navbar-text pull-right"><a href="/#/signup">Sign Up</a></p>
             <p class="navbar-text pull-right">&nbsp;&nbsp;&nbsp;&nbsp;</p>
-            <p id="signout-link" class="navbar-text pull-right"><a ng-click="mylogout()">Sign Out</a></p>
+            <p id="signout-link" class="navbar-text pull-right"><a href="/#/" ng-click="signout()">Sign Out</a></p>
             <p class="navbar-text pull-right">&nbsp;&nbsp;&nbsp;&nbsp;</p>
-            <p id="signin-link" class="navbar-text pull-right"><a ng-click="signinform()">Sign In</a></p>
+            <p id="signin-link" class="navbar-text pull-right"><a href="/#/signin">Sign In</a></p>
             <p class="navbar-text pull-left"><b style="font-size:3em;">TrellMe</b></p>
           </div><!--/.nav-collapse -->
         </div>
       </div>
     </div>
-  <br><br>
 
-    <div class="container" id="container">
-      <div class="row">
-  <div id="signin" class="span12 text-center" style="position:relative; top:40px;">
-    <div id="login">
-      <h1>Sign In</h1><br>
-      <form id="loginForm" name="login" ng-submit="mylogin()" >
-        <div><label for="email"><i>Email:</i></label><input id="email" type="text" name="email" ng-model="user.username" placeholder="Enter your email address" required ></div>
-        <div><label for="password"><i>Password:</i></label><input id="password" type="password" name="password" ng-model="user.password" placeholder="Enter your password" required ></div>
-        <div><button id="submit" type="submit">Submit</button></div>
-      </form>
-    </div>
-  </div>
+    <div class="container">
+      <div class="row" ng-view>
+        <!--
+        <div id="signin" class="span12 text-center" style="position:relative; top:40px;">
+          <div id="login">
+            <h1>Sign In</h1><br>
+            <form id="loginForm" name="login" ng-submit="mylogin()" >
+              <div><label for="email"><i>Email:</i></label><input id="email" type="text" name="email" ng-model="user.username" placeholder="Enter your email address" required ></div>
+              <div><label for="password"><i>Password:</i></label><input id="password" type="password" name="password" ng-model="user.password" placeholder="Enter your password" required ></div>
+              <div><button id="submit" type="submit">Submit</button></div>
+            </form>
+          </div>
+        </div>
 
-  <div id="signup" class="span12 text-center invisible" style="position:relative; top:-215px;">
-    <div id="_signup">
-      <h1>Sign Up</h1><br>
-      <form id="signupForm" name="signup" ng-submit="mysignup()" >
-        <label for="email"><i>Email:</i></label>
-        <input id="email" type="text" name="email" ng-model="signupu.email" placeholder="Enter your email address" required>
-        <label for="passwrod"><i>Password:</i></label>
-        <input id="password" type="password" name="password" ng-model="signupu.password" placeholder="Enter your password" required>
-        <label for="trello_username"><i>Trello Username:</i></label>
-        <input id="trello_username" type="text" name="trello_username" ng-model="signupu.trello_username" placeholder="Enter your Trello user name" required>
-        <div><button id="submit" type="submit">Submit</button></div>
-      </form>
-    </div>
-  </div>
+        <div id="signup" class="span12 text-center invisible" style="position:relative; top:-215px;">
+          <div id="_signup">
+            <h1>Sign Up</h1><br>
+            <form id="signupForm" name="signup" ng-submit="mysignup()" >
+              <label for="email"><i>Email:</i></label>
+              <input id="email" type="text" name="email" ng-model="signupu.email" placeholder="Enter your email address" required>
+              <label for="passwrod"><i>Password:</i></label>
+              <input id="password" type="password" name="password" ng-model="signupu.password" placeholder="Enter your password" required>
+              <label for="trello_username"><i>Trello Username:</i></label>
+              <input id="trello_username" type="text" name="trello_username" ng-model="signupu.trello_username" placeholder="Enter your Trello user name" required>
+              <div><button id="submit" type="submit">Submit</button></div>
+            </form>
+          </div>
+        </div>
+        -->
 
       </div><!--row-->
-      <!--<pre>{{user|json}}{{token}}{{signupu|json}}</pre>-->
 
       <br><div id="report-html" style="position:relative; top:-550px;"></div>
       <div id="footer">
         TrellMe is a reporting tool to get snapshots of your Trello Boards on the web and as a daily email. You can see progress on the tool's development on our <a href="https:/\
-/trello.com/board/trellme-development/51c871f449b009200c000d39">Trello Board</a> and prov ide feedback on it.
+          /trello.com/board/trellme-development/51c871f449b009200c000d39">Trello Board</a> and prov ide feedback on it.
 
-<br><br>
-<span style="font-size: 10px">(c) 2013 TrellMe.com. TrellMe is an independent project and not affiliated with Trello or Fog Creek Software in any way.</span>
+        <br><br>
+        <span style="font-size: 10px">(c) 2013 TrellMe.com. TrellMe is an independent project and not affiliated with Trello or Fog Creek Software in any way.</span>
       </div>
 
     </div> <!--container-->
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <!-- TODO: Maybe move this into a directive? -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-41970615-2', 'trellme.com');
-  ga('send', 'pageview');
-
-</script>
-
-</body>
+      ga('create', 'UA-41970615-2', 'trellme.com');
+      ga('send', 'pageview');
+    </script>
+    <script src="trellme.js"></script>
+  </body>
 </html>
