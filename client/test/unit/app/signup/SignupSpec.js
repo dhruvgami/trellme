@@ -29,7 +29,7 @@
 
       describe('/signup', function() {
         beforeEach(function() {
-          route = routes['/signup']
+          route = routes['/signup'];
         });
 
         describe('controller', function() {
