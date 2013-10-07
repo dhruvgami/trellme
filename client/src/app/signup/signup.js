@@ -1,13 +1,11 @@
 (function() {
   'use strict';
 
-  angular.module('signup', ['ngRoute']).
+  angular.module('signup', ['ngRoute', 'services.config']).
     config(['$routeProvider', '$locationProvider', function($router, $location) {
       $router.when('/signup', {
         controller  : 'SignupCtrl',
-        templateUrl : '/app/signup/form.html'
+        templateUrl : '/src/app/signup/form.html'
       });
-
-      $location.html5Mode(true);
     }]);
 }());

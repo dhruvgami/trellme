@@ -12,12 +12,9 @@
       it('should depend on ngRoute', function() {
         expect(_.contains(deps, 'ngRoute')).toBe(true);
       });
-    });
 
-    it('should enable html5 mode', function() {
-      inject(function($injector) {
-        var $location = $injector.get('$location');
-        expect($location.$$html5).toBe(true);
+      it('should depend on config service', function() {
+        expect(_.contains(deps, 'services.config')).toBe(true);
       });
     });
 
@@ -39,8 +36,8 @@
         });
 
         describe('templateUrl', function() {
-          it('should point to /app/signup/form.html', function() {
-            expect(route.templateUrl).toEqual('/app/signup/form.html');
+          it('should point to /src/app/signup/form.html', function() {
+            expect(route.templateUrl).toEqual('/src/app/signup/form.html');
           });
         });
       });

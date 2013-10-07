@@ -1,0 +1,30 @@
+<div class="span12 text-center">
+  <form name="form" ng-submit="signup()" >
+    <label for="email"><i>Email:</i></label>
+    <input
+    type="email"
+    ng-model="user.email"
+    ng-required="true"
+    placeholder="Enter your email address" />
+
+    <label for="password"><i>Password:</i></label>
+    <input
+      type="password"
+      ng-model="user.password"
+      ng-required="true"
+      placeholder="Enter your password" />
+
+    <label for="trello_username"><i>Trello Username:</i></label>
+    <input
+      type="text"
+      ng-model="user.trello_username"
+      ng-required="true"
+      placeholder="Enter your Trello user name" />
+    <div>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        ng-disabled="form.$invalid || form.$pristine">Sign up</button>
+    </div>
+  </form>
+</div>
