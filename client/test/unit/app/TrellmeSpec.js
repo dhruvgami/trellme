@@ -20,6 +20,10 @@
       it('should depend on signin', function() {
         expect(_.contains(deps, 'signin')).toBe(true);
       });
+
+      it('should depend on services.session', function() {
+        expect(_.contains(deps, 'services.session')).toBe(true);
+      });
     });
 
     describe('router', function() {
