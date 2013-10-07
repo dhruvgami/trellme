@@ -1,2 +1,4 @@
 # Ignore packages installed by npm
 /server/node_modules
+# Ignore npm log
+/server/npm-debug.log
