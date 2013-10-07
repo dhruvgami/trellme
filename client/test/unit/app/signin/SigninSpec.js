@@ -12,6 +12,10 @@
       it('should depend on ngRoute', function() {
         expect(_.contains(deps, 'ngRoute')).toBe(true);
       });
+
+      it('should depend on services.config', function() {
+        expect(_.contains(deps, 'services.config')).toBe(true);
+      });
     });
 
     describe('routes', function() {

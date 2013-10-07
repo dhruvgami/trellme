@@ -1,0 +1,29 @@
+<div class="span12 text-center">
+  <h1>Sign In</h1>
+  <form name="form" ng-submit="signin()" >
+    <div>
+      <label for="email"><i>Email:</i></label>
+      <input
+        type="email"
+        ng-model="user.email"
+        ng-required="true"
+        placeholder="Enter your email address" />
+    </div>
+
+    <div>
+      <label for="password"><i>Password:</i></label>
+      <input
+        type="password"
+        ng-model="user.password"
+        ng-required="true"
+        placeholder="Enter your password" />
+    </div>
+
+    <div>
+      <button
+        class="btn btn-primary"
+        ng-disabled="form.$pristine || form.$dirty"
+        type="submit">Sign in</button>
+    </div>
+  </form>
+</div>
