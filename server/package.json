@@ -1,39 +1,42 @@
 {
-  "name": "trellme",
-  "version": "1.0.0",
-  "description": "Trello info mailer",
-  "keywords": [
+  "name"        : "trellme",
+  "version"     : "1.0.0",
+  "description" : "Trello info mailer",
+  "keywords"    : [
     "trello",
     "mailer"
   ],
-  "author": "Yoshikazu Noda <noda.yoshikazu@gmail.com>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/dhruvgami/trellme.git"
+  "author"     : "Yoshikazu Noda <noda.yoshikazu@gmail.com>",
+  "contributors" : [
+    "Carlos León <mail@carlosleon.inf> http://carlosleon.info"
+  ],
+  "repository" : {
+    "type" : "git",
+    "url"  : "https://github.com/dhruvgami/trellme.git"
   },
   "dependencies": {
-    "express": "3.x",
-    "should": "~1.2.2",
-    "underscore": "~1.4.4",
-    "coffee-script": "~1.6.2",
-    "passport": "~0.1.16",
-    "passport-local": "~0.1.6",
-    "oauth": "~0.9.10",
-    "mongodb": "~1.3.9",
-    "handlebars": "~1.0.12",
-    "async": "~0.2.9",
-    "finish": "~0.4.0",
-    "node-mandrill": "~1.0.1",
-    "sugar": "~1.3.8"
+    "express"        : "3.x",
+    "underscore"     : "~1.4.4",
+    "coffee-script"  : "~1.6.2",
+    "passport"       : "~0.1.16",
+    "passport-local" : "~0.1.6",
+    "oauth"          : "~0.9.10",
+    "mongodb"        : "~1.3.9",
+    "handlebars"     : "~1.0.12",
+    "async"          : "~0.2.9",
+    "finish"         : "~0.4.0",
+    "node-mandrill"  : "~1.0.1",
+    "sugar"          : "~1.3.8"
   },
   "devDependencies": {
-    "should": ">= 0.0.1"
+    "should" : "~1.2.2"
   },
-  "main": "lib/app.js",
-  "scripts": {
-    "test": "make test"
+  "main" : "lib/app.js",
+  "scripts" : {
+    "start" : "node ./lib/app.js",
+    "test"  : "make test"
   },
-  "engines": {
-    "node": ">= 0.8.x"
+  "engines" : {
+    "node" : ">= 0.8.x"
   }
 }

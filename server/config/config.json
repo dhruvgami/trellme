@@ -1,17 +1,17 @@
 {
-    "api_host":     "api.trellme.com",
-    "mail_interval": 86400000,
-    "trello": {
-        "requestURL":    "https://trello.com/1/OAuthGetRequestToken",
-    	"accessURL":     "https://trello.com/1/OAuthGetAccessToken",
-	"authorizeURL":  "https://trello.com/1/OAuthAuthorizeToken",
-	"appName":       "TrellMe",
-	"key":           "80e7f11a72d431dee0e0db0a52631180",
-	"secret":        "33c1455220cd7d821bdac09dc8891fc66086359f8936169de2a4d3d56ea2f583"
-    },
-    "mail": {
-    	"fromAddress": "admin@trellme.com",
-	"subject": "[TrellMe] Updates on your Trello Boards",
-	"due_notify_subject": "[TrellMe] Trello Cards due now!"
-    }
+  "api_host"      : "api.trellme.com",
+  "mail_interval" : 86400000,
+  "trello"        : {
+    "appName"      : "TrellMe",
+    "requestURL"   : "https://trello.com/1/OAuthGetRequestToken",
+    "accessURL"    : "https://trello.com/1/OAuthGetAccessToken",
+    "authorizeURL" : "https://trello.com/1/OAuthAuthorizeToken",
+    "key"          : "80e7f11a72d431dee0e0db0a52631180",
+    "secret"       : "33c1455220cd7d821bdac09dc8891fc66086359f8936169de2a4d3d56ea2f583"
+  },
+  "mail" : {
+    "fromAddress"        : "admin@trellme.com",
+    "subject"            : "[TrellMe] Updates on your Trello Boards",
+    "due_notify_subject" : "[TrellMe] Trello Cards due now!"
+  }
 }
