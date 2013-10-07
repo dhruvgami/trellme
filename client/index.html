@@ -9,14 +9,16 @@
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <div class="nav-collapse">
-            <p id="signup-link" class="navbar-text pull-right"><a href="/#/signup">Sign Up</a></p>
-            <p class="navbar-text pull-right">&nbsp;&nbsp;&nbsp;&nbsp;</p>
-            <p id="signout-link" class="navbar-text pull-right"><a href="/#/" ng-click="signout()">Sign Out</a></p>
-            <p class="navbar-text pull-right">&nbsp;&nbsp;&nbsp;&nbsp;</p>
-            <p id="signin-link" class="navbar-text pull-right"><a href="/#/signin">Sign In</a></p>
-            <p class="navbar-text pull-left"><b style="font-size:3em;">TrellMe</b></p>
-          </div><!--/.nav-collapse -->
+          <b class="brand" style="font-size:3em;">TrellMe</b>
+          <ul class="nav pull-right">
+            <!-- TODO: This should be visible if user signed in -->
+            <li><a href="/#/signin">Sign In</a></p>
+            <li class="divider-vertical"></li>
+            <li><a href="/#/signup">Sign Up</a></li>
+            <li class="divider-vertical"></li>
+            <!-- TODO: This should be visible if user signed out -->
+            <li><a href="/#/" ng-click="signout()">Sign Out</a></li>
+          </ul>
         </div>
       </div>
     </div>
