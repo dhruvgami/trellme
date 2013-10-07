@@ -16,6 +16,10 @@
       it('should depend on signup', function() {
         expect(_.contains(deps, 'signup')).toBe(true);
       });
+
+      it('should depend on signin', function() {
+        expect(_.contains(deps, 'signin')).toBe(true);
+      });
     });
 
     describe('router', function() {
