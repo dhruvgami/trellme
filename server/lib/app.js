@@ -125,11 +125,10 @@
     app.use(express.session({
       secret: 'change-me-before-going-to-production'
     }));
-    app.use(allowCrossDomain);
     app.use(passport.initialize());
     app.use(passport.session());
     app.use(app.router);
-    return app.use(express["static"](path.join(__dirname, "public")));
+    return app.use(express["static"](path.join(__dirname, "/../../client")));
   });
 
   app.configure("development", function() {

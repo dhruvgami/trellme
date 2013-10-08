@@ -89,14 +89,17 @@ app.configure ->
   app.use express.bodyParser()
   app.use express.methodOverride()
   app.use express.session { secret : 'change-me-before-going-to-production' }
-  app.use allowCrossDomain
   app.use passport.initialize()
   app.use passport.session()
   app.use app.router
-  app.use express.static(path.join(__dirname, "public"))
+  app.use express.static(path.join(__dirname, "/../../client"))
 
 app.configure "development", ->
   app.use express.errorHandler()
+
+# # # # # #
+# Routes  #
+# # # # # #
 
 #
 # POST /app/tokens = Login

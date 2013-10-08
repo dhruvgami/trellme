@@ -4,11 +4,11 @@
 #  users collection has only email and password
 #   { "_id" : ObjectId("518b37d647f1af1b31be73f4"), "email" : "test255@gmail.com", "password" : "password" }
 #
-mongodb = require 'mongodb'
-ObjectID = require('mongodb').ObjectID
+mongodb      = require 'mongodb'
+ObjectID     = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
-should = require 'should'
-GenPassword = require '../helpers/genpassword'
+should       = require 'should'
+GenPassword  = require '../helpers/genpassword'
 
 
 module.exports = class Users extends dbconnection
