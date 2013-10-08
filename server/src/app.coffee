@@ -71,6 +71,12 @@ passport.deserializeUser (id, done) ->
   db_users.get id, (err, user) ->
     done err, user
 
+# Middleware to use whenever a route requires users to be authenticated.
+authRequired = (req, res, next) ->
+ return next() if req.isAuthenticated()
+ res.status 401
+ res.send 'Unauthorized'
+
 #
 # Express environment setup
 #
@@ -114,20 +120,30 @@ app.post "/app/tokens", (req, res, next) ->
         return res.json tk[0]
   )(req, res, next)
 
+# - Log the user in - #
 app.post('/login', passport.authenticate('api'), (req, res) ->
   tokens = new Tokens()
   tokens.create req.user, (err, tk) ->
     res.json tk[0]
 )
 
-authRequired = (req, res, next) ->
- return next() if req.isAuthenticated()
- res.status 401
- res.send 'Unauthorized'
+# - Log the user out a.k.a. destroy session - #
+app.delete '/logout', authRequired, (req, res) ->
+  req.logout()
+  res.status 204
+  res.send ''
 
+# - Retrieve logged in user information - #
+# Note: We use this enpoint to bootstrap the AngularJS application.
+#       When the user loads the page the applications sends a request to this
+#       route and, if there is an active session, this will return a 200 status
+#       code, along with the current logged in user's information. If there is
+#       no session then this will return 401 and the user will be prompted its
+#       credentials.
 app.get('/me', authRequired, (req, res) ->
   res.json req.user
 )
+
 #
 # DELETE /app/tokens == Logout
 # Logout

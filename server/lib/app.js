@@ -51,15 +51,15 @@
     }
   };
 
-  passport.use(new LocalStrategy(function(email, password, done) {
+  passport.use(new LocalStrategy(function(username, password, done) {
     return process.nextTick(function() {
-      return db_users.findByEmail(email, function(err, user) {
+      return db_users.findByEmail(username, function(err, user) {
         if (err) {
           return done(err);
         }
         if (!user) {
           return done(null, false, {
-            message: "Unknown user with email " + email
+            message: "Unknown user with email " + username
           });
         }
         if (!db_users.verifyPassword(user, password)) {
@@ -104,6 +104,14 @@
       return done(err, user);
     });
   });
+
+  authRequired = function(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401);
+    return res.send('Unauthorized');
+  };
 
   app = express();
 
@@ -156,13 +164,11 @@
     });
   });
 
-  authRequired = function(req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.status(401);
-    return res.send('Unauthorized');
-  };
+  app["delete"]('/logout', authRequired, function(req, res) {
+    req.logout();
+    res.status(204);
+    return res.send('');
+  });
 
   app.get('/me', authRequired, function(req, res) {
     return res.json(req.user);
