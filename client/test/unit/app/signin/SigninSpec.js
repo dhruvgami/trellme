@@ -16,6 +16,10 @@
       it('should depend on services.config', function() {
         expect(_.contains(deps, 'services.config')).toBe(true);
       });
+
+      it('should depend on services.session', function() {
+        expect(_.contains(deps, 'services.session')).toBe(true);
+      });
     });
 
     describe('routes', function() {
