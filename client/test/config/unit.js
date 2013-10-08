@@ -5,6 +5,7 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
 
     files: [
+      'test/test_helper.js',
       'vendor/angular/angular.js',
       'vendor/**/*.js',
       'src/app/trellme.js',
