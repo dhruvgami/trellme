@@ -26,6 +26,69 @@
       });
     }); /* end defaults */
 
+    describe('.bootstrapUrl', function() {
+      it('should be defined as a function', function() {
+        expect(typeof Session.bootstrapUrl).toBe('function');
+      });
+
+      it('should contain api endpoint', function() {
+        expect(Session.bootstrapUrl()).toContain(Config.apiEndpoint);
+      });
+
+      it('should point to /me', function() {
+        expect(Session.bootstrapUrl()).toContain('/me');
+      });
+    });
+
+    describe('.bootstrap', function() {
+      it('should return a promise', function() {
+        var bootstrap = Session.bootstrap();
+        expect(bootstrap.then).toBeDefined();
+        expect(typeof bootstrap.then).toBe('function');
+      });
+
+      it('should GET user info from the server', function() {
+        var url = [Config.apiEndpoint, 'me'].join('/');
+        $httpBackend.expectGET(url).respond(200);
+        Session.bootstrap();
+        $httpBackend.flush();
+      });
+
+      describe('given the server responds with success', function() {
+        it('should set loggedIn to true', function() {
+          Session.loggedIn = false;
+          var url = [Config.apiEndpoint, 'me'].join('/');
+          $httpBackend.expectGET(url).respond(200);
+          Session.bootstrap();
+          $httpBackend.flush();
+          expect(Session.loggedIn).toBe(true);
+        });
+      });
+
+      describe('given the server responds with failure', function() {
+        var errorMessage;
+        beforeEach(function() {
+          Session.loggedIn = true;
+          var url = [Config.apiEndpoint, 'me'].join('/');
+          $httpBackend.expectGET(url).respond(401, 'Unauthenticated');
+          Session.
+            bootstrap().
+            then(null, function(data) {
+              errorMessage = data.message;
+            });
+          $httpBackend.flush();
+        });
+
+        it('should set loggedIn to false', function() {
+          expect(Session.loggedIn).toBe(false);
+        });
+
+        it('should pass along error message', function() {
+          expect(errorMessage).toBe('Session bootstrap failed: Unauthenticated');
+        });
+      });
+    });
+
     describe('.loginUrl', function() {
       it('should contain api endpoint', function() {
         expect(Session.loginUrl()).toContain(Config.apiEndpoint);

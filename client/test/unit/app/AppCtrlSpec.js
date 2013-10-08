@@ -17,7 +17,14 @@
         '$location' : $location,
         '$window'   : $window
       });
+
+      $httpBackend.when('GET', Session.bootstrapUrl()).respond(401);
     }));
+
+    afterEach(function() {
+      $httpBackend.verifyNoOutstandingRequest();
+      $httpBackend.verifyNoOutstandingExpectation();
+    });
 
     it('should expose the Session data to the scope', function() {
       expect($scope.session).toBe(Session);
@@ -25,9 +32,11 @@
 
     describe('.signout', function() {
       it('should call on Session.logout method', function() {
+        $httpBackend.expectDELETE(Session.logoutUrl()).respond(200);
         Session.loggedIn = true;
         spyOn(Session, 'logout').andCallThrough();
         $scope.signout();
+        $httpBackend.flush();
         expect(Session.logout).toHaveBeenCalled();
       });
 

@@ -7,12 +7,31 @@
         loggedIn : false
       };
 
+      Session.bootstrapUrl = function() {
+        return [Config.apiEndpoint, 'me'].join('/');
+      };
+
       Session.loginUrl = function() {
         return [Config.apiEndpoint, 'login'].join('/');
       };
 
       Session.logoutUrl = function() {
         return [Config.apiEndpoint, 'logout'].join('/');
+      };
+
+      Session.bootstrap = function() {
+        var deferred = $q.defer();
+        $http.
+          get(Session.bootstrapUrl()).
+          success(function(data) {
+            Session.loggedIn = true;
+            deferred.resolve(data);
+          }).
+          error(function(data) {
+            Session.loggedIn = false;
+            deferred.reject(new Error(['Session bootstrap failed:', data].join(' ')));
+          });
+        return deferred.promise;
       };
 
       Session.login = function(email, password) {
