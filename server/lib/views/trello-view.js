@@ -235,42 +235,60 @@
     };
 
     TrelloView.prototype.render_action = function(action, tzdiff) {
-      var actionText, actiondate, adate, context;
-      adate = Date.create(action.date).addHours(tzdiff);
-      actiondate = adate.format("{Mon} {d}, {yyyy} at {h}:{mm} {TT}");
-      if (action.type === "updateCard") {
-        actionText = "updated " + action.data.card.name;
-      } else if (action.type === "createCard") {
-        actionText = "added " + action.data.card.name + " to " + action.data.list.name;
-      } else if (action.type === "createBoard") {
-        actionText = "created this board.";
-      } else if (action.type === "commentCard") {
-        actionText = "commented on " + action.data.card.name + ", saying " + action.data.text;
-      } else if (action.type === "addMemberToCard") {
-        actionText = "added " + action.member.fullName + " to " + action.data.card.name;
-      } else if (action.type === "removeMemberFromCard") {
-        actionText = "removed " + action.member.fullName + " from " + action.data.card.name;
-      } else if (action.type === "updateBoard") {
-        actionText = "updated " + action.data.board.name;
-      } else if (action.type === "createList") {
-        actionText = "created list " + action.data.list.name;
-      } else if (action.type === "moveCardToBoard") {
-        actionText = "moved " + action.data.card.name + " from " + action.data.boardSource.name + " to " + action.data.board.name;
-      } else if (action.type === "addAttachmentToCard") {
-        actionText = "added an attachment to " + action.data.card.name;
-      } else if (action.type === "addChecklistToCard") {
-        actionText = "added a Checklist to " + action.data.card.name;
-      } else if (action.type === "addMemberToBoard") {
-        actionText = "added " + action.member.fullName + " to " + action.data.board.name;
-      } else {
-        actionText = "took an action";
+      var actionText, actiondate, adate, context, err, logtext;
+      try {
+        adate = Date.create(action.date).addHours(tzdiff);
+        actiondate = adate.format("{Mon} {d}, {yyyy} at {h}:{mm} {TT}");
+        if (action.type === "updateCard") {
+          actionText = "updated " + action.data.card.name;
+        } else if (action.type === "createCard") {
+          actionText = "added " + action.data.card.name + " to " + action.data.list.name;
+        } else if (action.type === "createBoard") {
+          actionText = "created this board.";
+        } else if (action.type === "commentCard") {
+          actionText = "commented on " + action.data.card.name + ", saying " + action.data.text;
+        } else if (action.type === "addMemberToCard") {
+          actionText = "added " + action.member.fullName + " to " + action.data.card.name;
+        } else if (action.type === "removeMemberFromCard") {
+          actionText = "removed " + action.member.fullName + " from " + action.data.card.name;
+        } else if (action.type === "updateBoard") {
+          actionText = "updated " + action.data.board.name;
+        } else if (action.type === "createList") {
+          actionText = "created list " + action.data.list.name;
+        } else if (action.type === "moveCardToBoard") {
+          actionText = "moved " + action.data.card.name + " from " + action.data.boardSource.name + " to " + action.data.board.name;
+        } else if (action.type === "addAttachmentToCard") {
+          actionText = "added an attachment to " + action.data.card.name;
+        } else if (action.type === "addChecklistToCard") {
+          actionText = "added a Checklist to " + action.data.card.name;
+        } else if (action.type === "addMemberToBoard") {
+          actionText = "added a member to " + action.data.board.name;
+        } else {
+          actionText = "took an action";
+        }
+        context = {
+          full_name: action.memberCreator.fullName,
+          action: actionText,
+          date: adate.format("{Mon} {d}, {yyyy} {h}:{mm} {TT}")
+        };
+        return TrelloView.templates.action.template(context);
+      } catch (_error) {
+        err = _error;
+        logtext = "Exception in TrelloView.prototype.render_actions\n";
+        if (action.type) {
+          logtext += "Action Type = " + action.type + "\n";
+        }
+        if (action.data.board.name) {
+          logtext += "Board Name = " + action.data.board.name + "\n";
+        }
+        if (action.user_id) {
+          logtext += "User = " + action.user_id + "\n";
+        }
+        if (action.id) {
+          logtext += "Action ID = " + action.id + "\n";
+        }
+        return console.log(logtext + err);
       }
-      context = {
-        full_name: action.memberCreator.fullName,
-        action: actionText,
-        date: adate.format("{Mon} {d}, {yyyy} {h}:{mm} {TT}")
-      };
-      return TrelloView.templates.action.template(context);
     };
 
     TrelloView.prototype.recent_actions = function(alldata, board_id) {

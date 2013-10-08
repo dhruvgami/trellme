@@ -24,7 +24,7 @@
       this.genpass = new GenPassword();
     }
 
-    Users.prototype.findByEmail = function(obj, fn) {
+    Users.prototype.findByEmail = function(email, fn) {
       var _this = this;
       return dbconnection.get_client(function(err, p_client) {
         return p_client.collection('users', function(err, col) {
@@ -32,7 +32,7 @@
             return fn(err, null);
           }
           return col.findOne({
-            email: obj.username
+            email: email
           }, function(err, user) {
             return fn(err, user);
           });

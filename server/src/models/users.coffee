@@ -1,7 +1,7 @@
 #
 # users.coffee
 #
-#  users collection has only email and password 
+#  users collection has only email and password
 #   { "_id" : ObjectId("518b37d647f1af1b31be73f4"), "email" : "test255@gmail.com", "password" : "password" }
 #
 mongodb = require 'mongodb'
@@ -13,35 +13,35 @@ GenPassword = require '../helpers/genpassword'
 
 module.exports = class Users extends dbconnection
     genpass: null
-    
+
     #
     # Constructor
-    # 
+    #
     constructor: ->
         super()
         @genpass = new GenPassword()
-        
+
     #
     # Looks up a user data from email (username)
-    # 
-    findByEmail: (obj, fn) ->
-        dbconnection.get_client (err, p_client) =>
-            p_client.collection 'users', (err, col) =>
-                if err
-                    return fn(err, null)
-                col.findOne {email: obj.username}, (err, user) =>
-                    fn(err, user)
+    #
+    findByEmail: (email, fn) ->
+      dbconnection.get_client (err, p_client) =>
+        p_client.collection 'users', (err, col) =>
+          if err
+            return fn(err, null)
+          col.findOne {email: email}, (err, user) =>
+            fn(err, user)
 
     #
     # Checks if password matches the user.password
-    # 
+    #
     verifyPassword: (user, password) ->
         r = @genpass.validateHash(user.password, password)
         r
 
     #
     # Get all users
-    # 
+    #
     findAll: (fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
@@ -49,7 +49,7 @@ module.exports = class Users extends dbconnection
                     return fn(err, null)
                 col.find {}, (err, cursor) =>
                     if err
-                        return fn(err, null)                        
+                        return fn(err, null)
                     cursor.toArray (err, items) =>
                         items.length.should.be.above(0)
                         fn(err, items)
@@ -58,7 +58,7 @@ module.exports = class Users extends dbconnection
     # Update user document - store token_secret
     # user_id: user ID in string
     # value: token_secret string
-    # 
+    #
     save_token_secret: (user_id, value, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
@@ -74,7 +74,7 @@ module.exports = class Users extends dbconnection
     # Update user document - store access token
     # user_id: user ID in string
     # values: user data - must match users document key-value pairs
-    # 
+    #
     save_access_token: (user_id, values, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
@@ -89,7 +89,7 @@ module.exports = class Users extends dbconnection
     #
     # Get user documemt by _id
     # user_id: user ID in string
-    # 
+    #
     get: (user_id, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
@@ -102,7 +102,7 @@ module.exports = class Users extends dbconnection
     #
     # Get user documemt by _id
     # user_id: user ID in ObjectDI
-    # 
+    #
     get2: (user_id, fn) ->
         dbconnection.get_client (err, p_client) =>
             p_client.collection 'users', (err, col) =>
@@ -118,7 +118,7 @@ module.exports = class Users extends dbconnection
     #
     # Add a new user
     # params: email, password, trello_username, tzdiff
-    # 
+    #
     add: (params, fn) ->
         # These must exist
         should.exist(params.email)
@@ -153,7 +153,7 @@ module.exports = class Users extends dbconnection
     #
     # Remove a user
     # user_id: user ID in string
-    # 
+    #
     remove: (user_id, fn) ->
         should.exist(user_id)
         dbconnection.get_client (err, p_client) =>
@@ -162,4 +162,4 @@ module.exports = class Users extends dbconnection
                     fn(500, "Failed to insert a user")
                     return
                 col.remove {_id: new ObjectID user_id}, (err, docs)=>
-                    fn(null, "Remove user suceess")        
+                    fn(null, "Remove user suceess")

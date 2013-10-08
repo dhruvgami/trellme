@@ -1,9 +1,9 @@
 #
 # app.coffee
-# 
+#
 # TrellMe
-# 
-# 
+#
+#
 os               = require('os')
 cluster          = require('cluster')
 express          = require("express")
@@ -37,67 +37,97 @@ allowCrossDomain = (req, res, next) ->
     else
         next()
 
+# Maybe move this out of the controller into a model.
 # Auth by username(email) and password
-passport.use(new LocalStrategy(  (username, password, done) ->
-    process.nextTick ->
-        db_users.findByEmail {username: username}, (err, user) ->
-            if err
-                return done(err)
-            unless user
-                return done(null, false, message: "Unknown user " + username)   # don't ever 'return' keyword!
-            unless db_users.verifyPassword(user, password)
-                return done(null, false, message: "Invalid password")   # don't ever 'return' keyword!
-            done null, user
+passport.use(new LocalStrategy( (username, password, done) ->
+  process.nextTick ->
+    # TODO: Move should move this out to the model.
+    db_users.findByEmail username, (err, user) ->
+      if err
+        return done(err)
+      unless user
+        return done(null, false, message: "Unknown user with email #{username}")   # don't ever 'return' keyword!
+      unless db_users.verifyPassword(user, password)
+        return done(null, false, message: "Invalid password")   # don't ever 'return' keyword!
+
+      done null, user
 ))
+
+passport.use 'api', new LocalStrategy { usernameField : 'email' }, (email, password, done) ->
+  process.nextTick ->
+    db_users.findByEmail email, (err, user) ->
+      if err
+        return done(err)
+      unless user
+        return done(null, false, message: "Unknown user with email #{email}")
+      unless db_users.verifyPassword(user, password)
+        return done(null, false, message: "Invalid password")
+      done null, user
+
+passport.serializeUser (user, done) ->
+  done(null, user._id.toString())
+
+passport.deserializeUser (id, done) ->
+  db_users.get id, (err, user) ->
+    done err, user
 
 #
 # Express environment setup
-# 
+#
 app = express()
 app.configure ->
-    app.set "port", process.env.PORT or 3000
-    app.use express.favicon()
-    app.use express.logger()
-    app.use express.bodyParser()
-    app.use express.methodOverride()
-    app.use allowCrossDomain
-    app.use passport.initialize()
-    app.use app.router
-    app.use express.static(path.join(__dirname, "public"))
+  app.set "port", process.env.PORT or 3000
+  app.use express.logger "dev"
+  app.use express.favicon()
+  app.use express.cookieParser()
+  app.use express.bodyParser()
+  app.use express.methodOverride()
+  app.use express.session { secret : 'change-me-before-going-to-production' }
+  app.use allowCrossDomain
+  app.use passport.initialize()
+  app.use passport.session()
+  app.use app.router
+  app.use express.static(path.join(__dirname, "public"))
 
 app.configure "development", ->
-    app.use express.errorHandler()
-
-# Sample API
-#app.get "/app/users", (req, res) ->
-#    db_users.findAll (err, all) ->
-#        res.status 200
-#        res.json all
+  app.use express.errorHandler()
 
 #
 # POST /app/tokens = Login
 #  params:
 #    username and password
 #  Returns a token entry of tokens database
-# 
+#
 app.post "/app/tokens", (req, res, next) ->
-    #console.log(req.body)
-    passport.authenticate("local", {session: false}, (err, user, info) =>
-        if err
-            return next(err)
-        if not user
-            res.status 401
-            return res.send null
-        else
-            # Test Email
-            #(new MailService()).send("Hey what's up dude?", "noda.yoshikazu@gmail.com")
-            tokens = new Tokens()
-            tokens.create user, (err, tk) =>
-                res.status 200
-                return res.json tk[0]
-    )(req, res, next)
+  passport.authenticate("local", (err, user, info) =>
+    if err
+      return next(err)
+    if not user
+      res.status 401
+      return res.send "Unauthorized"
+    else
+      # Test Email
+      #(new MailService()).send("Hey what's up dude?", "noda.yoshikazu@gmail.com")
+      tokens = new Tokens()
+      tokens.create user, (err, tk) =>
+        res.status 200
+        return res.json tk[0]
+  )(req, res, next)
 
+app.post('/login', passport.authenticate('api'), (req, res) ->
+  tokens = new Tokens()
+  tokens.create req.user, (err, tk) ->
+    res.json tk[0]
+)
 
+authRequired = (req, res, next) ->
+ return next() if req.isAuthenticated()
+ res.status 401
+ res.send 'Unauthorized'
+
+app.get('/me', authRequired, (req, res) ->
+  res.json req.user
+)
 #
 # DELETE /app/tokens == Logout
 # Logout
@@ -107,7 +137,7 @@ app.delete "/app/tokens/(([A-Za-z0-9_]+))", (req, res) ->
     #
     # This is how you validate the access token.
     #  If ok is not null, it has been validated, and ok is null otherwise.
-    # 
+    #
     console.log(req.body)
     tk = new Tokens()
     tk.validate req.params[0], (err, ok) =>
@@ -128,7 +158,7 @@ app.delete "/app/tokens/(([A-Za-z0-9_]+))", (req, res) ->
                         res.send "You have signed out"
 #
 # Login Form (for debugging purpose only)
-# 
+#
 app.get "/app/login", (req, res) ->
     login_form = '<form action="/app/tokens" method="post">'+
         '<div><label>Email:</label><input type="text" name="username"/></div>'+
@@ -139,7 +169,7 @@ app.get "/app/login", (req, res) ->
 
 #
 # Logout form (for debugging purpose only)
-# 
+#
 app.get "/app/logout", (req, res) ->
     logout_form = '<form action="/app/tokens" method="post">'+
         '    <div><label for="token">Token:</label><input type="text" name="token" id="token" /></div>'+
@@ -151,7 +181,7 @@ app.get "/app/logout", (req, res) ->
 
 #
 # Sign up form
-# 
+#
 app.get "/app/signup", (req, res)->
     signup_form = '<form action="/app/users" method="post">'+
     '    <div><label for="email">Email(loginID):</label><input type="text" name="email" id="email" /></div>'+
@@ -161,7 +191,7 @@ app.get "/app/signup", (req, res)->
     '</form>'
     res.send (signup_form)
 
-    
+
 #=================================================
 # Users API
 #  email, password, name, Trello-username, misc(can be any char string)
@@ -170,7 +200,7 @@ app.get "/app/signup", (req, res)->
 # Sign-up
 #   No token is needed for this endpoint
 #   data: email, password, trello_username, tzdiff
-# 
+#
 app.post "/app/users",  (req, res) ->
     #console.log(req.body)
     db_users.add req.body, (err, result) =>
@@ -184,7 +214,7 @@ app.post "/app/users",  (req, res) ->
 #
 # Remove a user by username (email)
 #   query string token={token}
-# 
+#
 app.delete "/app/users", (req, res) ->
     (new Tokens()).validate req.query['token'], (err, token_record) =>
         if err
@@ -203,16 +233,16 @@ app.delete "/app/users", (req, res) ->
 
 
 #=================================================
-# 
+#
 # Trello API
 #
 #=================================================
 #
 # Trello OAuth API
 #  URL param is the user email
-# 
+#
 app.get "/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>
         if err
             res.status 401; res.send "No such user"
         else
@@ -232,7 +262,7 @@ app.get "/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
 #
 # Trello OAuth callback
 # Redirect URL from Trello
-# 
+#
 app.get "/app/auths/trello_callback", (req, res) ->
     if typeof req.query.oauth_verifier isnt 'undefined'
         toa = new TrelloOAuth(req.query.state)
@@ -250,9 +280,9 @@ app.get "/app/auths/trello_callback", (req, res) ->
 
 #
 # Get OAuth result
-# 
+#
 app.get "/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+    db_users.findByEmail {username: req.params[0]}, (err, user)=>
         if err
             res.status 401; res.send "No such user"
         else
@@ -265,7 +295,7 @@ app.get "/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
 
 #
 # Revoke Trello oauth - Remove access_token from user.
-# 
+#
 app.delete '/app/auths/delete', (req, res)->
     null
 
@@ -277,9 +307,9 @@ app.delete '/app/auths/delete', (req, res)->
 
 ###
 # Collect all data test execution API
-# 
+#
 #app.get "/app/trello/report/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-#    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+#    db_users.findByEmail {username: req.params[0]}, (err, user)=>
 #        if err
 #            res.status 404; res.send "No such user"
 #        else
@@ -299,7 +329,7 @@ app.delete '/app/auths/delete', (req, res)->
 #
 # Trash these later
 #app.get "/app/trello/collecttest/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-#    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+#    db_users.findByEmail {username: req.params[0]}, (err, user)=>
 #        if err
 #            res.status 404; res.send "No such user"
 #        else
@@ -310,9 +340,9 @@ app.delete '/app/auths/delete', (req, res)->
 #                else
 #                    res.status 200
 #                    res.send result
-#                    
+#
 #app.get "/app/trello/viewtest/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-#    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+#    db_users.findByEmail {username: req.params[0]}, (err, user)=>
 #        if err
 #            res.status 404; res.send "No such user"
 #        else
@@ -328,7 +358,7 @@ app.delete '/app/auths/delete', (req, res)->
 #
 # Collect Trello summary
 # url param = token
-# 
+#
 app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
     (new Tokens()).validate req.params[0], (err, tokendoc) =>
         if err
@@ -336,7 +366,7 @@ app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
         else unless tokendoc
             res.status 401; res.json "Invalid token."
         else
-            db_users.get2 tokendoc.user_id, (err, user)=>                
+            db_users.get2 tokendoc.user_id, (err, user)=>
                 if err
                     res.status 404; res.send "No such user"
                 else
@@ -351,7 +381,7 @@ app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
 #
 # Get the view (html) of the Trello summary
 # url param is token
-# 
+#
 app.get "/app/trello/view/(([A-Za-z0-9_]+))", (req, res) ->
     (new Tokens()).validate req.params[0], (err, tokendoc) =>
         if err
@@ -373,9 +403,9 @@ app.get "/app/trello/view/(([A-Za-z0-9_]+))", (req, res) ->
 
 ###
 # For Debugging only
-# 
+#
 #app.get "/app/trello/orgboards/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-#    db_users.findByEmail {username: req.params[0]}, (err, user)=>    
+#    db_users.findByEmail {username: req.params[0]}, (err, user)=>
 #        if err
 #            res.status 404; res.send "No such user"
 #        else
@@ -392,9 +422,9 @@ app.get "/app/trello/view/(([A-Za-z0-9_]+))", (req, res) ->
 # Get Trello stuff of a user
 #   First param: boards, lists, cards
 #   Second param: username (email)
-# 
+#
 app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-    db_users.findByEmail {username: req.params[1]}, (err, user)=>    
+    db_users.findByEmail {username: req.params[1]}, (err, user)=>
         if err
             res.status 404; res.send "No such user"
         else
@@ -428,7 +458,7 @@ app.get "/app/update", (req, res) ->
 
 #
 # mainLoop sends regular once a day report to users.
-# 
+#
 # mailLoop = () ->
 #    mailservice = new MailService()
 #    mloop = setInterval( ()=>
@@ -453,7 +483,7 @@ notificationLoop = () ->
     mailservice = new MailService()
     trellos = new Trellos()
     trelloView = new TrelloView()
-    
+
     nloop = setInterval( () =>
         #
         # for all users in users
@@ -474,11 +504,11 @@ notificationLoop = () ->
                         console.log("Due notification sent to #{user.email}")
     ,1000*10*60)    # Do every 10 minutes
 
-    
+
 #
 # Server with Cluster
-# 
-if (cluster.isMaster) 
+#
+if (cluster.isMaster)
 
     for i in [1..2]   # Specify the number of workers you want to create
         cluster.fork()
@@ -500,5 +530,5 @@ else if (cluster.isWorker)
     console.log("worker("+cluster.worker.id+")")
 #    if cluster.worker.id is 1
 #         mailLoop()
-    if cluster.worker.id is 2    
+    if cluster.worker.id is 2
         notificationLoop()
