@@ -378,6 +378,10 @@ app.delete '/app/auths/delete', (req, res)->
 # Collect Trello summary
 # url param = token
 #
+# TODO: Refactor.
+#       We no longer need to go ahead and find the user by the given token
+#       as we now are keeping the user in session, so we can go ahead and
+#       pass along the user id directly to the TrelloApi#collect_data_sync method.
 app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
     (new Tokens()).validate req.params[0], (err, tokendoc) =>
         if err
@@ -401,6 +405,11 @@ app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
 # Get the view (html) of the Trello summary
 # url param is token
 #
+# TODO: Refactor.
+#       We no longer need to go ahead and find the user by the given token
+#       as we now are keeping the user in session, so we can go ahead and
+#       pass along the user id directly to the TrelloApi#collect_data_sync method.
+# TODO: Return JSON instead of HTML. Thanks.
 app.get "/app/trello/view/(([A-Za-z0-9_]+))", (req, res) ->
     (new Tokens()).validate req.params[0], (err, tokendoc) =>
         if err
