@@ -122,6 +122,24 @@
       return cards;
     };
 
+    TrelloView.prototype.cardsByListId = function(data, listId) {
+      var cards,
+        _this = this;
+      cards = _.find(data.cards, function(card) {
+        return card.list_id === listId;
+      });
+      if (cards && _.has(cards, 'cards')) {
+        return _.map(cards.cards, function(card) {
+          card.asignee = _this.card_member(data, card);
+          card.comments_count = card.badges.comments;
+          card.due = _.isUndefined(card.due) ? 'None' : Date.create(card.due).format("{Mon} {d}, {yyyy} at {h}:{mm} {TT}");
+          return card;
+        });
+      } else {
+        return [];
+      }
+    };
+
     TrelloView.prototype.lookup_board_by_id = function(alldata, board_id) {
       var bd;
       bd = _.find(alldata.boards, function(board) {
@@ -396,14 +414,25 @@
               return board.org_name === organization;
             });
             return _.each(boards, function(board) {
-              var recentActivity;
+              var allLists, lists, recentActivity;
               recentActivity = _.map(_this.recent_actions(data, board.boards.id), function(action) {
                 return _this.actionSummary(action);
               });
+              allLists = _.filter(data.lists, function(list) {
+                return list.board_id === board.boards.id;
+              });
+              lists = [];
+              _.each(allLists, function(list) {
+                return _.each(list.lists, function(innerList) {
+                  innerList.cards = _this.cardsByListId(data, innerList.id);
+                  return lists.push(innerList);
+                });
+              });
               return reports.boards.push({
                 id: board.boards.id,
-                organization: organization,
                 name: board.boards.name,
+                organization: organization,
+                lists: lists,
                 recent_activity: recentActivity
               });
             });

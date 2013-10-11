@@ -94,7 +94,24 @@ module.exports = class TrelloView
         cards = _.find alldata.cards, (cards) =>
             cards.list_id is list_id
         cards
-        
+
+    # Find cards for a given listId.
+    cardsByListId: (data, listId) ->
+      cards = _.find data.cards, (card) ->
+        card.list_id is listId
+      if cards and _.has(cards, 'cards')
+        _.map cards.cards, (card) =>
+          card.asignee        = @card_member data, card
+          card.comments_count = card.badges.comments
+          card.due            = if _.isUndefined(card.due)
+            'None'
+          else
+            Date.create(card.due).format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+
+          card
+      else
+        []
+
     #
     # Finds a board by board ID
     # 
@@ -354,10 +371,21 @@ module.exports = class TrelloView
             _.each boards, (board) =>
               recentActivity = _.map @recent_actions(data, board.boards.id), (action) =>
                 @actionSummary action
+
+              allLists = _.filter data.lists, (list) =>
+                list.board_id is board.boards.id
+
+              lists = []
+              _.each allLists, (list) =>
+                _.each list.lists, (innerList) =>
+                  innerList.cards = @cardsByListId(data, innerList.id)
+                  lists.push innerList
+
               reports.boards.push
                 id              : board.boards.id
-                organization    : organization
                 name            : board.boards.name
+                organization    : organization
+                lists           : lists
                 recent_activity : recentActivity
 
           fn null, reports
