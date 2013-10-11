@@ -16,6 +16,16 @@
       $httpBackend.verifyNoOutstandingExpectation();
     });
 
+    describe('.collectUrl', function() {
+      it('should include the api endpoint', function() {
+        expect(Report.collectUrl()).toContain(Config.apiEndpoint);
+      });
+
+      it('should point to /app/trello/collect', function() {
+        expect(Report.collectUrl()).toContain('/app/trello/collect');
+      });
+    });
+
     describe('.reportsUrl', function() {
       it('should include the api endpoint', function() {
         expect(Report.reportsUrl()).toContain(Config.apiEndpoint);
@@ -25,6 +35,44 @@
         expect(Report.reportsUrl()).toContain('/app/trello/reports');
       });
     });
+
+    describe('.collect', function() {
+      it('should GET from the server using collectUrl', function() {
+        $httpBackend.expectGET(Report.collectUrl()).respond(200);
+        Report.collect();
+        $httpBackend.flush();
+      });
+
+      it('should return a promise', function() {
+        $httpBackend.expectGET(Report.collectUrl()).respond(200);
+        expect(Report.collect()).toBeAPromise();
+        $httpBackend.flush();
+      });
+
+      describe('given the server responds with success', function() {
+        it('should resolve the promise with data returned from server', function() {
+          var promiseData;
+          $httpBackend.expectGET(Report.collectUrl()).respond(200, 'ok');
+          Report.collect().then(function(data) {
+            promiseData = data;
+          });
+          $httpBackend.flush();
+          expect(promiseData).toEqual('ok');
+        });
+      });
+
+      describe('given the server responds with failure', function() {
+        it('should reject the promise with error message', function() {
+          var errorMessage;
+          $httpBackend.expectGET(Report.collectUrl()).respond(500, 'some internal error');
+          Report.collect().then(function() {}, function(err) {
+            errorMessage = err.message;
+          });
+          $httpBackend.flush();
+          expect(errorMessage).toBe('Error 500 while collecting: some internal error');
+        });
+      });
+    }); /* end .collect */
 
     describe('.reports', function() {
       it('should GET from server using reportsUrl', function() {
@@ -64,6 +112,6 @@
           expect(errorMessage).toBe('Error 500 while fetching reports: some internal error');
         });
       });
-    });
+    }); /* end .reports */
   });
 }());
