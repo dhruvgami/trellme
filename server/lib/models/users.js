@@ -25,7 +25,6 @@
     }
 
     Users.prototype.findByEmail = function(email, fn) {
-      var _this = this;
       return dbconnection.get_client(function(err, p_client) {
         return p_client.collection('users', function(err, col) {
           if (err) {
@@ -41,9 +40,7 @@
     };
 
     Users.prototype.verifyPassword = function(user, password) {
-      var r;
-      r = this.genpass.validateHash(user.password, password);
-      return r;
+      return this.genpass.validateHash(user.password, password);
     };
 
     Users.prototype.findAll = function(fn) {

@@ -259,9 +259,7 @@
 
   app.get("/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", function(req, res) {
     var _this = this;
-    return db_users.findByEmail({
-      username: req.params[0]
-    }, function(err, user) {
+    return db_users.findByEmail(req.params[0], function(err, user) {
       var toa;
       if (err) {
         res.status(401);
@@ -389,62 +387,38 @@
   */
 
 
-  app.get("/app/trello/collect/(([A-Za-z0-9_]+))", function(req, res) {
+  app.get("/app/trello/collect", function(req, res) {
     var _this = this;
-    return (new Tokens()).validate(req.params[0], function(err, tokendoc) {
+    return (new TrelloApi()).collect_data_sync(req.user, function(err, result) {
       if (err) {
-        res.status(401);
-        return res.json(tokendoc);
-      } else if (!tokendoc) {
-        res.status(401);
-        return res.json("Invalid token.");
+        res.status(err);
+        return res.send(result);
       } else {
-        return db_users.get2(tokendoc.user_id, function(err, user) {
-          if (err) {
-            res.status(404);
-            return res.send("No such user");
-          } else {
-            return (new TrelloApi()).collect_data_sync(user, function(err, result) {
-              if (err) {
-                res.status(err);
-                return res.send(result);
-              } else {
-                res.status(200);
-                return res.send(result);
-              }
-            });
-          }
-        });
+        res.status(200);
+        return res.send(result);
       }
     });
   });
 
-  app.get("/app/trello/view/(([A-Za-z0-9_]+))", function(req, res) {
-    var _this = this;
-    return (new Tokens()).validate(req.params[0], function(err, tokendoc) {
+  app.get("/app/trello/view", authRequired, function(req, res) {
+    return new TrelloView().getSummary(req.user, function(err, result) {
       if (err) {
-        res.status(401);
-        return res.json(tokendoc);
-      } else if (!tokendoc) {
-        res.status(401);
-        return res.json("Invalid token.");
+        res.status(err);
+        return res.send(result);
       } else {
-        return db_users.get2(tokendoc.user_id, function(err, user) {
-          if (err) {
-            res.status(404);
-            return res.send("No such user");
-          } else {
-            return (new TrelloView()).getSummary(user, function(err, result) {
-              if (err) {
-                res.status(err);
-                return res.send(result);
-              } else {
-                res.status(200);
-                return res.send(result);
-              }
-            });
-          }
-        });
+        res.status(200);
+        return res.send(result);
+      }
+    });
+  });
+
+  app.get("/app/trello/reports", authRequired, function(req, res) {
+    return new TrelloView().getReports(req.user._id, function(err, result) {
+      if (err) {
+        res.status(500);
+        return res.send(err);
+      } else {
+        return res.send(result);
       }
     });
   });

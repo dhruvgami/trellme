@@ -261,7 +261,7 @@ app.delete "/app/users", (req, res) ->
 #  URL param is the user email
 #
 app.get "/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-    db_users.findByEmail {username: req.params[0]}, (err, user)=>
+    db_users.findByEmail req.params[0], (err, user)=>
         if err
             res.status 401; res.send "No such user"
         else
@@ -378,56 +378,39 @@ app.delete '/app/auths/delete', (req, res)->
 # Collect Trello summary
 # url param = token
 #
-# TODO: Refactor.
-#       We no longer need to go ahead and find the user by the given token
-#       as we now are keeping the user in session, so we can go ahead and
-#       pass along the user id directly to the TrelloApi#collect_data_sync method.
-app.get "/app/trello/collect/(([A-Za-z0-9_]+))", (req, res) ->
-    (new Tokens()).validate req.params[0], (err, tokendoc) =>
-        if err
-            res.status 401; res.json tokendoc
-        else unless tokendoc
-            res.status 401; res.json "Invalid token."
-        else
-            db_users.get2 tokendoc.user_id, (err, user)=>
-                if err
-                    res.status 404; res.send "No such user"
-                else
-                    (new TrelloApi()).collect_data_sync user, (err, result) =>
-                        if err
-                            res.status err
-                            res.send result
-                        else
-                            res.status 200
-                            res.send result
+app.get "/app/trello/collect", (req, res) ->
+  (new TrelloApi()).collect_data_sync req.user, (err, result) =>
+    if err
+      res.status err
+      res.send result
+    else
+      res.status 200
+      res.send result
 
 #
 # Get the view (html) of the Trello summary
 # url param is token
 #
-# TODO: Refactor.
-#       We no longer need to go ahead and find the user by the given token
-#       as we now are keeping the user in session, so we can go ahead and
-#       pass along the user id directly to the TrelloApi#collect_data_sync method.
 # TODO: Return JSON instead of HTML. Thanks.
-app.get "/app/trello/view/(([A-Za-z0-9_]+))", (req, res) ->
-    (new Tokens()).validate req.params[0], (err, tokendoc) =>
-        if err
-            res.status 401; res.json tokendoc
-        else unless tokendoc
-            res.status 401; res.json "Invalid token."
-        else
-            db_users.get2 tokendoc.user_id, (err, user)=>
-                if err
-                    res.status 404; res.send "No such user"
-                else
-                    (new TrelloView()).getSummary user, (err, result) =>
-                        if err
-                            res.status err
-                            res.send result
-                        else
-                            res.status 200
-                            res.send result  # HTML
+app.get "/app/trello/view", authRequired, (req, res) ->
+  new TrelloView().getSummary req.user, (err, result) ->
+    if err
+      res.status err
+      res.send result
+    else
+      res.status 200
+      res.send result  # HTML <- Why? this is an API.
+
+# Get the reports summary JSON.
+# Authentication required as the reports are scoped to the logged in user.
+app.get "/app/trello/reports", authRequired, (req, res) ->
+  # First we need to fetch the results from Trello. Then pull the reports from db.
+  new TrelloView().getReports req.user._id, (err, result) ->
+    if err
+      res.status 500
+      res.send err
+    else
+      res.send result
 
 ###
 # For Debugging only

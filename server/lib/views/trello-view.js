@@ -195,6 +195,72 @@
       return htmls.join('<br>\n');
     };
 
+    TrelloView.prototype.listCardsDueform = function(alldata, cardids, tzdiff, fn) {
+      var cards,
+        _this = this;
+      cards = [];
+      _.each(cardids, function(card_id) {
+        var aboard, acard, alist, context, due, duedate, members;
+        acard = _this.lookup_card_by_id(alldata, card_id);
+        aboard = _this.lookup_board_by_id(alldata, acard[0].board_id);
+        alist = _this.lookup_list_by_id(alldata, acard[0].board_id, acard[0].list_id);
+        members = _this.card_member(alldata, acard[1]);
+        due = Date.create(acard[1].due).addHours(tzdiff);
+        duedate = due.format("{Mon} {d}, {yyyy} at {h}:{mm} {TT}");
+        context = {
+          board_name: aboard.boards.name,
+          board_url: aboard.boards.url,
+          org_name: aboard.org_name,
+          list_name: alist[1].name,
+          list_url: "",
+          card_name: acard[1].name,
+          card_url: acard[1].url,
+          due: duedate,
+          assigned_to: members
+        };
+        return htmls.push(TrelloView.templates.duecard.template(context));
+      });
+      return cards;
+    };
+
+    TrelloView.prototype.actionSummary = function(action) {
+      var actionText, actiondate, adate;
+      adate = Date.create(action.date);
+      actiondate = adate.format("{Mon} {d}, {yyyy} at {h}:{mm} {TT}");
+      if (action.type === "updateCard") {
+        actionText = "updated " + action.data.card.name;
+      } else if (action.type === "createCard") {
+        actionText = "added " + action.data.card.name + " to " + action.data.list.name;
+      } else if (action.type === "createBoard") {
+        actionText = "created this board.";
+      } else if (action.type === "commentCard") {
+        actionText = "commented on " + action.data.card.name + ", saying " + action.data.text;
+      } else if (action.type === "addMemberToCard") {
+        actionText = "added " + action.member.fullName + " to " + action.data.card.name;
+      } else if (action.type === "removeMemberFromCard") {
+        actionText = "removed " + action.member.fullName + " from " + action.data.card.name;
+      } else if (action.type === "updateBoard") {
+        actionText = "updated " + action.data.board.name;
+      } else if (action.type === "createList") {
+        actionText = "created list " + action.data.list.name;
+      } else if (action.type === "moveCardToBoard") {
+        actionText = "moved " + action.data.card.name + " from " + action.data.boardSource.name + " to " + action.data.board.name;
+      } else if (action.type === "addAttachmentToCard") {
+        actionText = "added an attachment to " + action.data.card.name;
+      } else if (action.type === "addChecklistToCard") {
+        actionText = "added a Checklist to " + action.data.card.name;
+      } else if (action.type === "addMemberToBoard") {
+        actionText = "added a member to " + action.data.board.name;
+      } else {
+        actionText = "took an action";
+      }
+      return {
+        full_name: action.memberCreator.fullName,
+        action: actionText,
+        date: adate.format("{Mon} {d}, {yyyy} {h}:{mm} {TT}")
+      };
+    };
+
     TrelloView.prototype.list_tabular = function(alldata, lists, tzdiff) {
       var html, rows, tables,
         _this = this;
@@ -307,6 +373,44 @@
         size = 5;
       }
       return (sorted.slice(sorted.length - size, len)).reverse();
+    };
+
+    TrelloView.prototype.getReports = function(userId, fn) {
+      var _this = this;
+      return new Trellos().get_all_data(userId, function(err, data) {
+        var dueCards, reports;
+        if (err) {
+          return fn(err, null);
+        } else {
+          reports = {
+            due: {},
+            boards: []
+          };
+          dueCards = _this.collect_cards_per_due(data.cards);
+          reports.due.today = _this.listCardsDueform(data, dueCards.today);
+          reports.due.soon = _this.listCardsDueform(data, dueCards.soon);
+          reports.due.past = _this.listCardsDueform(data, dueCards.past);
+          _.each(_this.all_org_names(data), function(organization) {
+            var boards;
+            boards = _.filter(data.boards, function(board) {
+              return board.org_name === organization;
+            });
+            return _.each(boards, function(board) {
+              var recentActivity;
+              recentActivity = _.map(_this.recent_actions(data, board.boards.id), function(action) {
+                return _this.actionSummary(action);
+              });
+              return reports.boards.push({
+                id: board.boards.id,
+                organization: organization,
+                name: board.boards.name,
+                recent_activity: recentActivity
+              });
+            });
+          });
+          return fn(null, reports);
+        }
+      });
     };
 
     TrelloView.prototype.renderHtml = function(trellos, user, fn) {

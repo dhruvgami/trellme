@@ -7,7 +7,7 @@
 
       Report.reportsUrl = function() {
         return [Config.apiEndpoint, 'app', 'trello', 'reports'].join('/');
-      }
+      };
 
       Report.reports = function() {
         var deferred = $q.defer();

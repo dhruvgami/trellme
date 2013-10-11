@@ -166,6 +166,73 @@ module.exports = class TrelloView
             htmls.push '<div>No Cards</div>'
         htmls.join('<br>\n')
 
+    listCardsDueform: (alldata, cardids, tzdiff, fn) ->
+      cards = []
+      _.each cardids, (card_id) =>
+        acard = @lookup_card_by_id alldata, card_id
+        # [cards, card]
+        aboard = @lookup_board_by_id alldata, acard[0].board_id
+        # board
+        alist = @lookup_list_by_id alldata, acard[0].board_id, acard[0].list_id
+        # [lists, list]
+
+        # Assigned To members
+        members = @card_member(alldata, acard[1])
+        # Due date format
+        due = Date.create(acard[1].due).addHours(tzdiff)  # Change to localtime
+        duedate = due.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+        context = {
+            board_name:  aboard.boards.name
+            board_url:   aboard.boards.url
+            org_name:    aboard.org_name
+            list_name:   alist[1].name
+            list_url: ""
+            card_name:   acard[1].name
+            card_url:    acard[1].url
+            due:         duedate
+            assigned_to: members
+        }
+        htmls.push TrelloView.templates.duecard.template(context)
+      cards
+
+    actionSummary: (action) ->
+      # Action date format
+      #adate = Date.create(action.date).addHours(tzdiff)  # Change to localtime
+      #actiondate = adate.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+      adate      = Date.create action.date
+      actiondate = adate.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
+
+      if action.type is "updateCard"
+        actionText = "updated #{action.data.card.name}"
+      else if action.type is "createCard"
+        actionText = "added #{action.data.card.name} to #{action.data.list.name}"
+      else if action.type is "createBoard"
+        actionText = "created this board."
+      else if action.type is "commentCard"
+        actionText = "commented on #{action.data.card.name}, saying #{action.data.text}"
+      else if action.type is "addMemberToCard"
+        actionText = "added #{action.member.fullName} to #{action.data.card.name}"
+      else if action.type is "removeMemberFromCard"
+        actionText = "removed #{action.member.fullName} from #{action.data.card.name}"
+      else if action.type is "updateBoard"
+        actionText = "updated #{action.data.board.name}"
+      else if action.type is "createList"
+        actionText = "created list #{action.data.list.name}"
+      else if action.type is "moveCardToBoard"
+        actionText = "moved #{action.data.card.name} from #{action.data.boardSource.name} to #{action.data.board.name}"
+      else if action.type is "addAttachmentToCard"
+        actionText = "added an attachment to #{action.data.card.name}"
+      else if action.type is "addChecklistToCard"
+        actionText = "added a Checklist to #{action.data.card.name}"
+      else if action.type is "addMemberToBoard"
+        actionText = "added a member to #{action.data.board.name}"
+      else
+        actionText = "took an action"
+
+      full_name : action.memberCreator.fullName
+      action    : actionText
+      date      : adate.format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
+
     #
     # Renders list tables
     # 
@@ -264,6 +331,36 @@ module.exports = class TrelloView
             size = 5
         (sorted.slice(sorted.length - size, len)).reverse()
 
+    getReports: (userId, fn) ->
+      new Trellos().get_all_data userId, (err, data) =>
+        if err
+          fn err, null
+        else
+          reports =
+            due    : {}
+            boards : []
+
+          dueCards          = @collect_cards_per_due data.cards
+          reports.due.today = @listCardsDueform data, dueCards.today
+          reports.due.soon  = @listCardsDueform data, dueCards.soon
+          reports.due.past  = @listCardsDueform data, dueCards.past
+
+          # For each of the organizations
+          _.each @all_org_names(data), (organization) =>
+            boards = _.filter data.boards, (board) =>
+              board.org_name is organization
+
+            # For each of the boards for the current organization
+            _.each boards, (board) =>
+              recentActivity = _.map @recent_actions(data, board.boards.id), (action) =>
+                @actionSummary action
+              reports.boards.push
+                id              : board.boards.id
+                organization    : organization
+                name            : board.boards.name
+                recent_activity : recentActivity
+
+          fn null, reports
 
     #
     # Reads all data from DB and render (create) HTML for the data

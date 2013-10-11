@@ -25,19 +25,18 @@ module.exports = class Users extends dbconnection
     # Looks up a user data from email (username)
     #
     findByEmail: (email, fn) ->
-      dbconnection.get_client (err, p_client) =>
-        p_client.collection 'users', (err, col) =>
+      dbconnection.get_client (err, p_client) ->
+        p_client.collection 'users', (err, col) ->
           if err
             return fn(err, null)
-          col.findOne {email: email}, (err, user) =>
+          col.findOne { email: email }, (err, user) ->
             fn(err, user)
 
     #
     # Checks if password matches the user.password
     #
     verifyPassword: (user, password) ->
-        r = @genpass.validateHash(user.password, password)
-        r
+      @genpass.validateHash(user.password, password)
 
     #
     # Get all users

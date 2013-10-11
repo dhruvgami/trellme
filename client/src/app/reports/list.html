@@ -1,0 +1,15 @@
+<h3>Reports</h3>
+<hr />
+
+<h3>Recent Activities</h3>
+<div ng-repeat="board in reports.boards">
+  <h4>Board: {{board.organization}} / {{board.name}}</h4>
+
+  <div class="activity" ng-repeat="activity in board.recent_activity">
+    <b>{{activity.full_name}}</b>
+    {{activity.data.text}}
+    {{activity.action}}
+    <br />
+    <span class="date">{{activity.date}}</span>
+  </div>
+</div>

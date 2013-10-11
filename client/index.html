@@ -13,6 +13,7 @@
           <ul class="nav pull-right">
             <li ng-hide="session.loggedIn"><a href="/#/signin">Sign In</a></p>
             <li ng-hide="session.loggedIn"><a href="/#/signup">Sign Up</a></li>
+            <li ng-show="session.loggedIn"><a href="/#/reports">Reports</a></li>
             <li ng-show="session.loggedIn"><a href="/#/" ng-click="signout()">Sign Out</a></li>
           </ul>
         </div>
@@ -21,11 +22,7 @@
 
     <div class="container">
       <div class="row" ng-view>
-      </div><!--row-->
-
-      <!-- TODO: This probably is going away to its own application -->
-      <div id="report-html" style="position:relative; top:-550px;"></div>
-
+      </div><!-- End main AngularJS view. -->
       <div id="footer">
         <p>
           TrellMe is a reporting tool to get snapshots of your Trello Boards on

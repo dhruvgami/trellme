@@ -6,6 +6,7 @@ module.exports = function(grunt) {
         src : [
           'vendor/angular/angular.js',
           'vendor/**/*.js',
+          'src/app/reports/reports.js',
           'src/app/trellme.js',
           'src/**/*.js'
         ],
