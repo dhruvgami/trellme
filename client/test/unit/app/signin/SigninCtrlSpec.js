@@ -2,13 +2,14 @@
   'use strict';
 
   describe('SinginCtrl', function() {
-    var Session, $httpBackend, $window, $scope, apiEndpoint;
+    var Session, $httpBackend, $window, $location, $scope, apiEndpoint;
     beforeEach(module('signin'));
     beforeEach(inject(function($injector) {
       Session         = $injector.get('Session');
       $httpBackend    = $injector.get('$httpBackend');
       $scope          = $injector.get('$rootScope').$new();
       $window         = $injector.get('$window');
+      $location       = $injector.get('$location');
       var Config      = $injector.get('Config'),
           $controller = $injector.get('$controller');
 
@@ -44,6 +45,7 @@
 
       describe('given the Session login service resolves', function() {
         beforeEach(function() {
+          spyOn($location, 'path');
           $httpBackend.expectPOST(Session.loginUrl()).respond(200, { token : 'abc123' });
           $scope.email    = 'john@doe.com';
           $scope.password = 'secret';
@@ -53,6 +55,10 @@
 
         it('should assign the returned token to the scope', function() {
           expect($scope.token).toBe('abc123');
+        });
+
+        it('should redirect to /reports', function() {
+          expect($location.path).toHaveBeenCalledWith('/reports');
         });
       });
 
