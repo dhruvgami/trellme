@@ -9,6 +9,7 @@ module.exports = function(config) {
       'vendor/angular/angular.js',
       'vendor/**/*.js',
       'src/app/trellme.js',
+      'src/app/reports/reports.js',
       'src/**/*.js',
       'test/vendor/angular/angular.mocks.js',
       'test/unit/**/*Spec.js'

@@ -3,27 +3,34 @@
 
   describe('TrellMe', function() {
     beforeEach(module('trellme'));
+    beforeEach(function() {
+      SpecHelper.setup(this);
+    });
 
     describe('dependencies', function() {
-      var deps;
+      var app;
       beforeEach(function() {
-        deps = angular.module('trellme').requires;
+        app = angular.module('trellme');
       });
 
       it('should depend on ngRoute', function() {
-        expect(_.contains(deps, 'ngRoute')).toBe(true);
+        expect(app).toDependOn('ngRoute');
       });
 
       it('should depend on signup', function() {
-        expect(_.contains(deps, 'signup')).toBe(true);
+        expect(app).toDependOn('signup');
       });
 
       it('should depend on signin', function() {
-        expect(_.contains(deps, 'signin')).toBe(true);
+        expect(app).toDependOn('signin');
+      });
+
+      it('should depend on reports', function() {
+        expect(app).toDependOn('reports');
       });
 
       it('should depend on services.session', function() {
-        expect(_.contains(deps, 'services.session')).toBe(true);
+        expect(app).toDependOn('services.session');
       });
     });
 

@@ -9,7 +9,15 @@
 
   SpecHelper.matchers.toDependOn = function(expected) {
     return _(this.actual.requires).contains(expected);
-  }
+  };
+
+  SpecHelper.matchers.toBeAPromise = function(expected) {
+    var thenPresent    = _.isFunction(this.actual.then),
+        catchPresent   = _.isFunction(this.actual.catch),
+        finallyPresent = _.isFunction(this.actual.finally);
+
+    return thenPresent && catchPresent && finallyPresent;
+  };
 
   window.SpecHelper = SpecHelper;
 }());
