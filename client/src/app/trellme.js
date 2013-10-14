@@ -6,7 +6,9 @@
     'signup',
     'signin',
     'reports',
-    'services.session'
+    'services.session',
+    'services.httpMonitor',
+    'directives.spinner'
     ]).
     config(['$routeProvider', function($router) {
       $router.otherwise({ redirectTo : '/signin' });

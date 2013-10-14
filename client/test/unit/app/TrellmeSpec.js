@@ -32,6 +32,14 @@
       it('should depend on services.session', function() {
         expect(app).toDependOn('services.session');
       });
+
+      it('should depend on directives.spinner', function() {
+        expect(app).toDependOn('directives.spinner');
+      });
+
+      it('should depend on services.httpMonitor', function() {
+        expect(app).toDependOn('services.httpMonitor');
+      });
     });
 
     describe('router', function() {
