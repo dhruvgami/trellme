@@ -69,6 +69,14 @@ module.exports = class Users extends dbconnection
                     else
                         fn(null, "update success")
 
+    saveUserSettings: (userId, settings, fn) ->
+      dbconnection.get_client (err, client) ->
+        client.collection 'users', (err, collection) ->
+          if err
+            fn(err, null)
+          else
+            collection.findAndModify { _id : new ObjectID(userId) }, null, { $set : { settings : settings } }, { new : true }, fn
+
     #
     # Update user document - store access token
     # user_id: user ID in string

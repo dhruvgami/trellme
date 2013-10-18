@@ -87,6 +87,26 @@
       });
     };
 
+    Users.prototype.saveUserSettings = function(userId, settings, fn) {
+      return dbconnection.get_client(function(err, client) {
+        return client.collection('users', function(err, collection) {
+          if (err) {
+            return fn(err, null);
+          } else {
+            return collection.findAndModify({
+              _id: new ObjectID(userId)
+            }, null, {
+              $set: {
+                settings: settings
+              }
+            }, {
+              "new": true
+            }, fn);
+          }
+        });
+      });
+    };
+
     Users.prototype.save_access_token = function(user_id, values, fn) {
       var _this = this;
       return dbconnection.get_client(function(err, p_client) {

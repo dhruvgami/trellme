@@ -147,6 +147,19 @@ app.get('/me', authRequired, (req, res) ->
   res.json req.user
 )
 
+# - Retrieve user settings - #
+app.get '/settings', authRequired, (req, res) ->
+  res.json req.user.settings
+
+app.post '/settings', authRequired, (req, res) ->
+  db_users.saveUserSettings req.user.id, req.body, (err, user) ->
+    if err
+      res.status 500
+      res.send err
+    else
+      res.status 201
+      res.json user.settings
+
 #
 # DELETE /app/tokens == Logout
 # Logout

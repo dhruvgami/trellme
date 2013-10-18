@@ -173,6 +173,22 @@
     return res.json(req.user);
   });
 
+  app.get('/settings', authRequired, function(req, res) {
+    return res.json(req.user.settings);
+  });
+
+  app.post('/settings', authRequired, function(req, res) {
+    return db_users.saveUserSettings(req.user.id, req.body, function(err, user) {
+      if (err) {
+        res.status(500);
+        return res.send(err);
+      } else {
+        res.status(201);
+        return res.json(user.settings);
+      }
+    });
+  });
+
   app["delete"]("/app/tokens/(([A-Za-z0-9_]+))", function(req, res) {
     var tk,
       _this = this;
