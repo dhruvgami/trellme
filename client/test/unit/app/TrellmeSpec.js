@@ -29,6 +29,10 @@
         expect(app).toDependOn('reports');
       });
 
+      it('should depend on userSettings', function() {
+        expect(app).toDependOn('userSettings');
+      });
+
       it('should depend on services.session', function() {
         expect(app).toDependOn('services.session');
       });

@@ -6,6 +6,7 @@
     'signup',
     'signin',
     'reports',
+    'userSettings',
     'services.session',
     'services.httpMonitor',
     'directives.spinner'
