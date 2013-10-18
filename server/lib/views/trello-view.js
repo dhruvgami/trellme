@@ -217,26 +217,26 @@
       var cards,
         _this = this;
       cards = [];
-      _.each(cardids, function(card_id) {
-        var aboard, acard, alist, context, due, duedate, members;
-        acard = _this.lookup_card_by_id(alldata, card_id);
+      _.each(cardids, function(cardId) {
+        var aboard, acard, alist, card, due, duedate, members;
+        acard = _this.lookup_card_by_id(alldata, cardId);
         aboard = _this.lookup_board_by_id(alldata, acard[0].board_id);
         alist = _this.lookup_list_by_id(alldata, acard[0].board_id, acard[0].list_id);
         members = _this.card_member(alldata, acard[1]);
         due = Date.create(acard[1].due).addHours(tzdiff);
         duedate = due.format("{Mon} {d}, {yyyy} at {h}:{mm} {TT}");
-        context = {
-          board_name: aboard.boards.name,
+        card = {
+          name: acard[1].name,
+          url: acard[1].url,
+          board: aboard.boards.name,
           board_url: aboard.boards.url,
           org_name: aboard.org_name,
-          list_name: alist[1].name,
+          list: alist[1].name,
           list_url: "",
-          card_name: acard[1].name,
-          card_url: acard[1].url,
           due: duedate,
           assigned_to: members
         };
-        return htmls.push(TrelloView.templates.duecard.template(context));
+        return cards.push(card);
       });
       return cards;
     };

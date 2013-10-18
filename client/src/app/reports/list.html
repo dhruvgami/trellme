@@ -1,6 +1,55 @@
 <h3>Reports</h3>
 <hr />
 
+<h3>Due Today</h3>
+<div ng-hide="reports.due.today.length > 0">
+  No cards due today.
+</div>
+<div class="due-cards due-today" ng-show="reports.due.today.length > 0">
+  <p ng-repeat="card in reports.due.today">
+  <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
+  <span class="list">
+    List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
+  </span>
+  <span>Due: {{card.due}}</span>
+  <span>Assigned To: {{card.assigned_to}}</span>
+  </p>
+</div>
+<hr />
+
+<h3>Due Soon</h3>
+<div ng-hide="reports.due.soon.length > 0">
+  No cards due soon.
+</div>
+<div class="due-cards due-soon" ng-show="reports.due.soon.length > 0">
+  <p ng-repeat="card in reports.due.soon">
+  <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
+  <span class="list">
+    List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
+  </span>
+  <span>Due: {{card.due}}</span>
+  <span>Assigned To: {{card.assigned_to}}</span>
+  </p>
+</div>
+<hr />
+
+
+<h3>Past Due</h3>
+<div ng-hide="reports.due.past.length > 0">
+  No cards past due.
+</div>
+<div class="due-cards due-past" ng-show="reports.due.past.length > 0">
+  <p ng-repeat="card in reports.due.past">
+  <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
+  <span class="list">
+    List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
+  </span>
+  <span>Due: {{card.due}}</span>
+  <span>Assigned To: {{card.assigned_to}}</span>
+  </p>
+</div>
+<hr />
+
 <h3>Recent Activities</h3>
 <div ng-repeat="board in reports.boards">
   <h4>Board: {{board.organization}} / {{board.name}}</h4>

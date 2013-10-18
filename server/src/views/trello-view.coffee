@@ -185,8 +185,8 @@ module.exports = class TrelloView
 
     listCardsDueform: (alldata, cardids, tzdiff, fn) ->
       cards = []
-      _.each cardids, (card_id) =>
-        acard = @lookup_card_by_id alldata, card_id
+      _.each cardids, (cardId) =>
+        acard = @lookup_card_by_id alldata, cardId
         # [cards, card]
         aboard = @lookup_board_by_id alldata, acard[0].board_id
         # board
@@ -196,20 +196,20 @@ module.exports = class TrelloView
         # Assigned To members
         members = @card_member(alldata, acard[1])
         # Due date format
-        due = Date.create(acard[1].due).addHours(tzdiff)  # Change to localtime
+        due     = Date.create(acard[1].due).addHours(tzdiff)  # Change to localtime
         duedate = due.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
-        context = {
-            board_name:  aboard.boards.name
+        card    = {
+            name:        acard[1].name
+            url:         acard[1].url
+            board:       aboard.boards.name
             board_url:   aboard.boards.url
             org_name:    aboard.org_name
-            list_name:   alist[1].name
-            list_url: ""
-            card_name:   acard[1].name
-            card_url:    acard[1].url
+            list:        alist[1].name
+            list_url:    ""
             due:         duedate
             assigned_to: members
         }
-        htmls.push TrelloView.templates.duecard.template(context)
+        cards.push card
       cards
 
     actionSummary: (action) ->

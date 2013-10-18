@@ -28,3 +28,7 @@ h1 {
   width: 124px;
   height: 124px;
 }
+
+.due-cards span {
+  display: block;
+}
