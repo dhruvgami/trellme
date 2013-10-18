@@ -131,7 +131,7 @@ app.post('/login', passport.authenticate('api'), (req, res) ->
 )
 
 # - Log the user out a.k.a. destroy session - #
-app.delete '/logout', authRequired, (req, res) ->
+app.delete '/logout', (req, res) ->
   req.logout()
   res.status 204
   res.send ''
@@ -378,7 +378,7 @@ app.delete '/app/auths/delete', (req, res)->
 # Collect Trello summary
 # url param = token
 #
-app.get "/app/trello/collect", (req, res) ->
+app.get "/app/trello/collect", authRequired, (req, res) ->
   (new TrelloApi()).collect_data_sync req.user, (err, result) =>
     if err
       res.status err

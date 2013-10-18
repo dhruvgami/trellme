@@ -163,7 +163,7 @@
     });
   });
 
-  app["delete"]('/logout', authRequired, function(req, res) {
+  app["delete"]('/logout', function(req, res) {
     req.logout();
     res.status(204);
     return res.send('');
@@ -387,7 +387,7 @@
   */
 
 
-  app.get("/app/trello/collect", function(req, res) {
+  app.get("/app/trello/collect", authRequired, function(req, res) {
     var _this = this;
     return (new TrelloApi()).collect_data_sync(req.user, function(err, result) {
       if (err) {
