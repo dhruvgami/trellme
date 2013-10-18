@@ -19,7 +19,6 @@
       });
 
       apiEndpoint = Config.apiEndpoint;
-      spyOn($window, 'open').andCallThrough();
       $httpBackend.
         when('POST', [apiEndpoint, 'app', 'users'].join('/')).
         respond(200);
@@ -32,6 +31,7 @@
 
     describe('.signup', function() {
       it('should call $window to create a popup', function() {
+        spyOn($window, 'open').andCallThrough();
         $scope.signup();
         expect($window.open).toHaveBeenCalledWith('', 'OAuth Popup', 'height=800,width=800');
       });
@@ -57,18 +57,37 @@
       });
 
       describe('given the server responds with success', function() {
-        beforeEach(function() {
+        var $location;
+        beforeEach(inject(function($injector) {
+          $location = $injector.get('$location');
           $scope.user = {
             email            : 'john@doe.com',
             password         : 'secret',
             trellme_username : 'johnny'
           };
+
           var expectedUrl = [
             apiEndpoint,
             'app',
             'users',
           ].join('/');
-          $httpBackend.expectPOST(expectedUrl).respond(200);
+
+          $httpBackend.expectPOST(expectedUrl).respond(200, { debug : true });
+          spyOn($location, 'path');
+          spyOn($window, 'open').andReturn({
+            closed   : true,
+            location : { replace : function() {} }
+          });
+        }));
+
+        // Can't get to test this :/
+        xit('should redirect user to sign in path', function() {
+          runs(function() {
+            $scope.signup(true);
+          });
+          waitsFor(function() {
+            expect($location.path).toHaveBeenCalledWith('/signin');
+          }, 'Location should be called', 100);
         });
 
         xit('should update the popup location to the OAuth authorization page', function() {
