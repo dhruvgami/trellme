@@ -391,7 +391,6 @@ app.get "/app/trello/collect", authRequired, (req, res) ->
 # Get the view (html) of the Trello summary
 # url param is token
 #
-# TODO: Return JSON instead of HTML. Thanks.
 app.get "/app/trello/view", authRequired, (req, res) ->
   new TrelloView().getSummary req.user, (err, result) ->
     if err
