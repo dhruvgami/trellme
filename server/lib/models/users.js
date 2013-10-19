@@ -88,6 +88,11 @@
     };
 
     Users.prototype.saveUserSettings = function(userId, settings, fn) {
+      var userSettings;
+      userSettings = {
+        daily_email: settings.daily_email || true,
+        manual_sync: settings.manual_sync || false
+      };
       return dbconnection.get_client(function(err, client) {
         return client.collection('users', function(err, collection) {
           if (err) {
@@ -97,7 +102,7 @@
               _id: new ObjectID(userId)
             }, null, {
               $set: {
-                settings: settings
+                settings: userSettings
               }
             }, {
               "new": true
@@ -173,27 +178,28 @@
       should.exist(params.password);
       should.exist(params.trello_username);
       if (!params.email.match(/^[a-zA-Z0-9\\.!#$%&'*+\-/=?\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)) {
-        fn(500, "Invalid email address");
-        return;
+        return fn(500, "Invalid email address");
       }
       if (!params.trello_username.match(/^[a-zA-Z\\.\-0-9_]+$/)) {
-        fn(500, "Invalid Trello username");
-        return;
+        return fn(500, "Invalid Trello username");
       }
       return dbconnection.get_client(function(err, p_client) {
         return p_client.collection('users', function(err, col) {
-          var pwd, values;
+          var values;
           if (err) {
             fn(500, "Failed to insert a user");
             return;
           }
-          pwd = _this.genpass.createHash(params.password);
           values = {
             email: params.email,
-            password: pwd,
+            password: _this.genpass.createHash(params.password),
             trello_username: params.trello_username,
             tzdiff: params.tzdiff,
-            created: new Date()
+            created: new Date(),
+            settings: {
+              daily_email: true,
+              manual_sync: false
+            }
           };
           return col.insert(values, function(err, docs) {
             return fn(null, "Add user suceess");

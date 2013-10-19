@@ -183,8 +183,10 @@
         res.status(500);
         return res.send(err);
       } else {
+        console.log(user);
+        console.log("***********");
         res.status(201);
-        return res.json(user.settings);
+        return res.send('');
       }
     });
   });

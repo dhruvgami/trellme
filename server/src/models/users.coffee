@@ -70,12 +70,15 @@ module.exports = class Users extends dbconnection
                         fn(null, "update success")
 
     saveUserSettings: (userId, settings, fn) ->
+      userSettings =
+        daily_email : settings.daily_email || true
+        manual_sync : settings.manual_sync || false
       dbconnection.get_client (err, client) ->
         client.collection 'users', (err, collection) ->
           if err
             fn(err, null)
           else
-            collection.findAndModify { _id : new ObjectID(userId) }, null, { $set : { settings : settings } }, { new : true }, fn
+            collection.findAndModify { _id : new ObjectID(userId) }, null, { $set : { settings : userSettings } }, { new : true }, fn
 
     #
     # Update user document - store access token
@@ -98,13 +101,12 @@ module.exports = class Users extends dbconnection
     # user_id: user ID in string
     #
     get: (user_id, fn) ->
-        dbconnection.get_client (err, p_client) =>
-            p_client.collection 'users', (err, col) =>
-                if err
-                    fn(err, null)
-                    return
-                col.findOne {_id: new ObjectID user_id}, (err, user) =>
-                    fn(null, user)
+      dbconnection.get_client (err, p_client) =>
+        p_client.collection 'users', (err, col) =>
+          if err
+            return fn(err, null)
+          col.findOne {_id: new ObjectID user_id}, (err, user) =>
+            fn(null, user)
 
     #
     # Get user documemt by _id
@@ -127,35 +129,35 @@ module.exports = class Users extends dbconnection
     # params: email, password, trello_username, tzdiff
     #
     add: (params, fn) ->
-        # These must exist
-        should.exist(params.email)
-        should.exist(params.password)
-        should.exist(params.trello_username)
-        # Check email address
-        if not params.email.match(/^[a-zA-Z0-9\\.!#$%&'*+\-/=?\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
-            fn(500, "Invalid email address")
+      # These must exist
+      should.exist(params.email)
+      should.exist(params.password)
+      should.exist(params.trello_username)
+      # Check email address
+      if not params.email.match(/^[a-zA-Z0-9\\.!#$%&'*+\-/=?\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
+        return fn(500, "Invalid email address")
+      # Check trello username
+      if not params.trello_username.match(/^[a-zA-Z\\.\-0-9_]+$/)
+        return fn(500, "Invalid Trello username")
+
+      # Values are good
+      dbconnection.get_client (err, p_client) =>
+        p_client.collection 'users', (err, col) =>
+          if err
+            fn(500, "Failed to insert a user")
             return
-        # Check trello username
-        if not params.trello_username.match(/^[a-zA-Z\\.\-0-9_]+$/)
-            fn(500, "Invalid Trello username")
-            return
-        # Values are good
-        dbconnection.get_client (err, p_client) =>
-            p_client.collection 'users', (err, col) =>
-                if err
-                    fn(500, "Failed to insert a user")
-                    return
-                # Hash password
-                pwd = @genpass.createHash(params.password)
-                values = {
-                    email: params.email
-                    password: pwd
-                    trello_username: params.trello_username
-                    tzdiff: params.tzdiff
-                    created: new Date()
-                }
-                col.insert values, (err, docs)=>
-                    fn(null, "Add user suceess")
+          # Hash password
+          values =
+            email           : params.email
+            password        : @genpass.createHash(params.password)
+            trello_username : params.trello_username
+            tzdiff          : params.tzdiff
+            created         : new Date()
+            settings        :
+              daily_email: true
+              manual_sync: false
+          col.insert values, (err, docs) =>
+            fn(null, "Add user suceess")
 
     #
     # Remove a user

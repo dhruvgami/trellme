@@ -158,7 +158,7 @@ app.post '/settings', authRequired, (req, res) ->
       res.send err
     else
       res.status 201
-      res.json user.settings
+      res.send ''
 
 #
 # DELETE /app/tokens == Logout
