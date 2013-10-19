@@ -2,10 +2,10 @@
   'use strict';
 
   angular.module('trellme').
-    controller('AppCtrl', ['Session', '$scope', '$location', '$window', function(Session, $scope, $location, $window) {
-      $scope.session = Session;
+    controller('AppCtrl', ['UserSession', '$scope', '$location', '$window', function(UserSession, $scope, $location, $window) {
+      $scope.session = UserSession;
       $scope.signout = function() {
-        Session.
+        UserSession.
           logout().
           then(function() {
             $location.path('/signin');

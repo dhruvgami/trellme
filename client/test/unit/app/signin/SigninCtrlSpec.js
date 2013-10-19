@@ -2,10 +2,10 @@
   'use strict';
 
   describe('SinginCtrl', function() {
-    var Session, $httpBackend, $window, $location, $scope, apiEndpoint;
+    var UserSession, $httpBackend, $window, $location, $scope, apiEndpoint;
     beforeEach(module('signin'));
     beforeEach(inject(function($injector) {
-      Session         = $injector.get('Session');
+      UserSession     = $injector.get('UserSession');
       $httpBackend    = $injector.get('$httpBackend');
       $scope          = $injector.get('$rootScope').$new();
       $window         = $injector.get('$window');
@@ -16,13 +16,13 @@
       apiEndpoint = Config.apiEndpoint;
 
       $controller('SigninCtrl', {
-        'Config'  : Config,
-        'Session' : Session,
-        '$scope'  : $scope,
-        '$window' : $window
+        'Config'      : Config,
+        'UserSession' : UserSession,
+        '$scope'      : $scope,
+        '$window'     : $window
       });
 
-      $httpBackend.when('POST', Session.loginUrl()).respond(200);
+      $httpBackend.when('POST', UserSession.loginUrl()).respond(200);
     }));
 
     afterEach(function() {
@@ -35,18 +35,18 @@
         expect($scope.signin).toBeDefined();
       });
 
-      it('should call Session.login with email and password', function() {
+      it('should call UserSession.login with email and password', function() {
         $scope.email    = 'john@doe.com';
         $scope.password = 'foobar';
-        spyOn(Session, 'login').andCallThrough();
+        spyOn(UserSession, 'login').andCallThrough();
         $scope.signin();
-        expect(Session.login).toHaveBeenCalledWith('john@doe.com', 'foobar');
+        expect(UserSession.login).toHaveBeenCalledWith('john@doe.com', 'foobar');
       });
 
-      describe('given the Session login service resolves', function() {
+      describe('given the UserSession login service resolves', function() {
         beforeEach(function() {
           spyOn($location, 'path');
-          $httpBackend.expectPOST(Session.loginUrl()).respond(200, { token : 'abc123' });
+          $httpBackend.expectPOST(UserSession.loginUrl()).respond(200, { token : 'abc123' });
           $scope.email    = 'john@doe.com';
           $scope.password = 'secret';
           $scope.signin();
@@ -62,11 +62,11 @@
         });
       });
 
-      describe('given the Session login serice rejects', function() {
+      describe('given the UserSession login serice rejects', function() {
         it('should alert the user about the error', function() {
           spyOn($window, 'alert');
           $httpBackend.
-            expectPOST(Session.loginUrl()).
+            expectPOST(UserSession.loginUrl()).
             respond(403, 'some error message');
           $scope.email    = 'john@doe.com';
           $scope.password = 'foobar';

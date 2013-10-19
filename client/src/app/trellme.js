@@ -7,14 +7,14 @@
     'signin',
     'reports',
     'userSettings',
-    'services.session',
+    'services.userSession',
     'services.httpMonitor',
     'directives.spinner'
     ]).
     config(['$routeProvider', function($router) {
       $router.otherwise({ redirectTo : '/signin' });
     }]).
-    run(['Session', function(Session) {
-      Session.bootstrap();
+    run(['UserSession', function(UserSession) {
+      UserSession.bootstrap();
     }]);
 }());

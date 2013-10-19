@@ -1,40 +1,40 @@
 (function() {
   'use strict';
 
-  angular.module('services.session', ['services.config']).
-    service('Session', ['Config', '$http', '$q', function(Config, $http, $q) {
-      var Session = {
+  angular.module('services.userSession', ['services.config']).
+    service('UserSession', ['Config', '$http', '$q', function(Config, $http, $q) {
+      var UserSession = {
         loggedIn : false
       };
 
-      Session.bootstrapUrl = function() {
+      UserSession.bootstrapUrl = function() {
         return [Config.apiEndpoint, 'me'].join('/');
       };
 
-      Session.loginUrl = function() {
+      UserSession.loginUrl = function() {
         return [Config.apiEndpoint, 'login'].join('/');
       };
 
-      Session.logoutUrl = function() {
+      UserSession.logoutUrl = function() {
         return [Config.apiEndpoint, 'logout'].join('/');
       };
 
-      Session.bootstrap = function() {
+      UserSession.bootstrap = function() {
         var deferred = $q.defer();
         $http.
-          get(Session.bootstrapUrl()).
+          get(UserSession.bootstrapUrl()).
           success(function(data) {
-            Session.loggedIn = true;
+            UserSession.loggedIn = true;
             deferred.resolve(data);
           }).
           error(function(data) {
-            Session.loggedIn = false;
+            UserSession.loggedIn = false;
             deferred.reject(new Error(['Session bootstrap failed:', data].join(' ')));
           });
         return deferred.promise;
       };
 
-      Session.login = function(email, password) {
+      UserSession.login = function(email, password) {
         if (!email) {
           throw new Error('missing email argument');
         }
@@ -45,9 +45,9 @@
 
         var deferred = $q.defer();
         $http.
-          post(Session.loginUrl(), { email : email, password : password }).
+          post(UserSession.loginUrl(), { email : email, password : password }).
           success(function(data) {
-            Session.loggedIn = true;
+            UserSession.loggedIn = true;
             deferred.resolve(data);
           }).
           error(function(data) {
@@ -57,13 +57,13 @@
         return deferred.promise;
       }; /* end .login */
 
-      Session.logout = function() {
-        if (Session.loggedIn) {
+      UserSession.logout = function() {
+        if (UserSession.loggedIn) {
           var deferred = $q.defer();
           $http.
-            delete(Session.logoutUrl()).
+            delete(UserSession.logoutUrl()).
             success(function(data) {
-              Session.loggedIn = false;
+              UserSession.loggedIn = false;
               deferred.resolve(data);
             }).
             error(function(data) {
@@ -73,6 +73,6 @@
         }
       };
 
-      return Session;
+      return UserSession;
     }]);
 }());

@@ -17,8 +17,8 @@
         expect(_.contains(deps, 'services.config')).toBe(true);
       });
 
-      it('should depend on services.session', function() {
-        expect(_.contains(deps, 'services.session')).toBe(true);
+      it('should depend on services.userSession', function() {
+        expect(_.contains(deps, 'services.userSession')).toBe(true);
       });
     });
 

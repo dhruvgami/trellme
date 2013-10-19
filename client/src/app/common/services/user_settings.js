@@ -2,8 +2,8 @@
   'use strict';
 
   angular.
-    module('services.userSettings', ['services.session', 'services.config']).
-    factory('UserSettings', ['$q', '$http', 'Session', 'Config', function($q, $http, Session, Config) {
+    module('services.userSettings', ['services.userSession', 'services.config']).
+    factory('UserSettings', ['$q', '$http', 'UserSession', 'Config', function($q, $http, UserSession, Config) {
       var UserSettings = {};
 
       UserSettings.settingsUrl = function() {
@@ -12,7 +12,7 @@
 
       UserSettings.load = function() {
         var deferred = $q.defer();
-        if (Session.loggedIn) {
+        if (UserSession.loggedIn) {
           $http.
             get(UserSettings.settingsUrl()).
             success(function(data) {
@@ -29,7 +29,7 @@
 
       UserSettings.save = function() {
         var deferred = $q.defer();
-        if (Session.loggedIn) {
+        if (UserSession.loggedIn) {
           $http.
             post(UserSettings.settingsUrl());
         } else {

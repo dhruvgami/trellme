@@ -5,15 +5,15 @@
     var $q, $scope, UserSettings, $controller, $httpBackend, $rootScope;
     beforeEach(module('userSettings'));
     beforeEach(inject(function($injector) {
-      var Session  = $injector.get('Session');
-      $q           = $injector.get('$q');
-      $rootScope   = $injector.get('$rootScope');
-      UserSettings = $injector.get('UserSettings');
-      $controller  = $injector.get('$controller');
-      $httpBackend = $injector.get('$httpBackend');
-      $scope       = $rootScope.$new();
+      var UserSession = $injector.get('UserSession');
+      $q              = $injector.get('$q');
+      $rootScope      = $injector.get('$rootScope');
+      UserSettings    = $injector.get('UserSettings');
+      $controller     = $injector.get('$controller');
+      $httpBackend    = $injector.get('$httpBackend');
+      $scope          = $rootScope.$new();
 
-      Session.loggedIn = true;
+      UserSession.loggedIn = true;
       spyOn(UserSettings, 'load').andCallThrough();
       $httpBackend.when('GET', UserSettings.settingsUrl()).respond(200);
       $controller('SettingsCtrl', {

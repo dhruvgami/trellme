@@ -2,7 +2,7 @@
   'use strict';
 
   describe('Settings', function() {
-    var app, $httpBackend, $rootScope, UserSettings, Session, Config;
+    var app, $httpBackend, $rootScope, UserSettings, UserSession, Config;
     beforeEach(module('services.userSettings'));
     beforeEach(inject(function($injector) {
       SpecHelper.setup(this);
@@ -10,7 +10,7 @@
       $httpBackend = $injector.get('$httpBackend');
       $rootScope   = $injector.get('$rootScope');
       UserSettings = $injector.get('UserSettings');
-      Session      = $injector.get('Session');
+      UserSession  = $injector.get('UserSession');
       Config       = $injector.get('Config');
     }));
 
@@ -20,8 +20,8 @@
     });
 
     describe('dependencies', function() {
-      it('should depend on services.session', function() {
-        expect(app).toDependOn('services.session');
+      it('should depend on services.userSession', function() {
+        expect(app).toDependOn('services.userSession');
       });
 
       it('should depend on services.config', function() {
@@ -45,9 +45,9 @@
         expect(result).toBeAPromise();
       });
 
-      describe('given the Session.loggedIn is false', function() {
+      describe('given the UserSession.loggedIn is false', function() {
         beforeEach(function() {
-          Session.loggedIn = false;
+          UserSession.loggedIn = false;
         });
 
         it('should not hit the server', function() {
@@ -69,9 +69,9 @@
         });
       });
 
-      describe('given the Session.loggedIn is true', function() {
+      describe('given the UserSession.loggedIn is true', function() {
         beforeEach(function() {
-          Session.loggedIn = true;
+          UserSession.loggedIn = true;
         });
 
         it('should GET settings from the server', function() {
@@ -100,9 +100,9 @@
         expect(UserSettings.save()).toBeAPromise();
       });
 
-      describe('given the Session.loggedIn is false', function() {
+      describe('given the UserSession.loggedIn is false', function() {
         beforeEach(function() {
-          Session.loggedIn = false;
+          UserSession.loggedIn = false;
         });
 
         it('should not hit the server', function() {
@@ -125,9 +125,9 @@
         });
       });
 
-      describe('given the Session.loggedIn is true', function() {
+      describe('given the UserSession.loggedIn is true', function() {
         beforeEach(function() {
-          Session.loggedIn = true;
+          UserSession.loggedIn = true;
         });
 
         it('should POST to the server', function() {

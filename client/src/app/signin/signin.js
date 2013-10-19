@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  angular.module('signin', ['ngRoute', 'services.config', 'services.session']).
+  angular.module('signin', ['ngRoute', 'services.config', 'services.userSession']).
     config(['$routeProvider', function($router) {
       $router.when('/signin', {
         controller  : 'SigninCtrl',

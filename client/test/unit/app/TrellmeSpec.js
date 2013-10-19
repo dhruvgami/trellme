@@ -33,8 +33,8 @@
         expect(app).toDependOn('userSettings');
       });
 
-      it('should depend on services.session', function() {
-        expect(app).toDependOn('services.session');
+      it('should depend on services.userSession', function() {
+        expect(app).toDependOn('services.userSession');
       });
 
       it('should depend on directives.spinner', function() {
@@ -56,7 +56,7 @@
     }); /* end router */
 
     describe('run block', function() {
-      it('should call Session.bootstrap method', function() {
+      it('should call UserSession.bootstrap method', function() {
         var DummySession = { bootstrap : function() {} };
         spyOn(DummySession, 'bootstrap');
 
