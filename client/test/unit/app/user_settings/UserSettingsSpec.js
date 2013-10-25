@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  describe('Settings', function() {
+  describe('User Settings', function() {
     var app, routes, route;
     beforeEach(module('userSettings'));
     beforeEach(function() {

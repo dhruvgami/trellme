@@ -7,7 +7,7 @@ module.exports = function(grunt) {
           'vendor/angular/angular.js',
           'vendor/**/*.js',
           'src/app/reports/reports.js',
-          'src/app/reports/user_settings.js',
+          'src/app/user_settings/user_settings.js',
           'src/app/trellme.js',
           'src/**/*.js'
         ],

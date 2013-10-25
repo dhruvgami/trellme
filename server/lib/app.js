@@ -141,7 +141,8 @@
   });
 
   app.post('/settings', authRequired, function(req, res) {
-    return db_users.saveUserSettings(req.user.id, req.body, function(err, user) {
+    console.log(req.user);
+    return db_users.saveUserSettings(req.user._id, req.body, function(err, user) {
       if (err) {
         res.status(500);
         return res.send(err);
@@ -240,34 +241,30 @@
     });
   });
 
-  /*
-  #
-  # Collect Trello summary
-  # url param = token
-  #
-  app.get "/app/trello/collect", authRequired, (req, res) ->
-    (new TrelloApi()).collect_data_sync req.user, (err, result) =>
-      if err
-        res.status err
-        res.send result
-      else
-        res.status 200
-        res.send result
-  
-  #
-  # Get the view (html) of the Trello summary
-  # url param is token
-  #
-  app.get "/app/trello/view", authRequired, (req, res) ->
-    new TrelloView().getSummary req.user, (err, result) ->
-      if err
-        res.status err
-        res.send result
-      else
-        res.status 200
-        res.send result  # HTML <- Why? this is an API.
-  */
+  app.get("/app/trello/collect", authRequired, function(req, res) {
+    var _this = this;
+    return new TrelloApi().collect_data_sync(req.user, function(err, result) {
+      if (err) {
+        res.status(err);
+        return res.send(result);
+      } else {
+        res.status(200);
+        return res.send(result);
+      }
+    });
+  });
 
+  app.get("/app/trello/view", authRequired, function(req, res) {
+    return new TrelloView().getSummary(req.user, function(err, result) {
+      if (err) {
+        res.status(err);
+        return res.send(result);
+      } else {
+        res.status(200);
+        return res.send(result);
+      }
+    });
+  });
 
   app.get("/app/trello/reports", authRequired, function(req, res) {
     return new TrelloView().getReports(req.user._id, function(err, result) {

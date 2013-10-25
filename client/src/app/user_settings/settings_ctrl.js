@@ -5,6 +5,7 @@
     controller('SettingsCtrl', ['$scope', 'UserSettings', function($scope, UserSettings) {
       $scope.saveFailed    = false;
       $scope.saveSucceeded = false;
+      $scope.settings      = {};
 
       UserSettings.
         load().
@@ -15,7 +16,7 @@
 
       $scope.save = function() {
         UserSettings.
-          save().
+          save($scope.settings).
           then(function(data) {
             $scope.saveSucceeded = true;
             $scope.saveFailed    = false;

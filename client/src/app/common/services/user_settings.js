@@ -27,11 +27,15 @@
         return deferred.promise;
       };
 
-      UserSettings.save = function() {
+      UserSettings.save = function(settings) {
+        if (!_.isPlainObject(settings)) {
+          throw new Error('Invalid "settings" param');
+        }
+
         var deferred = $q.defer();
         if (UserSession.loggedIn) {
           $http.
-            post(UserSettings.settingsUrl());
+            post(UserSettings.settingsUrl(), settings);
         } else {
           deferred.reject(new Error("User not logged in"));
         }

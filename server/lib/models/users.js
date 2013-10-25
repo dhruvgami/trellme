@@ -90,8 +90,8 @@
     Users.prototype.saveUserSettings = function(userId, settings, fn) {
       var userSettings;
       userSettings = {
-        daily_email: settings.daily_email || true,
-        manual_sync: settings.manual_sync || false
+        daily_email: settings.daily_email,
+        manual_sync: settings.manual_sync
       };
       return dbconnection.get_client(function(err, client) {
         return client.collection('users', function(err, collection) {
@@ -99,7 +99,7 @@
             return fn(err, null);
           } else {
             return collection.findAndModify({
-              _id: new ObjectID(userId)
+              _id: userId
             }, null, {
               $set: {
                 settings: userSettings

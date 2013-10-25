@@ -15,7 +15,7 @@
 
       UserSession.loggedIn = true;
       spyOn(UserSettings, 'load').andCallThrough();
-      $httpBackend.when('GET', UserSettings.settingsUrl()).respond(200);
+      $httpBackend.when('GET', UserSettings.settingsUrl()).respond(200, {});
       $controller('SettingsCtrl', {
         '$scope'       : $scope,
         'UserSettings' : UserSettings
@@ -33,14 +33,19 @@
       expect(_.isFunction($scope.save)).toBe(true);
     });
 
-    it('shuold expose saveSucceeded variable as false on the scope', function() {
+    it('should expose saveSucceeded variable as false on the scope', function() {
       expect($scope.saveSucceeded).toBeDefined();
       expect($scope.saveSucceeded).toBe(false);
     });
 
-    it('shuold expose saveFailed variable as false on the scope', function() {
+    it('should expose saveFailed variable as false on the scope', function() {
       expect($scope.saveFailed).toBeDefined();
       expect($scope.saveFailed).toBe(false);
+    });
+
+    it('should expose an empty settings object on the scope', function() {
+      expect($scope.settings).toBeDefined();
+      expect(_.isPlainObject($scope.settings)).toBe(true);
     });
 
     it('should call UserSettings.load service', function() {
@@ -60,12 +65,17 @@
     });
 
     describe('#save()', function() {
-      it('should call on the UserSettings.save method', function() {
+      it('should call on the UserSettings.save method passing along settings from scope', function() {
+        var settings = {
+          foo : 'foo',
+          bar : 'bar'
+        };
         spyOn(UserSettings, 'save').andCallThrough();
         $httpBackend.expectPOST(UserSettings.settingsUrl()).respond(200);
+        $scope.settings = settings;
         $scope.save();
         $httpBackend.flush();
-        expect(UserSettings.save).toHaveBeenCalled();
+        expect(UserSettings.save).toHaveBeenCalledWith(settings);
       });
 
       describe('given the UserSettings.save service resolves', function() {

@@ -15,18 +15,19 @@
     "url"  : "https://github.com/dhruvgami/trellme.git"
   },
   "dependencies": {
-    "express"        : "3.x",
-    "underscore"     : "~1.4.4",
-    "coffee-script"  : "~1.6.2",
-    "passport"       : "~0.1.16",
-    "passport-local" : "~0.1.6",
-    "oauth"          : "~0.9.10",
-    "mongodb"        : "~1.3.9",
-    "handlebars"     : "~1.0.12",
-    "async"          : "~0.2.9",
-    "finish"         : "~0.4.0",
-    "node-mandrill"  : "~1.0.1",
-    "sugar"          : "~1.3.8"
+    "express"         : "3.x",
+    "underscore"      : "~1.4.4",
+    "coffee-script"   : "~1.6.2",
+    "connect-mongodb" : "~1.1.5",
+    "passport"        : "~0.1.16",
+    "passport-local"  : "~0.1.6",
+    "oauth"           : "~0.9.10",
+    "mongodb"         : "~1.3.9",
+    "handlebars"      : "~1.0.12",
+    "async"           : "~0.2.9",
+    "finish"          : "~0.4.0",
+    "node-mandrill"   : "~1.0.1",
+    "sugar"           : "~1.3.8"
   },
   "devDependencies": {
     "mocha"     : "latest",

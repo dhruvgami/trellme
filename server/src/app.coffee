@@ -118,7 +118,8 @@ app.get '/settings', authRequired, (req, res) ->
 
 # - Save user settings - #
 app.post '/settings', authRequired, (req, res) ->
-  db_users.saveUserSettings req.user.id, req.body, (err, user) ->
+  console.log req.user
+  db_users.saveUserSettings req.user._id, req.body, (err, user) ->
     if err
       res.status 500
       res.send err
@@ -205,13 +206,9 @@ app.get "/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
       res.status 200
       res.send stat
 
-###
-#
 # Collect Trello summary
-# url param = token
-#
 app.get "/app/trello/collect", authRequired, (req, res) ->
-  (new TrelloApi()).collect_data_sync req.user, (err, result) =>
+  new TrelloApi().collect_data_sync req.user, (err, result) =>
     if err
       res.status err
       res.send result
@@ -232,7 +229,6 @@ app.get "/app/trello/view", authRequired, (req, res) ->
       res.status 200
       res.send result  # HTML <- Why? this is an API.
 
-###
 # Get the reports summary JSON.
 # Authentication required as the reports are scoped to the logged in user.
 app.get "/app/trello/reports", authRequired, (req, res) ->

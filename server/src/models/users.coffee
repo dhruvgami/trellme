@@ -71,14 +71,14 @@ module.exports = class Users extends dbconnection
 
     saveUserSettings: (userId, settings, fn) ->
       userSettings =
-        daily_email : settings.daily_email || true
-        manual_sync : settings.manual_sync || false
+        daily_email : settings.daily_email
+        manual_sync : settings.manual_sync
       dbconnection.get_client (err, client) ->
         client.collection 'users', (err, collection) ->
           if err
             fn(err, null)
           else
-            collection.findAndModify { _id : new ObjectID(userId) }, null, { $set : { settings : userSettings } }, { new : true }, fn
+            collection.findAndModify { _id : userId }, null, { $set : { settings : userSettings } }, { new : true }, fn
 
     #
     # Update user document - store access token

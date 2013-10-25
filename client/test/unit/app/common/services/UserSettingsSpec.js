@@ -96,8 +96,16 @@
     });
 
     describe('#save()', function() {
+      describe('given no params', function() {
+        it('should raise an exception', function() {
+          expect(function() {
+            UserSettings.save();
+          }).toThrow('Invalid "settings" param');
+        });
+      });
+
       it('should return a promise', function() {
-        expect(UserSettings.save()).toBeAPromise();
+        expect(UserSettings.save({})).toBeAPromise();
       });
 
       describe('given the UserSession.loggedIn is false', function() {
@@ -109,7 +117,7 @@
           inject(function($injector) {
             var $http = $injector.get('$http');
             spyOn($http, 'post');
-            UserSettings.save();
+            UserSettings.save({});
             $rootScope.$apply();
             expect($http.post).not.toHaveBeenCalled();
           });
@@ -117,7 +125,7 @@
 
         it('should reject the promise with error message', function() {
           var errorMessage;
-          UserSettings.save().then(null, function(err) {
+          UserSettings.save({}).then(null, function(err) {
             errorMessage = err.message;
           });
           $rootScope.$apply();
@@ -130,12 +138,13 @@
           UserSession.loggedIn = true;
         });
 
-        it('should POST to the server', function() {
-          $httpBackend.expectPOST(UserSettings.settingsUrl()).respond(200);
-          UserSettings.save();
+        it('should POST settings to the server', function() {
+          var settings = { foo : 'foo', bar : 'bar' };
+          $httpBackend.expectPOST(UserSettings.settingsUrl(), settings).respond(200);
+          UserSettings.save(settings);
           $httpBackend.flush();
         });
       });
-    });
+    }); /* end #save() */
   });
 }());
