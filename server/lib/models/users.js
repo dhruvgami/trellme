@@ -139,8 +139,7 @@
       return dbconnection.get_client(function(err, p_client) {
         return p_client.collection('users', function(err, col) {
           if (err) {
-            fn(err, null);
-            return;
+            return fn(err, null);
           }
           return col.findOne({
             _id: new ObjectID(user_id)
