@@ -19,5 +19,9 @@
     return thenPresent && catchPresent && finallyPresent;
   };
 
+  SpecHelper.matchers.toBeAFunction = function() {
+    return _.isFunction(this.actual);
+  };
+
   window.SpecHelper = SpecHelper;
 }());
