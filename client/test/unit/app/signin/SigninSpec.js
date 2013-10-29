@@ -2,23 +2,28 @@
   'use strict';
 
   describe('Signin', function() {
-    var deps;
+    var app;
     beforeEach(module('signin'));
     beforeEach(function() {
-      deps = angular.module('signin').requires;
+      SpecHelper.setup(this);
+      app = angular.module('signin');
     });
 
     describe('dependencies', function() {
       it('should depend on ngRoute', function() {
-        expect(_.contains(deps, 'ngRoute')).toBe(true);
+        expect(app).toDependOn('ngRoute');
       });
 
       it('should depend on services.config', function() {
-        expect(_.contains(deps, 'services.config')).toBe(true);
+        expect(app).toDependOn('services.config');
       });
 
       it('should depend on services.userSession', function() {
-        expect(_.contains(deps, 'services.userSession')).toBe(true);
+        expect(app).toDependOn('services.userSession');
+      });
+
+      it('should depend on services.userSettings', function() {
+        expect(app).toDependOn('services.userSettings');
       });
     });
 

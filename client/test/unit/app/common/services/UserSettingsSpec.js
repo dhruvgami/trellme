@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  describe('Settings', function() {
+  describe('UserSettings', function() {
     var app, $httpBackend, $rootScope, UserSettings, UserSession, Config;
     beforeEach(module('services.userSettings'));
     beforeEach(inject(function($injector) {
@@ -36,6 +36,58 @@
 
       it('should contain /settings', function() {
         expect(UserSettings.settingsUrl()).toContain('/settings');
+      });
+    });
+
+    describe('#assignSettings', function() {
+      describe('given a non object param', function() {
+        it('should raise an error', function() {
+          ['', 123, false, 1.1, []].forEach(function(arg) {
+            expect(function() {
+              UserSettings.assignSettings(arg);
+            }).toThrow('Invalid type of argument. Object expected');
+          });
+        });
+      });
+
+      describe('given a valid object', function() {
+        it('should not raise an error', function() {
+          expect(function() {
+            UserSettings.assignSettings({});
+          }).not.toThrow();
+        });
+
+        it('should assign settings to itself', function() {
+          var settings = { foo : 'Foo', bar : 'Bar', lolz : 'katz' };
+          UserSettings.assignSettings(settings);
+          for (var key in settings) {
+            expect(UserSettings[key]).toBeDefined();
+            expect(UserSettings[key]).toEqual(settings[key]);
+          }
+        });
+      });
+    });
+
+    describe('#manualSyncEnabled()', function() {
+      describe('when property manual_sync is undefined', function() {
+        it('should return false', function() {
+          UserSettings.manual_sync = undefined;
+          expect(UserSettings.manualSyncEnabled()).toBeFalsy();
+        });
+      });
+
+      describe('when property manual_sync is false', function() {
+        it('should return false', function() {
+          UserSettings.manual_sync = false;
+          expect(UserSettings.manualSyncEnabled()).toBeFalsy();
+        });
+      });
+
+      describe('when property manual_sync is true', function() {
+        it('should return true', function() {
+          UserSettings.manual_sync = true;
+          expect(UserSettings.manualSyncEnabled()).toBeTruthy();
+        });
       });
     });
 
@@ -75,12 +127,21 @@
         });
 
         it('should GET settings from the server', function() {
-          $httpBackend.expectGET(UserSettings.settingsUrl()).respond(200);
+          $httpBackend.expectGET(UserSettings.settingsUrl()).respond(200, {});
           UserSettings.load();
           $httpBackend.flush();
         });
 
         describe('given the server responds with success', function() {
+          it('should call assignSettings method with returned value from server', function() {
+            spyOn(UserSettings, 'assignSettings');
+            var settings = { foo : 'foo', bar : 'bar' };
+            $httpBackend.expectGET(UserSettings.settingsUrl()).respond(200, settings);
+            UserSettings.load();
+            $httpBackend.flush();
+            expect(UserSettings.assignSettings).toHaveBeenCalledWith(settings);
+          });
+
           it('should resolve the promise passing along the retrieved settings', function() {
             var returnedValue,
                 settings = { foo : 'foo', bar : 'bar' };
@@ -140,9 +201,18 @@
 
         it('should POST settings to the server', function() {
           var settings = { foo : 'foo', bar : 'bar' };
-          $httpBackend.expectPOST(UserSettings.settingsUrl(), settings).respond(200);
+          $httpBackend.expectPOST(UserSettings.settingsUrl(), settings).respond(200, settings);
           UserSettings.save(settings);
           $httpBackend.flush();
+        });
+
+        it('should call assignSettings passing along values retrieved from server', function() {
+          spyOn(UserSettings, 'assignSettings');
+          var settings = { foo : 'foo', bar : 'bar' };
+          $httpBackend.expectPOST(UserSettings.settingsUrl(), settings).respond(200, settings);
+          UserSettings.save(settings);
+          $httpBackend.flush();
+          expect(UserSettings.assignSettings).toHaveBeenCalledWith(settings);
         });
       });
     }); /* end #save() */

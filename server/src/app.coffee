@@ -118,14 +118,13 @@ app.get '/settings', authRequired, (req, res) ->
 
 # - Save user settings - #
 app.post '/settings', authRequired, (req, res) ->
-  console.log req.user
   db_users.saveUserSettings req.user._id, req.body, (err, user) ->
     if err
       res.status 500
       res.send err
     else
       res.status 201
-      res.send ''
+      res.send user.settings
 
 #=================================================
 # Users API

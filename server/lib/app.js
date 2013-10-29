@@ -141,14 +141,13 @@
   });
 
   app.post('/settings', authRequired, function(req, res) {
-    console.log(req.user);
     return db_users.saveUserSettings(req.user._id, req.body, function(err, user) {
       if (err) {
         res.status(500);
         return res.send(err);
       } else {
         res.status(201);
-        return res.send('');
+        return res.send(user.settings);
       }
     });
   });

@@ -17,6 +17,10 @@
       it('should depend on services.config', function() {
         expect(app).toDependOn('services.config');
       });
+
+      it('should depend on services.userSettings', function() {
+        expect(app).toDependOn('services.userSettings');
+      });
     });
 
     describe('routes', function() {

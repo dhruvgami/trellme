@@ -2,14 +2,16 @@
   'use strict';
 
   describe('SinginCtrl', function() {
-    var UserSession, $httpBackend, $window, $location, $scope, apiEndpoint;
+    var UserSession, UserSettings, $q, $rootScope, $window, $location, $scope, apiEndpoint;
     beforeEach(module('signin'));
     beforeEach(inject(function($injector) {
       UserSession     = $injector.get('UserSession');
-      $httpBackend    = $injector.get('$httpBackend');
-      $scope          = $injector.get('$rootScope').$new();
+      UserSettings    = $injector.get('UserSettings');
+      $q              = $injector.get('$q');
+      $rootScope      = $injector.get('$rootScope');
       $window         = $injector.get('$window');
       $location       = $injector.get('$location');
+      $scope          = $rootScope.$new();
       var Config      = $injector.get('Config'),
           $controller = $injector.get('$controller');
 
@@ -22,13 +24,7 @@
         '$window'     : $window
       });
 
-      $httpBackend.when('POST', UserSession.loginUrl()).respond(200);
     }));
-
-    afterEach(function() {
-      $httpBackend.verifyNoOutstandingRequest();
-      $httpBackend.verifyNoOutstandingExpectation();
-    });
 
     describe('.signin', function() {
       it('should be defined in the scope', function() {
@@ -43,36 +39,41 @@
         expect(UserSession.login).toHaveBeenCalledWith('john@doe.com', 'foobar');
       });
 
-      describe('given the UserSession login service resolves', function() {
+      describe('given the UserSession.login service resolves', function() {
         beforeEach(function() {
+          var deferred = $q.defer();
+          deferred.resolve('yay!');
           spyOn($location, 'path');
-          $httpBackend.expectPOST(UserSession.loginUrl()).respond(200, { token : 'abc123' });
+          spyOn(UserSession, 'login').andReturn(deferred.promise);
+          spyOn(UserSettings, 'load').andReturn(deferred.promise);
           $scope.email    = 'john@doe.com';
           $scope.password = 'secret';
           $scope.signin();
-          $httpBackend.flush();
+          $rootScope.$apply();
         });
 
-        it('should assign the returned token to the scope', function() {
-          expect($scope.token).toBe('abc123');
+        it('should call the UserSettings.load function', function() {
+          expect(UserSettings.load).toHaveBeenCalled();
         });
 
-        it('should redirect to /reports', function() {
-          expect($location.path).toHaveBeenCalledWith('/reports');
+        describe('given the UserSettings.load service resolves', function() {
+          it('should redirect to /reports', function() {
+            expect($location.path).toHaveBeenCalledWith('/reports');
+          });
         });
       });
 
       describe('given the UserSession login serice rejects', function() {
         it('should alert the user about the error', function() {
+          var deferred = $q.defer();
+          deferred.reject({ message  : 'we have failed, master' });
+          spyOn(UserSession, 'login').andReturn(deferred.promise);
           spyOn($window, 'alert');
-          $httpBackend.
-            expectPOST(UserSession.loginUrl()).
-            respond(403, 'some error message');
           $scope.email    = 'john@doe.com';
           $scope.password = 'foobar';
           $scope.signin();
-          $httpBackend.flush();
-          expect($window.alert).toHaveBeenCalledWith('Sign in failed: some error message');
+          $rootScope.$apply();
+          expect($window.alert).toHaveBeenCalledWith('we have failed, master');
         });
       });
     });
