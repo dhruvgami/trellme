@@ -273,9 +273,19 @@ app.get "/app/update", (req, res) ->
       res.status 200
   console.log('Update complete')
   res.send "OK"
+
+app.get '/sub', (req, res) ->
+  db_users.subscribedUsers (err, users) ->
+    if err
+      res.status 500
+      res.send err
+    else
+      res.json users
+
 #
 # Due notification mail loop
 #
+# TODO: Move this its own model.
 notificationLoop = () ->
   mailservice = new MailService()
   trellos     = new Trellos()
@@ -290,7 +300,7 @@ notificationLoop = () ->
     # * note that this loop will not read from API. Checks only the database
     #   contents.
     #
-    db_users.findAll (err, users) =>
+    db_users.subscribedUsers (err, users) =>
       _.each users, (user) =>
         trellos.get_all_data user._id, (err, all)=>
           result = trelloView.all_card_due_notifications(all, user)

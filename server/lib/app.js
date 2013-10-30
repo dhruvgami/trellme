@@ -316,6 +316,17 @@
     return res.send("OK");
   });
 
+  app.get('/sub', function(req, res) {
+    return db_users.subscribedUsers(function(err, users) {
+      if (err) {
+        res.status(500);
+        return res.send(err);
+      } else {
+        return res.json(users);
+      }
+    });
+  });
+
   notificationLoop = function() {
     var mailservice, nloop, trelloView, trellos,
       _this = this;
@@ -323,7 +334,7 @@
     trellos = new Trellos();
     trelloView = new TrelloView();
     return nloop = setInterval(function() {
-      return db_users.findAll(function(err, users) {
+      return db_users.subscribedUsers(function(err, users) {
         return _.each(users, function(user) {
           return trellos.get_all_data(user._id, function(err, all) {
             var mailtext, result;

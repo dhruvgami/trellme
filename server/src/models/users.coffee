@@ -32,6 +32,14 @@ module.exports = class Users extends dbconnection
           col.findOne { email: email }, (err, user) ->
             fn(err, user)
 
+    # Get all users with "daily email" setting enabled.
+    subscribedUsers: (fn) ->
+      dbconnection.get_client (err, db) ->
+        db.
+          collection('users').
+          find({ 'settings.daily_email' : true }).
+          toArray(fn)
+
     #
     # Checks if password matches the user.password
     #

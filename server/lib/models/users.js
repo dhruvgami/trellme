@@ -39,6 +39,14 @@
       });
     };
 
+    Users.prototype.subscribedUsers = function(fn) {
+      return dbconnection.get_client(function(err, db) {
+        return db.collection('users').find({
+          'settings.daily_email': true
+        }).toArray(fn);
+      });
+    };
+
     Users.prototype.verifyPassword = function(user, password) {
       return this.genpass.validateHash(user.password, password);
     };
