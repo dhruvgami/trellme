@@ -1,42 +1,31 @@
-trellme
+Trellme
 =======
 
 ### TrellMe Reporting Tool for Trello Boards
 
-### Installation
+### Setup instructions for the server application:
+```bash
+$ cd server/
+$ make init  # This is going to install the required NodeJS packages.
+$ make build # This is going to compile the CoffeeScript app into plain Javascript.
+```
+---
+### Setup instructions for the client application:
+```bash
+$ cd client/
+$ make init  # (Required) This is going to install all NodeJS dependencies
+$ make build # (Required) This is going to create the trellme.js dist file.
+```
+---
+### Running and accessing the application:
 
-    > make init
-    > make build
+1. Make sure that you have MongoDB installed and running. 
+   MongoDB reference:  http://docs.mongodb.org/manual/tutorial/getting-started/
+2. Then please run this command from your Trellme's server directory:
 
-### Running the back-end
+```bash
+$ cd server/
+$ node ./lib/app.js
+```
 
-[1] Please start "mongod" before you start this app. 
-
-[2] Please create the trellme database if you haven't done so - one time only.
-
-     $ mongo
-     mongo> use node-mongo-loginskel
-
-  MongoDB reference:  http://docs.mongodb.org/manual/tutorial/getting-started/
-
-[3] Then please run this command from your trellme directory:
-
-    > node ./lib/app.js
-
-### Running the front-end
-
-Currently "Signup" is not put in the front-end html yet. If you haven't done so, please sign up and create a user.
-
-[1] Please start the back-end.
-
-[2] If you haven't signed up: open your browser and access this url http://localhost:3000/app/signup and create a user. Please be sure to enter a correct Trello username.
-
-[3] Open a Finder (Mac) and go to the trellme directory. Double click on the frontend/trellme.html. 
-
-[4] Login and then click "Auth Trello" button to authorize this app to access your Trello account. You can authorize as many times as you like but usually once is enough - access key will be stored in the database.
-
-[5] Click "Get My Boards" to see your board info.
-
-
-End
-
+The application will be running by default under port 300, so access `http://localhost:3000/` from your browser.
