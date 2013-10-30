@@ -274,14 +274,6 @@ app.get "/app/update", (req, res) ->
   console.log('Update complete')
   res.send "OK"
 
-app.get '/sub', (req, res) ->
-  db_users.subscribedUsers (err, users) ->
-    if err
-      res.status 500
-      res.send err
-    else
-      res.json users
-
 #
 # Due notification mail loop
 #
