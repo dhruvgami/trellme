@@ -17,48 +17,42 @@ module.exports = class TrelloOAuth
     oauth_token: null
     oauth_token_secret: null
     user_id: null
-    
+
     #
     # Constructor
-    # 
+    #
     constructor: (user_id) ->
         @user_id = user_id
-        
+
     #
-    # auth.service_id -> service 
-    #
-    createOAuth: (fn)->
-        callback = "http://#{config.api_host}/app/auths/trello_callback?state=#{@user_id}"
-        @oauth = new OAuth(config.trello.requestURL, config.trello.accessURL, config.trello.key, config.trello.secret, "1.0", callback, "HMAC-SHA1")
-        console.log("createOAuth success")
-        fn(null, @oauth)
+    # auth.service_id -> service
+    # TODO: Delegate callback url generation to another method.
+    createOAuth: (fn) ->
+      callbackUrl = "http://#{config.api_host}/app/auths/trello_callback?state=#{@user_id}"
+      @oauth      = new OAuth(config.trello.requestURL, config.trello.accessURL, config.trello.key, config.trello.secret, "1.0", callbackUrl, "HMAC-SHA1")
+      fn(null, @oauth)
 
     #
     # OAuth step 1. Request request-token to get access token.
     # Returns redirect url
-    # 
-    requestToken: (fn)->
-        console.log("requestToken entered")
-        # These params are returned values and NOT passing values
-        @oauth.getOAuthRequestToken (error, token, tokenSecret, results) =>
-            if error
-                console.log("requestTOken getOAuthRequestToken error")
-                fn(error.statusCode, error.data)
-            else
-                console.log("requestTOken getOAuthRequestToken good")            
-                # These will be written in the auths.settings
-                @oauth_token = token
-                @oauth_token_secret = tokenSecret
-                (new Users()).save_token_secret @user_id, tokenSecret, (err)=>
-                    if not err
-                        fn(null, "#{config.trello.authorizeURL}?oauth_token=#{token}&name=#{config.trello.appName}&expires=never")
-                    else
-                        console.log('save_token_secret failed')
-                    
+    #
+    requestToken: (fn) ->
+      # These params are returned values and NOT passing values
+      @oauth.getOAuthRequestToken (error, token, tokenSecret, results) =>
+        if error
+          fn(error.statusCode, error.data)
+        else
+          # These will be written in the auths.settings
+          @oauth_token = token
+          @oauth_token_secret = tokenSecret
+          new Users().save_token_secret @user_id, tokenSecret, (err) =>
+            if not err
+              fn(null, "#{config.trello.authorizeURL}?oauth_token=#{token}&name=#{config.trello.appName}&expires=never")
+
     #
     # Step 2: Callback for the APP auth page.
     # Please note this isn't called on the same object with the one did the requestToken().
-    # 
+    #
     callbackCalled: (oauth, query, fn) ->
         console.log(query)
         users = new Users()

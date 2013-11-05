@@ -156,20 +156,22 @@ app.post "/app/users",  (req, res) ->
 app.get "/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
   db_users.findByEmail req.params[0], (err, user) =>
     if err
-      res.status 401; res.send "No such user"
+      res.status 401
+      res.send "No such user"
     else
       toa = new TrelloOAuth(user._id.toString())
       toa.createOAuth (err, oauth) =>
         if err
-          res.status err; res.send oauth # message
+          res.status err
+          res.send oauth # message
         else
-          toa.requestToken (err, redirect_url) =>
+          toa.requestToken (err, redirectUrl) =>
             if not err
               res.status 302
-              res.redirect redirect_url # encodeURI not needed
+              res.redirect redirectUrl # encodeURI not needed
             else
               # requestToken Error
-              res.status 500; res.json redirect_url  # message
+              res.status 500; res.json redirectUrl  # message
 
 #
 # Trello OAuth callback

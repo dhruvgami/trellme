@@ -179,13 +179,13 @@
             res.status(err);
             return res.send(oauth);
           } else {
-            return toa.requestToken(function(err, redirect_url) {
+            return toa.requestToken(function(err, redirectUrl) {
               if (!err) {
                 res.status(302);
-                return res.redirect(redirect_url);
+                return res.redirect(redirectUrl);
               } else {
                 res.status(500);
-                return res.json(redirect_url);
+                return res.json(redirectUrl);
               }
             });
           }

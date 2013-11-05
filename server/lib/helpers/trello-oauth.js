@@ -28,29 +28,23 @@
     }
 
     TrelloOAuth.prototype.createOAuth = function(fn) {
-      var callback;
-      callback = "http://" + config.api_host + "/app/auths/trello_callback?state=" + this.user_id;
-      this.oauth = new OAuth(config.trello.requestURL, config.trello.accessURL, config.trello.key, config.trello.secret, "1.0", callback, "HMAC-SHA1");
-      console.log("createOAuth success");
+      var callbackUrl;
+      callbackUrl = "http://" + config.api_host + "/app/auths/trello_callback?state=" + this.user_id;
+      this.oauth = new OAuth(config.trello.requestURL, config.trello.accessURL, config.trello.key, config.trello.secret, "1.0", callbackUrl, "HMAC-SHA1");
       return fn(null, this.oauth);
     };
 
     TrelloOAuth.prototype.requestToken = function(fn) {
       var _this = this;
-      console.log("requestToken entered");
       return this.oauth.getOAuthRequestToken(function(error, token, tokenSecret, results) {
         if (error) {
-          console.log("requestTOken getOAuthRequestToken error");
           return fn(error.statusCode, error.data);
         } else {
-          console.log("requestTOken getOAuthRequestToken good");
           _this.oauth_token = token;
           _this.oauth_token_secret = tokenSecret;
-          return (new Users()).save_token_secret(_this.user_id, tokenSecret, function(err) {
+          return new Users().save_token_secret(_this.user_id, tokenSecret, function(err) {
             if (!err) {
               return fn(null, "" + config.trello.authorizeURL + "?oauth_token=" + token + "&name=" + config.trello.appName + "&expires=never");
-            } else {
-              return console.log('save_token_secret failed');
             }
           });
         }
