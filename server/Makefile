@@ -19,6 +19,9 @@ build:
 
 test:
 
+server:
+	make build && node ./lib/app.js
+
 dist: clean init docs build test
 
 publish: dist
