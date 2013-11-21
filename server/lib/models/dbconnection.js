@@ -25,6 +25,19 @@
       }
     };
 
+    dbconnection.collection = function(cb) {
+      var _this = this;
+      if (this.colName === void 0) {
+        throw new Error('colName not defined');
+      }
+      return this.get_client(function(err, client) {
+        if (err) {
+          return cb(err, null);
+        }
+        return client.collection(_this.colName, cb);
+      });
+    };
+
     return dbconnection;
 
   })();
