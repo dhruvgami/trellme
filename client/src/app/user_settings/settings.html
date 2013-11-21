@@ -41,6 +41,19 @@
   </div>
   <!-- End Manual Sync -->
 
+  <legend>Which boards would you like to include in your report?</legend>
+
+  <!-- Boards Settings -->
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox" ng-repeat="board in settings.boards">
+        <input type="checkbox" ng-model="board.enabled">
+        {{board.name}}
+      </label>
+    </div>
+  </div>
+  <!-- End Boards Settings -->
+
   <div class="form-actions">
     <button type="submit" class="btn btn-large btn-primary">Save</button>
   </div>

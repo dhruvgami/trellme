@@ -137,7 +137,15 @@
   });
 
   app.get('/settings', authRequired, function(req, res) {
-    return res.json(req.user.settings);
+    return db_users.getUserSettings(req.user._id, function(err, settings) {
+      if (err) {
+        res.status(500);
+        return res.send(err);
+      } else {
+        res.status(200);
+        return res.json(settings);
+      }
+    });
   });
 
   app.post('/settings', authRequired, function(req, res) {

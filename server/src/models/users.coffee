@@ -1,13 +1,15 @@
 #
 # users.coffee
 #
-#  users collection has only email and password
-#   { "_id" : ObjectId("518b37d647f1af1b31be73f4"), "email" : "test255@gmail.com", "password" : "password" }
+#  users collection has only email, password and settings
+#   { "_id" : ObjectId("518b37d647f1af1b31be73f4"), "email" : "test255@gmail.com", "password" : "password", "settings" : {} }
 #
+_            = require 'underscore'
+should       = require 'should'
 mongodb      = require 'mongodb'
 ObjectID     = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
-should       = require 'should'
+Trellos      = require './trellos'
 GenPassword  = require '../helpers/genpassword'
 
 
@@ -67,26 +69,43 @@ module.exports = class Users extends dbconnection
     # value: token_secret string
     #
     save_token_secret: (user_id, value, fn) ->
-        dbconnection.get_client (err, p_client) =>
-            p_client.collection 'users', (err, col) =>
-                if err
-                    return fn(err, null)
-                col.update { _id: new ObjectID user_id }, { $set: { token_secret: value } }, (err) =>
-                    if err
-                        return fn(err, null)
-                    else
-                        fn(null, "update success")
+      dbconnection.get_client (err, p_client) =>
+        p_client.collection 'users', (err, col) =>
+          if err
+            return fn(err, null)
+          col.update { _id: new ObjectID user_id }, { $set: { token_secret: value } }, (err) =>
+            if err
+              return fn(err, null)
+            else
+              fn(null, "update success")
 
-    saveUserSettings: (userId, settings, fn) ->
-      userSettings =
+    getUserSettings: (userId, cb) ->
+      @get userId, (err, user) ->
+        return cb(err, null) if err
+        new Trellos().getBoards userId, (err, boards) ->
+          return cb(err, null) if err
+          boards = _(boards).map (board) ->
+            _id     : board._id
+            name    : board.boards.name
+            closed  : board.boards.closed
+            enabled : board.enabled
+          settings = _(user.settings).extend(boards : boards)
+          cb null, settings
+
+    saveUserSettings: (userId, settings, cb) ->
+      settings.boards = settings.boards || []
+      userSettings    =
         daily_email : settings.daily_email
         manual_sync : settings.manual_sync
       dbconnection.get_client (err, client) ->
         client.collection 'users', (err, collection) ->
-          if err
-            fn(err, null)
-          else
-            collection.findAndModify { _id : userId }, null, { $set : { settings : userSettings } }, { new : true }, fn
+          return cb(err, null) if err
+          collection.findAndModify { _id : userId }, null, { $set : { settings : userSettings } }, { new : true }, (err, user) ->
+            return cb(err, null) if err
+            _(settings.boards).each (board) ->
+              new Trellos().updateBoard board._id, { enabled : board.enabled }, (err, obj) ->
+                return cb(err, null) if err
+            cb(null, user.settings)
 
     #
     # Update user document - store access token
@@ -106,31 +125,16 @@ module.exports = class Users extends dbconnection
 
     #
     # Get user documemt by _id
-    # user_id: user ID in string
+    # userId: Either String or ObjectID
     #
-    get: (user_id, fn) ->
+    get: (userId, fn) ->
+      userId = new ObjectID(userId) if typeof userId is 'string'
       dbconnection.get_client (err, p_client) =>
         p_client.collection 'users', (err, col) =>
           if err
             return fn(err, null)
-          col.findOne {_id: new ObjectID user_id}, (err, user) =>
+          col.findOne { _id: userId }, (err, user) =>
             fn(null, user)
-
-    #
-    # Get user documemt by _id
-    # user_id: user ID in ObjectDI
-    #
-    get2: (user_id, fn) ->
-        dbconnection.get_client (err, p_client) =>
-            p_client.collection 'users', (err, col) =>
-                if err
-                    fn(err, null)
-                    return
-                col.findOne {_id: user_id}, (err, user) =>
-                    if err
-                        fn(500, null)
-                    else
-                        fn(null, user)
 
     #
     # Add a new user
@@ -154,7 +158,6 @@ module.exports = class Users extends dbconnection
           if err
             fn(500, "Failed to insert a user")
             return
-          # Hash password
           values =
             email           : params.email
             password        : @genpass.createHash(params.password)

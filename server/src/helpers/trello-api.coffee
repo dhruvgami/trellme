@@ -3,7 +3,7 @@
 #
 #  Trello API accessors
 #
-# 
+#
 _     = require 'underscore'
 fs    = require("fs")
 https = require('https')
@@ -38,19 +38,19 @@ module.exports = class TrelloApi
         'member_notifications': { method: 'GET',  path: '/1/members/{username}/notifications?key={key}&token={token}' }
         'member_actions':       { method: 'GET',  path: '/1/members/{username}/actions?key={key}&token={token}' }
     }
-    
+
     #
     # Initialize
-    # 
-    constructor: ()->
-        @
-    
+    #
+    constructor: ->
+      @
+
     #
     # Execute API request
-    # 
+    #
     #  paramObj: params if any like card_id, board_id, list_id, etc
     #  userObj: an user entry from users collection.
-    #  
+    #
     request: (action, userObj, paramObj, fn)->
         if typeof TrelloApi.endpoints[action] is 'undefined'
             fn(500, "No such action")
@@ -62,12 +62,12 @@ module.exports = class TrelloApi
         # Must have done OAuth authentiation
         if _.isUndefined(userObj.trello_username) or _.isUndefined(userObj.access_token)
             fn(500, "Access token not available")
-            
+
         # Common params
         params.username = userObj.trello_username
         params.key      = config.trello.key
         params.token    = userObj.access_token
-        
+
         # Replace the api url variables
         path = TrelloApi.endpoints[action].path.replaceAll(params)
         #console.log(path)
@@ -84,7 +84,7 @@ module.exports = class TrelloApi
                 'Accept': 'application/json, Text/javascript, */*; q=0.01'
                 'Content-Type': 'application/x-www-form-urlencoded'
                 'Content-Length': length
-        # Send request        
+        # Send request
         request = https.request opts, (resp) ->
             resp.setEncoding('utf8')
             data = ''
@@ -104,7 +104,7 @@ module.exports = class TrelloApi
 
     #
     # Parse JSON text
-    # 
+    #
     _parse: (json) ->
         try
             obj = JSON.parse(json)
@@ -114,15 +114,15 @@ module.exports = class TrelloApi
         obj
 
     #
-    # Read organization boards and public boards for the user 
+    # Read organization boards and public boards for the user
     # db: Trellos instance
     # userObj: user document
     # Returns: array of board data
-    # 
+    #
     get_all_boards: (db, userObj, fn)->
         #
         # Get all organization names
-        # 
+        #
         @request 'organizations', userObj, {}, (err, json) =>
             if err
                 fn(500, json)
@@ -133,7 +133,7 @@ module.exports = class TrelloApi
             async.each( orgs, (org, cb) =>
                 #
                 # Get organization boards
-                # 
+                #
                 @request 'org_boards', userObj, {orgname:org.name}, (err, json) =>
                     if err
                         fn(500, json)
@@ -147,7 +147,7 @@ module.exports = class TrelloApi
                             board.id is bd.id
                         if typeof bb is 'undefined'
                             allboards.push board  # Push only one that isn't already there
-                         
+
                         cb1(null)
                     , (err)=>
                         # Save data into db. Pass org name
@@ -160,7 +160,7 @@ module.exports = class TrelloApi
             , (err) =>
                 #
                 # Finally read all public board data
-                # 
+                #
                 @request 'public_boards', userObj, {}, (err, json) =>
                     if err
                         return fn(500, json)
@@ -176,7 +176,7 @@ module.exports = class TrelloApi
                     , (err) =>
                         db.save_boards uid, "public", boards, (err, wtf)=>
                             if err
-                                return fn(500,wtf)                
+                                return fn(500,wtf)
                             #console.log(allboards)
                             fn(null, allboards)
                     )
@@ -196,7 +196,7 @@ module.exports = class TrelloApi
             uid = new ObjectID(userObj._id.toString())
             db.save_boards uid, "public", boards, (err, wtf)=>
                 if err
-                    return fn(500,wtf)                
+                    return fn(500,wtf)
                 fn(null, boards)
 
     #
@@ -205,7 +205,7 @@ module.exports = class TrelloApi
     # userObj: user document
     # board: parent board of lists
     # Returns: array of list
-    # 
+    #
     get_all_lists_of_board: (db,userObj, board, fn)->
         @request 'all_lists_of_board', userObj, {board_id: board.id}, (err, json) =>
             if err
@@ -214,7 +214,7 @@ module.exports = class TrelloApi
             uid = new ObjectID(userObj._id.toString())
             db.save_lists uid, board.id, lists, (err, wtf)=>
                 if err
-                    return fn(500,wtf)            
+                    return fn(500,wtf)
                 fn(null, lists)
 
     #
@@ -233,7 +233,7 @@ module.exports = class TrelloApi
             uid = new ObjectID(userObj._id.toString())
             db.save_cards uid, board_id, list.id, cards, (err, wtf)=>
                 if err
-                    return fn(500, wtf)            
+                    return fn(500, wtf)
                 fn(null, cards)
 
     #
@@ -253,7 +253,7 @@ module.exports = class TrelloApi
             uid = new ObjectID(userObj._id.toString())
             db.save_checklists uid, board_id, list_id, card_id, checklists, (err, wtf)=>
                 if err
-                    return fn(500,wtf)            
+                    return fn(500,wtf)
                 fn(null, checklists)
 
     #
@@ -261,13 +261,13 @@ module.exports = class TrelloApi
     # db: Trellos instance
     # userObj: user document
     # member_id: member ID
-    # 
+    #
     get_member_name: (db, userObj, member_id, fn) ->
         should.exist(member_id)
         @request 'member_name', userObj, {member_id: member_id}, (err, json) =>
             if err
                 return fn(500, json)
-            name = @_parse(json)  # will be like {"_value":"Yoshikazu Noda"} 
+            name = @_parse(json)  # will be like {"_value":"Yoshikazu Noda"}
             uid = new ObjectID(userObj._id.toString())
             db.save_member uid, member_id, name, (err, wtf)=>
                 if err
@@ -279,13 +279,13 @@ module.exports = class TrelloApi
     # db: Trellos instance
     # userObj: user document
     # board_id: board ID
-    # 
+    #
     get_board_actions: (db, userObj, board_id, fn) ->
         should.exist(board_id)
         @request 'board_actions', userObj, {board_id: board_id}, (err, json) =>
             if err
                 return fn(500, json)
-            actions = @_parse(json)  # will be like {"_value":"Yoshikazu Noda"} 
+            actions = @_parse(json)  # will be like {"_value":"Yoshikazu Noda"}
             uid = new ObjectID(userObj._id.toString())
             db.save_actions uid, actions, (err, wtf)=>
                 if err
@@ -301,15 +301,15 @@ module.exports = class TrelloApi
     #
     # userObj: user document
     # fn: callback function to be called after done
-    # 
+    # TODO: Receive userId instead of userObj.
     collect_data_sync: (userObj, fn)->
-        db = new Trellos()
+        db  = new Trellos()
         uid = new ObjectID(userObj._id.toString())
 
         db.clear_all uid, (err, wtf)=>
             if err
                 fn(500, wtf)
-                return                
+                return
             # Get all BOARDS
             @get_all_boards db, userObj, (err, boards)=>
                 if err

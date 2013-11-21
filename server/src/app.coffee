@@ -89,11 +89,10 @@ app.configure "development", ->
 # # # # # #
 
 # - Log the user in - #
-app.post('/login', passport.authenticate('api'), (req, res) ->
+app.post '/login', passport.authenticate('api'), (req, res) ->
   tokens = new Tokens()
   tokens.create req.user, (err, tk) ->
     res.json tk[0]
-)
 
 # - Log the user out a.k.a. destroy session - #
 app.delete '/logout', (req, res) ->
@@ -108,13 +107,18 @@ app.delete '/logout', (req, res) ->
 #       code, along with the current logged in user's information. If there is
 #       no session then this will return 401 and the user will be prompted its
 #       credentials.
-app.get('/me', authRequired, (req, res) ->
+app.get '/me', authRequired, (req, res) ->
   res.json req.user
-)
 
 # - Retrieve user settings - #
 app.get '/settings', authRequired, (req, res) ->
-  res.json req.user.settings
+  db_users.getUserSettings req.user._id, (err, settings) ->
+    if err
+      res.status 500
+      res.send err
+    else
+      res.status 200
+      res.json settings
 
 # - Save user settings - #
 app.post '/settings', authRequired, (req, res) ->
@@ -233,7 +237,6 @@ app.get "/app/trello/view", authRequired, (req, res) ->
 # Get the reports summary JSON.
 # Authentication required as the reports are scoped to the logged in user.
 app.get "/app/trello/reports", authRequired, (req, res) ->
-  # First we need to fetch the results from Trello. Then pull the reports from db.
   new TrelloView().getReports req.user._id, (err, result) ->
     if err
       res.status 500

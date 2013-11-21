@@ -23,6 +23,29 @@
       Trellos.__super__.constructor.call(this);
     }
 
+    Trellos.prototype.updateBoard = function(boardId, attrs, cb) {
+      if (typeof boardId === 'string') {
+        boardId = new ObjectID(boardId);
+      }
+      return dbconnection.get_client(function(err, p_client) {
+        if (err) {
+          return cb(err, null);
+        }
+        return p_client.collection('boards', function(err, collection) {
+          if (err) {
+            return cb(err, null);
+          }
+          return collection.findAndModify({
+            _id: boardId
+          }, null, {
+            $set: attrs
+          }, {
+            "new": true
+          }, cb);
+        });
+      });
+    };
+
     Trellos.prototype.save_member = function(user_id, member_id, name, fn) {
       var _this = this;
       return dbconnection.get_client(function(err, p_client) {
@@ -112,12 +135,15 @@
               'boards.id': board.id
             }, function(err, cursor) {
               return cursor.count(function(err, count) {
+                var data;
                 if (count === 0) {
-                  return col.insert({
+                  data = {
                     user_id: user_id,
                     org_name: org_name,
-                    boards: board
-                  }, function(err) {
+                    boards: board,
+                    enabled: !board.closed
+                  };
+                  return col.insert(data, function(err) {
                     if (err) {
                       return fn(500, "Insert failed");
                     }
@@ -214,7 +240,7 @@
       });
     };
 
-    Trellos.prototype.get_boards = function(user_id, fn) {
+    Trellos.prototype.getBoards = function(userId, fn) {
       var _this = this;
       return dbconnection.get_client(function(err, p_client) {
         return p_client.collection('boards', function(err, col) {
@@ -223,7 +249,30 @@
             return;
           }
           return col.find({
-            user_id: user_id
+            user_id: userId
+          }, function(err, cursor) {
+            if (err) {
+              return fn(500, "Boards not found");
+            }
+            return cursor.toArray(function(err, items) {
+              return fn(err, items);
+            });
+          });
+        });
+      });
+    };
+
+    Trellos.prototype.getEnabledBoards = function(userId, fn) {
+      var _this = this;
+      return dbconnection.get_client(function(err, p_client) {
+        return p_client.collection('boards', function(err, col) {
+          if (err) {
+            fn(err, null);
+            return;
+          }
+          return col.find({
+            user_id: userId,
+            'boards.enabled': true
           }, function(err, cursor) {
             if (err) {
               return fn(500, "Boards not found");
@@ -474,7 +523,7 @@
       all = {};
       return async.parallel({
         boards: function(cb) {
-          return _this.get_boards(user_id, function(err, myboards) {
+          return _this.getBoards(user_id, function(err, myboards) {
             if (err) {
               return cb(500, 'Couldnt read data');
             } else {
