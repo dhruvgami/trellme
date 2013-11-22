@@ -542,6 +542,7 @@
         } else {
           return _(boards).each(function(board) {
             var boardId;
+            console.log("Getting data for board with id " + board.boards.id);
             boardId = board.boards.id;
             return async.parallel({
               actions: function(callback) {

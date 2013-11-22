@@ -1,7 +1,7 @@
 ObjectID = require('mongodb').ObjectID
 db       = require './dbconnection'
 
-module.exports = class Lists extends db
+module.exports = class Cards extends db
   @colName: 'cards'
 
   @findByBoardId: (boardId, cb) ->
