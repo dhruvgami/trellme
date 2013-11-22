@@ -173,8 +173,6 @@
     };
 
     TrelloView.prototype.lookup_board_by_id = function(data, boardId) {
-      console.log("data.boards looks like");
-      console.dir(data.boards);
       return _.find(data.boards, function(board) {
         return board.boards.id === boardId;
       });
@@ -253,9 +251,6 @@
         var aboard, acard, alist, due, duedate, members;
         acard = _this.lookup_card_by_id(alldata, cardId);
         aboard = _this.lookup_board_by_id(alldata, acard[0].board_id);
-        console.log("acard[0].board_id: " + acard[0].board_id);
-        console.log("aboard looks like");
-        console.dir(aboard);
         alist = _this.lookup_list_by_id(alldata, acard[0].board_id, acard[0].list_id);
         members = _this.card_member(alldata, acard[1]);
         due = Date.create(acard[1].due).addHours(tzdiff);
@@ -403,9 +398,8 @@
           logtext += "User = " + action.user_id + "\n";
         }
         if (action.id) {
-          logtext += "Action ID = " + action.id + "\n";
+          return logtext += "Action ID = " + action.id + "\n";
         }
-        return console.log(logtext + err);
       }
     };
 

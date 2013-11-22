@@ -273,17 +273,6 @@
     });
   });
 
-  app.get('/test', function(req, res) {
-    return new TrelloView().getReports('528d34cfc6b1e1eb41000001', function(err, data) {
-      if (err) {
-        res.status(500);
-        return res.send(err);
-      } else {
-        return res.send(data);
-      }
-    });
-  });
-
   app.get("/app/trello/reports", authRequired, function(req, res) {
     return new TrelloView().getReports(req.user._id, function(err, result) {
       if (err) {
