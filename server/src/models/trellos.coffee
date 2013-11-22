@@ -3,13 +3,17 @@
 #
 #
 #
-mongodb   = require 'mongodb'
-ObjectID  = require('mongodb').ObjectID
+mongodb      = require 'mongodb'
+ObjectID     = require('mongodb').ObjectID
+should       = require 'should'
+_            = require 'underscore'
+async        = require 'async'
 dbconnection = require './dbconnection'
-should    = require 'should'
-_         = require 'underscore'
-async     = require 'async'
-
+Actions      = require './actions'
+Boards       = require './boards'
+Cards        = require './cards'
+Lists        = require './lists'
+Members      = require './members'
 
 module.exports = class Trellos extends dbconnection
 
@@ -19,16 +23,6 @@ module.exports = class Trellos extends dbconnection
   constructor: ->
     super()
 
-  # Update a board
-  # boardId: Either String or ObjectID
-  updateBoard: (boardId, attrs, cb) ->
-    boardId = new ObjectID(boardId) if typeof boardId is 'string'
-    dbconnection.get_client (err, p_client) ->
-      return cb(err, null) if err
-      p_client.collection 'boards', (err, collection) ->
-        if err
-          return cb(err, null)
-        collection.findAndModify { _id : boardId }, null, { $set : attrs }, { new : true }, cb
   #
   # Save member data related to a user
   # user_id: user ID in ObjectID type
@@ -185,22 +179,18 @@ module.exports = class Trellos extends dbconnection
 
   # Get all boards
   # userId: user ID in ObjectID type
-  getEnabledBoards: (userId, fn) ->
+  getEnabledBoards: (userId, cb) ->
     dbconnection.get_client (err, p_client) =>
       p_client.collection 'boards', (err, col) =>
-        if err
-          fn(err, null)
-          return
-        col.find { user_id: userId, 'boards.enabled' : true }, (err, cursor) =>
-          if err
-            return fn(500, "Boards not found")
-          cursor.toArray (err, items) =>
-            fn(err, items)
+        return cb(err, null) if err
+        col.find { user_id: userId, enabled : true }, (err, boards) ->
+          return cb(err, null) if err
+          cursor.toArray cb
   #
   # Get all lists for a user
   # user_id: user ID in ObjectID type
   #
-  get_all_lists: (user_id, fn) ->
+  getAllLists: (user_id, fn) ->
     dbconnection.get_client (err, p_client) =>
       p_client.collection 'lists', (err, col) =>
         if err
@@ -352,6 +342,56 @@ module.exports = class Trellos extends dbconnection
             cursor.toArray (err, items) =>
               fn(err, items)  # items is an array
 
+
+  @getAllData1: (userId, cb) ->
+    userId = new ObjectID(userId) if typeof userId is 'string'
+    async.parallel({
+      actions: (callback) ->
+        Actions.findByUserId userId, callback
+      boards: (callback) ->
+        Boards.findEnabledByUserId userId, callback
+      cards: (callback) ->
+        Cards.findByUserId userId, callback
+      lists: (callback) ->
+        Lists.findByUserId userId, callback
+      members: (callback) ->
+        Members.findByUserId userId, callback
+    }, (err, results) ->
+      cb(err, results)
+    )
+
+  @getAllData: (userId, cb) ->
+    # We retrieve only those boards the users want in their reports (enabled boards).
+    # Once we've got the enabled boards with us, we need to scope lists, cards,
+    # actions, members and any other information required in the report
+    # scoped to those enabled boards.
+    Boards.findEnabledByUserId userId, (err, boards) ->
+      return cb(err, null) if err
+      if boards.length is 0
+        cb null,
+          boards  : []
+          lists   : []
+          cards   : []
+          actions : []
+          members : []
+      else
+        _(boards).each (board) ->
+          boardId = board.boards.id
+          async.parallel({
+            actions: (callback) ->
+               Actions.findByBoardId boardId, callback
+            boards: (callback) ->
+              callback(null, boards)
+            cards: (callback) ->
+              Cards.findByBoardId boardId, callback
+            lists: (callback) ->
+              Lists.findByBoardId boardId, callback
+            members: (callback) ->
+              Members.findByUserId userId, callback
+          }, (err, results) ->
+            cb(err, results)
+          )
+
   #
   # Load up all data from DB. This method blocks untill everything is done.
   #
@@ -363,27 +403,6 @@ module.exports = class Trellos extends dbconnection
 
     # Parallel process
     async.parallel({
-      boards: (cb) =>
-        @getBoards user_id, (err, myboards) =>
-          if err
-            cb(500, 'Couldnt read data')
-          else
-            all.boards = myboards
-            cb(null,1)
-      lists: (cb) =>
-        @get_all_lists user_id, (err, mylists) =>
-          if err
-            cb(500, 'Couldnt read data')
-          else
-            all.lists = mylists
-            cb(null,2)
-      cards: (cb) =>
-        @get_all_cards user_id, (err, mycards) =>
-          if err
-            cb(500, 'Couldnt read data')
-          else
-            all.cards = mycards
-            cb(null,3)
       actions: (cb) =>
         @get_all_actions user_id, (err, myactions) =>
           if err
@@ -391,6 +410,27 @@ module.exports = class Trellos extends dbconnection
           else
             all.actions = myactions
             cb(null, 4)
+      boards: (cb) =>
+        @getBoards user_id, (err, myboards) =>
+          if err
+            cb(500, 'Couldnt read data')
+          else
+            all.boards = myboards
+            cb(null,1)
+      cards: (cb) =>
+        @get_all_cards user_id, (err, mycards) =>
+          if err
+            cb(500, 'Couldnt read data')
+          else
+            all.cards = mycards
+            cb(null,3)
+      lists: (cb) =>
+        @getAllLists user_id, (err, mylists) =>
+          if err
+            cb(500, 'Couldnt read data')
+          else
+            all.lists = mylists
+            cb(null,2)
       members: (cb) =>
         @get_all_members user_id, (err, mymembers) =>
           if err

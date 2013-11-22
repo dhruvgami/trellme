@@ -11,3 +11,11 @@ module.exports = class Lists extends db
       col.
         find({ member_id : memberId }).
         toArray(cb)
+
+  @findByUserId: (userId, cb) ->
+    userId = new ObjectID(userId) unless userId instanceof ObjectID
+    @collection (err, col) ->
+      return cb(err, null) if err
+      col.
+        find({ user_id : userId }).
+        toArray(cb)

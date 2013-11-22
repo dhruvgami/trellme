@@ -1,35 +1,29 @@
-#
-# trello-view.coffee
-#
-#
-#
-fs       = require 'fs'
-#process  = require 'process'
-_        = require 'underscore'
-ObjectID = require('mongodb').ObjectID
-should   = require 'should'
+_          = require 'underscore'
+fs         = require 'fs'
+ObjectID   = require('mongodb').ObjectID
+should     = require 'should'
 handlebars = require 'handlebars'
-Trellos  = require '../models/trellos'
-sugar    = require 'sugar'
+sugar      = require 'sugar'
+Trellos    = require '../models/trellos'
+Cards      = require '../models/cards'
 
 
 Date.prototype.sameDateAs = (pDate) ->
     ((this.getFullYear()==pDate.getFullYear())&&(this.getMonth()==pDate.getMonth())&&(this.getDate()==pDate.getDate()))
 
-
 module.exports = class TrelloView
     @templates: {
         duecard:   { path: 'templates/duecard.tmpl', template: null}
         list_table:{ path: 'templates/list-tabular.tmpl', template: null}
-        list_table_nocard:{ path: 'templates/list-tabular-nocard.tmpl', template: null}        
+        list_table_nocard:{ path: 'templates/list-tabular-nocard.tmpl', template: null}
         list_row:  { path: 'templates/list-row.tmpl', template: null}
         action:    { path: 'templates/actions.tmpl', template: null}
     }
     @template_compiled: false
-    
+
     #
     # Constructor
-    # 
+    #
     constructor: ->
         if TrelloView.template_compiled isnt yes
             keys = _.keys TrelloView.templates
@@ -41,7 +35,7 @@ module.exports = class TrelloView
     #
     # Collect card IDs in an object {past:[], today:[], soon:[]}
     # all_cards: all card data
-    # 
+    #
     collect_cards_per_due: (all_cards, tzdiff) ->
         cardids = {past:[], today:[], soon:[]}
 
@@ -67,9 +61,34 @@ module.exports = class TrelloView
                             cardids.soon.push card.id  # this id is not mongo ObjectId
         cardids
 
+    # TODO: Move this to Cards model.
+    collectCardsPerDue: (cards) ->
+      now = new Date()
+      due =
+        past  : []
+        today : []
+        soon  : []
+      _.each cards, (card) =>
+        _.each card.cards, (kard) =>
+          if kard.due # If due is null, not need categorization
+            dueDate = new Date(kard.due)
+            diff = (dueDate - now) / 86400000
+            # diff < 0 : past due
+            # diff >= 0: due not past
+            # diff >= 0 and days_diff < 1: due today (less than one day)
+            # diff >= 1 and days_diff < 7: due soon
+            if dueDate.sameDateAs(now)
+              due.today.push card.id  # this id is not mongo ObjectId
+            else
+              if diff < 0
+                due.past.push kard.id  # this id is not mongo ObjectId
+              else if diff < 7
+                due.soon.push kard.id  # this id is not mongo ObjectId
+      due
+
     #
     # Returns a list of all organization names
-    # 
+    #
     all_org_names: (alldata) ->
         orgs = _.map alldata.boards, (board) =>
             board.org_name
@@ -77,7 +96,7 @@ module.exports = class TrelloView
 
     #
     # Finds card data by card_id
-    # 
+    #
     lookup_card_by_id: (alldata, card_id) ->
         cr = null
         cards = _.find alldata.cards, (cards) =>
@@ -88,7 +107,7 @@ module.exports = class TrelloView
 
     #
     # Finds cards for a list of list_id
-    # 
+    #
     lookup_cards_by_listid: (alldata, list_id) ->
         cr = null
         cards = _.find alldata.cards, (cards) =>
@@ -114,16 +133,14 @@ module.exports = class TrelloView
 
     #
     # Finds a board by board ID
-    # 
-    lookup_board_by_id: (alldata, board_id) ->
-        #console.log alldata.boards
-        bd = _.find alldata.boards, (board) ->
-            board.boards.id is board_id
-        bd
+    #
+    lookup_board_by_id: (data, boardId) ->
+      _.find data.boards, (board) ->
+        board.boards.id is boardId
 
     #
     # Finds a list by list ID
-    # 
+    #
     lookup_list_by_id: (alldata, board_id, list_id) ->
         lst = null
         lists = _.find alldata.lists, (list) =>
@@ -136,7 +153,7 @@ module.exports = class TrelloView
 
     #
     # Get all member names - multiple names are concatnated with a comma char.
-    # 
+    #
     card_member: (alldata, card) ->
         if 0 < card.idMembers.length
             member_names = []
@@ -188,6 +205,8 @@ module.exports = class TrelloView
       _.each cardids, (cardId) =>
         acard = @lookup_card_by_id alldata, cardId
         # [cards, card]
+        # It is failing because it's tryging to fetch information from a board
+        # that is actually disabled and so it's not present in the array of boards.
         aboard = @lookup_board_by_id alldata, acard[0].board_id
         # board
         alist = @lookup_list_by_id alldata, acard[0].board_id, acard[0].list_id
@@ -198,18 +217,16 @@ module.exports = class TrelloView
         # Due date format
         due     = Date.create(acard[1].due).addHours(tzdiff)  # Change to localtime
         duedate = due.format "{Mon} {d}, {yyyy} at {h}:{mm} {TT}"
-        card    = {
-            name:        acard[1].name
-            url:         acard[1].url
-            board:       aboard.boards.name
-            board_url:   aboard.boards.url
-            org_name:    aboard.org_name
-            list:        alist[1].name
-            list_url:    ""
-            due:         duedate
-            assigned_to: members
-        }
-        cards.push card
+        cards.push
+          name        : acard[1].name
+          url         : acard[1].url
+          board       : (aboard.boards.name)
+          board_url   : aboard.boards.url
+          org_name    : aboard.org_name
+          list        : alist[1].name
+          list_url    : ""
+          due         : duedate
+          assigned_to : members
       cards
 
     actionSummary: (action) ->
@@ -252,7 +269,7 @@ module.exports = class TrelloView
 
     #
     # Renders list tables
-    # 
+    #
     list_tabular: (alldata, lists, tzdiff) ->
         tables = []
         rows = []
@@ -281,7 +298,7 @@ module.exports = class TrelloView
 
     #
     # Render an action and return the result html
-    # 
+    #
     render_action: (action, tzdiff)->
         try
             # Action date format
@@ -321,7 +338,7 @@ module.exports = class TrelloView
                 date: adate.format "{Mon} {d}, {yyyy} {h}:{mm} {TT}"
             }
             TrelloView.templates.action.template(context)
-        catch err 
+        catch err
             logtext = "Exception in TrelloView.prototype.render_actions\n"
             if action.type
                 logtext += "Action Type = " + action.type + "\n"
@@ -331,11 +348,10 @@ module.exports = class TrelloView
                 logtext += "User = " + action.user_id + "\n"
             if action.id
                 logtext += "Action ID = " + action.id + "\n"
-            console.log logtext + err
 
     #
     # Get recent actions (max 5)
-    # 
+    #
     recent_actions: (alldata, board_id) ->
         actions = _.filter alldata.actions, (action) =>
             action.data.board.id is board_id
@@ -348,47 +364,47 @@ module.exports = class TrelloView
             size = 5
         (sorted.slice(sorted.length - size, len)).reverse()
 
-    getReports: (userId, fn) ->
-      new Trellos().get_all_data userId, (err, data) =>
-        if err
-          fn err, null
-        else
-          reports =
-            due    : {}
-            boards : []
+    getReports: (userId, cb) ->
+      userId = new ObjectID(userId) if typeof userId is 'string'
+      Trellos.getAllData userId, (err, data) =>
+        return cb(err, null) if err
 
-          dueCards          = @collect_cards_per_due data.cards
-          reports.due.today = @listCardsDueform data, dueCards.today
-          reports.due.soon  = @listCardsDueform data, dueCards.soon
-          reports.due.past  = @listCardsDueform data, dueCards.past
+        reports =
+          due    : {}
+          boards : []
 
-          # For each of the organizations
-          _.each @all_org_names(data), (organization) =>
-            boards = _.filter data.boards, (board) =>
-              board.org_name is organization
+        dueCards          = @collectCardsPerDue data.cards
+        reports.due.today = @listCardsDueform data, dueCards.today
+        reports.due.soon  = @listCardsDueform data, dueCards.soon
+        reports.due.past  = @listCardsDueform data, dueCards.past
 
-            # For each of the boards for the current organization
-            _.each boards, (board) =>
-              recentActivity = _.map @recent_actions(data, board.boards.id), (action) =>
-                @actionSummary action
+        # For each of the organizations
+        _.each @all_org_names(data), (organization) =>
+          boards = _.filter data.boards, (board) =>
+            board.org_name is organization
 
-              allLists = _.filter data.lists, (list) =>
-                list.board_id is board.boards.id
+          # For each of the boards for the current organization
+          _.each boards, (board) =>
+            recentActivity = _.map @recent_actions(data, board.boards.id), (action) =>
+              @actionSummary action
 
-              lists = []
-              _.each allLists, (list) =>
-                _.each list.lists, (innerList) =>
-                  innerList.cards = @cardsByListId(data, innerList.id)
-                  lists.push innerList
+            allLists = _.filter data.lists, (list) =>
+              list.board_id is board.boards.id
 
-              reports.boards.push
-                id              : board.boards.id
-                name            : board.boards.name
-                organization    : organization
-                lists           : lists
-                recent_activity : recentActivity
+            lists = []
+            _.each allLists, (list) =>
+              _.each list.lists, (innerList) =>
+                innerList.cards = @cardsByListId(data, innerList.id)
+                lists.push innerList
 
-          fn null, reports
+            reports.boards.push
+              id              : board.boards.id
+              name            : board.boards.name
+              organization    : organization
+              lists           : lists
+              recent_activity : recentActivity
+
+        cb(null, reports)
 
     #
     # Reads all data from DB and render (create) HTML for the data
@@ -396,7 +412,7 @@ module.exports = class TrelloView
     # trellos: Trellos object
     # user_id: user_id in ObjectID type
     # fn: callback fn(err, html)
-    # 
+    #
     renderHtml: (trellos, user, fn) ->
         user_id = new ObjectID(user._id.toString())
         trellos.get_all_data user_id, (err, all) =>
@@ -419,10 +435,10 @@ module.exports = class TrelloView
                 orgs = @all_org_names(all)
 
                 # Title - Board Snapshot
-                ret += "<br><h4>Recent Activities</h4>" 
+                ret += "<br><h4>Recent Activities</h4>"
                 _.each orgs, (org) =>
                     boards_for_org = _.filter all.boards, (bd) =>
-                        bd.org_name is org                        
+                        bd.org_name is org
                     _.each boards_for_org, (board) =>
                         ret += "<br><h4><i>Board: #{org} / #{board.boards.name}</i></h4>"  # Board name
                         actions = @recent_actions(all, board.boards.id)
@@ -430,7 +446,7 @@ module.exports = class TrelloView
                             ret += @render_action(a, user.tzdiff)
 
                 # Title - Board Snapshot
-                ret += "<br><h4>Boards Snapshot</h4>" 
+                ret += "<br><h4>Boards Snapshot</h4>"
                 # Tabular lists
                 _.each orgs, (org) =>
                     boards_for_org = _.filter all.boards, (bd) =>
@@ -449,15 +465,15 @@ module.exports = class TrelloView
     # get the summary of all Trello board data.
     # Returns HTML
     # user: user object
-    # 
+    #
     getSummary: (user, fn) ->
         trellos = new Trellos()
         @renderHtml trellos, user, fn
-        
+
 
     #
     # Checks card due is within limit minutes
-    # 
+    #
     is_due_soon: (card, limit) ->
         if card.due is null  # If due is null, not need categorization
             no
@@ -474,7 +490,7 @@ module.exports = class TrelloView
 
     #
     # Get html for due now cards for arg lists
-    # 
+    #
     card_due_notification: (alldata, lists, tzdiff) ->
         htmls = []
 
@@ -509,7 +525,7 @@ module.exports = class TrelloView
 
     #
     # Creates html for due now cards
-    # 
+    #
     all_card_due_notifications: (all, user, fn)->
         ret = ''
         orgs = @all_org_names(all)
@@ -523,10 +539,5 @@ module.exports = class TrelloView
                 _.each lists, (lists) =>
                     dd = @card_due_notification all, lists, user.tzdiff
                     if dd isnt null
-                        ret += "<br><h4><i>Board: #{org} / #{board.boards.name}</i></h4>"+dd  
+                        ret += "<br><h4><i>Board: #{org} / #{board.boards.name}</i></h4>"+dd
         ret
-
-
-
-
-

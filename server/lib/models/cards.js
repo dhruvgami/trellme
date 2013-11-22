@@ -32,6 +32,20 @@
       });
     };
 
+    Lists.findByUserId = function(userId, cb) {
+      if (!(userId instanceof ObjectID)) {
+        userId = new ObjectID(userId);
+      }
+      return this.collection(function(err, col) {
+        if (err) {
+          return cb(err, null);
+        }
+        return col.find({
+          user_id: userId
+        }).toArray(cb);
+      });
+    };
+
     return Lists;
 
   })(db);

@@ -28,7 +28,6 @@ db_users = new Users()
 # Auth by username(email) and password
 passport.use(new LocalStrategy( (username, password, done) ->
   process.nextTick ->
-    # TODO: Move should move this out to the model.
     db_users.findByEmail username, (err, user) ->
       if err
         return done(err)

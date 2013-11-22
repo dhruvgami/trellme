@@ -9,6 +9,7 @@ should       = require 'should'
 mongodb      = require 'mongodb'
 ObjectID     = require('mongodb').ObjectID
 dbconnection = require './dbconnection'
+Boards       = require './boards'
 Trellos      = require './trellos'
 GenPassword  = require '../helpers/genpassword'
 
@@ -103,7 +104,7 @@ module.exports = class Users extends dbconnection
           collection.findAndModify { _id : userId }, null, { $set : { settings : userSettings } }, { new : true }, (err, user) ->
             return cb(err, null) if err
             _(settings.boards).each (board) ->
-              new Trellos().updateBoard board._id, { enabled : board.enabled }, (err, obj) ->
+              Boards.updateBoard board._id, { enabled : board.enabled }, (err, obj) ->
                 return cb(err, null) if err
             cb(null, user.settings)
 
