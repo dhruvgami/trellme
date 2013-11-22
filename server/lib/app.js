@@ -155,7 +155,7 @@
         return res.send(err);
       } else {
         res.status(201);
-        return res.send(user.settings);
+        return res.json(user.settings);
       }
     });
   });
@@ -252,11 +252,11 @@
     var _this = this;
     return new TrelloApi().collect_data_sync(req.user, function(err, result) {
       if (err) {
-        res.status(err);
-        return res.send(result);
+        res.status(500);
+        return res.send(err);
       } else {
         res.status(200);
-        return res.send(result);
+        return res.json(result);
       }
     });
   });
@@ -264,10 +264,9 @@
   app.get("/app/trello/view", authRequired, function(req, res) {
     return new TrelloView().getSummary(req.user, function(err, result) {
       if (err) {
-        res.status(err);
-        return res.send(result);
+        res.status(500);
+        return res.send(err);
       } else {
-        res.status(200);
         return res.send(result);
       }
     });
@@ -279,7 +278,7 @@
         res.status(500);
         return res.send(err);
       } else {
-        return res.send(result);
+        return res.json(result);
       }
     });
   });
@@ -295,11 +294,10 @@
       } else {
         return (new TrelloApi()).request(req.params[0], user, {}, function(err, result) {
           if (err) {
-            res.status(err);
-            return res.send(result);
+            res.status(500);
+            return res.send(err);
           } else {
-            res.status(200);
-            return res.send(result);
+            return res.json(result);
           }
         });
       }

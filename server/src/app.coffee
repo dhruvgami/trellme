@@ -127,7 +127,7 @@ app.post '/settings', authRequired, (req, res) ->
       res.send err
     else
       res.status 201
-      res.send user.settings
+      res.json user.settings
 
 #=================================================
 # Users API
@@ -214,11 +214,11 @@ app.get "/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
 app.get "/app/trello/collect", authRequired, (req, res) ->
   new TrelloApi().collect_data_sync req.user, (err, result) =>
     if err
-      res.status err
-      res.send result
+      res.status 500
+      res.send err
     else
       res.status 200
-      res.send result
+      res.json result
 
 #
 # Get the view (html) of the Trello summary
@@ -227,10 +227,9 @@ app.get "/app/trello/collect", authRequired, (req, res) ->
 app.get "/app/trello/view", authRequired, (req, res) ->
   new TrelloView().getSummary req.user, (err, result) ->
     if err
-      res.status err
-      res.send result
+      res.status 500
+      res.send err
     else
-      res.status 200
       res.send result  # HTML <- Why? this is an API.
 
 # Get the reports summary JSON.
@@ -241,7 +240,7 @@ app.get "/app/trello/reports", authRequired, (req, res) ->
       res.status 500
       res.send err
     else
-      res.send result
+      res.json result
 
 # Get Trello stuff of a user
 # First param: boards, lists, cards
@@ -251,15 +250,15 @@ app.get "/app/trello/reports", authRequired, (req, res) ->
 app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
   db_users.findByEmail {username: req.params[1]}, (err, user) =>
     if err
-      res.status 404; res.send "No such user"
+      res.status 404
+      res.send "No such user"
     else
        (new TrelloApi()).request req.params[0], user, {}, (err, result) =>
         if err
-          res.status err
-          res.send result
+          res.status 500
+          res.send err
         else
-          res.status 200
-          res.send result  # Already JSON
+          res.json result  # Already JSON
 
 # Update Board data on demand
 # TODO: This should not be publicly accessible.
