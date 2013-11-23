@@ -526,7 +526,7 @@
       });
     };
 
-    Trellos.getAllData = function(userId, cb) {
+    Trellos.getAllData1 = function(userId, cb) {
       return Boards.findEnabledByUserId(userId, function(err, boards) {
         if (err) {
           return cb(err, null);
@@ -542,7 +542,6 @@
         } else {
           return _(boards).each(function(board) {
             var boardId;
-            console.log("Getting data for board with id " + board.boards.id);
             boardId = board.boards.id;
             return async.parallel({
               actions: function(callback) {
@@ -563,6 +562,65 @@
             }, function(err, results) {
               return cb(err, results);
             });
+          });
+        }
+      });
+    };
+
+    Trellos.getAllData = function(userId, cb) {
+      var append, data;
+      data = {
+        actions: [],
+        boards: [],
+        cards: [],
+        lists: [],
+        members: []
+      };
+      append = function(key, val) {
+        if (_(val).isArray()) {
+          return data[key] = _(data[key]).union(val);
+        }
+      };
+      return Boards.findEnabledByUserId(userId, function(err, boards) {
+        if (err) {
+          return cb(err, null);
+        }
+        if (boards.length === 0) {
+          return cb(null, data);
+        } else {
+          return async.each(boards, function(board, asyncCB) {
+            var boardId;
+            boardId = board.boards.id;
+            return async.parallel([
+              function(callback) {
+                return Actions.findByBoardId(boardId, function(err, results) {
+                  append('actions', results);
+                  return callback(err);
+                });
+              }, function(callback) {
+                append('boards', boards);
+                return callback(null);
+              }, function(callback) {
+                return Cards.findByBoardId(boardId, function(err, results) {
+                  append('cards', results);
+                  return callback(err);
+                });
+              }, function(callback) {
+                return Lists.findByBoardId(boardId, function(err, results) {
+                  append('lists', results);
+                  return callback(err);
+                });
+              }, function(callback) {
+                return Members.findByUserId(userId, function(err, results) {
+                  append('members', results);
+                  return callback(err);
+                });
+              }
+            ], function(err) {
+              return asyncCB(err);
+            });
+          }, function(err) {
+            return cb(err, data);
           });
         }
       });

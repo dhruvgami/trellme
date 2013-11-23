@@ -343,24 +343,15 @@ module.exports = class Trellos extends dbconnection
               fn(err, items)  # items is an array
 
 
-  @getAllData1: (userId, cb) ->
-    userId = new ObjectID(userId) if typeof userId is 'string'
-    async.parallel({
-      actions: (callback) ->
-        Actions.findByUserId userId, callback
-      boards: (callback) ->
-        Boards.findEnabledByUserId userId, callback
-      cards: (callback) ->
-        Cards.findByUserId userId, callback
-      lists: (callback) ->
-        Lists.findByUserId userId, callback
-      members: (callback) ->
-        Members.findByUserId userId, callback
-    }, (err, results) ->
-      cb(err, results)
-    )
-
   @getAllData: (userId, cb) ->
+    data =
+      actions : []
+      boards  : []
+      cards   : []
+      lists   : []
+      members : []
+    append = (key, val) ->
+      data[key] = _(data[key]).union val if _(val).isArray()
     # We retrieve only those boards the users want in their reports (enabled boards).
     # Once we've got the enabled boards with us, we need to scope lists, cards,
     # actions, members and any other information required in the report
@@ -368,29 +359,36 @@ module.exports = class Trellos extends dbconnection
     Boards.findEnabledByUserId userId, (err, boards) ->
       return cb(err, null) if err
       if boards.length is 0
-        cb null,
-          boards  : []
-          lists   : []
-          cards   : []
-          actions : []
-          members : []
+        cb null, data
       else
-        _(boards).each (board) ->
+        async.each(boards, (board, asyncCB) ->
           boardId = board.boards.id
-          async.parallel({
-            actions: (callback) ->
-               Actions.findByBoardId boardId, callback
-            boards: (callback) ->
-              callback(null, boards)
-            cards: (callback) ->
-              Cards.findByBoardId boardId, callback
-            lists: (callback) ->
-              Lists.findByBoardId boardId, callback
-            members: (callback) ->
-              Members.findByUserId userId, callback
-          }, (err, results) ->
-            cb(err, results)
+          async.parallel([
+            (callback) ->
+               Actions.findByBoardId boardId, (err, results) ->
+                 append('actions', results)
+                 callback(err)
+            , (callback) ->
+              append('boards', boards)
+              callback null
+            , (callback) ->
+              Cards.findByBoardId boardId, (err, results) ->
+                append('cards', results)
+                callback err
+            , (callback) ->
+              Lists.findByBoardId boardId, (err, results) ->
+                append('lists', results)
+                callback err
+            , (callback) ->
+              Members.findByUserId userId, (err, results) ->
+                append('members', results)
+                callback err
+          ], (err) ->
+            asyncCB err
           )
+        , (err) ->
+          cb(err, data)
+        )
 
   #
   # Load up all data from DB. This method blocks untill everything is done.
