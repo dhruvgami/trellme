@@ -1,31 +1,53 @@
-<div class="span12 text-center">
-  <h1>Sign up</h1>
-  <form name="form" ng-submit="signup()" >
-    <label for="email"><i>Email:</i></label>
-    <input
-    type="email"
-    ng-model="user.email"
-    ng-required="true"
-    placeholder="Enter your email address" />
+<div class="signup span12">
+  <div class="span2"></div>
+  <form class="form-horizontal span8" name="form" ng-submit="signup()">
+    <legend>Sign up</legend>
+    <div class="control-group">
+      <label class="control-label" for="email"><i>Email:</i></label>
+      <div class="controls">
+        <input
+          class="span4"
+          type="email"
+          name="email"
+          ng-model="user.email"
+          ng-required="true"
+          placeholder="Enter your email address" />
+      </div>
+    </div>
 
-    <label for="password"><i>Password:</i></label>
-    <input
-      type="password"
-      ng-model="user.password"
-      ng-required="true"
-      placeholder="Enter your password" />
+    <div class="control-group">
+      <label class="control-label" for="password"><i>Password:</i></label>
+      <div class="controls">
+        <input
+          class="span4"
+          type="password"
+          name="password"
+          ng-model="user.password"
+          ng-required="true"
+          placeholder="Enter your password" />
+      </div>
+    </div>
 
-    <label for="trello_username"><i>Trello Username:</i></label>
-    <input
-      type="text"
-      ng-model="user.trello_username"
-      ng-required="true"
-      placeholder="Enter your Trello user name" />
-    <div>
+    <div class="control-group">
+      <label class="control-label" for="trello_username"><i>Trello Username:</i></label>
+      <div class="controls">
+        <input
+          class="span4"
+          type="text"
+          name="trello_username"
+          ng-model="user.trello_username"
+          ng-required="true"
+          placeholder="Enter your Trello user name" />
+      </div>
+    </div>
+
+    <div class="form-actions">
       <button
-        class="btn btn-primary"
+        class="btn btn-primary span2"
         type="submit"
         ng-disabled="form.$invalid || form.$pristine">Sign up</button>
+      <a class="btn span2" href="/#/signin">Sign in</a>
     </div>
   </form>
+  <div class="span2"></div>
 </div>
