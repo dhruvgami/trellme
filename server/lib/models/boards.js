@@ -19,8 +19,8 @@
     Boards.colName = 'boards';
 
     Boards.findByUserId = function(userId, cb) {
-      if (userId instanceof ObjectID) {
-        userId = userId.toString();
+      if (typeof userId === 'string') {
+        userId = new ObjectID(userId);
       }
       return this.collection(function(err, col) {
         if (err) {

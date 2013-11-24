@@ -6,7 +6,7 @@ module.exports = class Boards extends db
 
   # Retrieve all boards that belong to a user
   @findByUserId: (userId, cb) ->
-    userId = userId.toString() if userId instanceof ObjectID
+    userId = new ObjectID(userId) if typeof userId is 'string'
     @collection (err, col) ->
       return cb(err, null) if err
       col.
