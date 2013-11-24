@@ -36,7 +36,7 @@
 
   passport.use(new LocalStrategy(function(username, password, done) {
     return process.nextTick(function() {
-      return db_users.findByEmail(username, function(err, user) {
+      return Users.findByEmail(username, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -59,7 +59,7 @@
     usernameField: 'email'
   }, function(email, password, done) {
     return process.nextTick(function() {
-      return db_users.findByEmail(email, function(err, user) {
+      return Users.findByEmail(email, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -78,15 +78,9 @@
     });
   }));
 
-  passport.serializeUser(function(user, done) {
-    return done(null, user._id.toString());
-  });
+  passport.serializeUser(Users.serialize);
 
-  passport.deserializeUser(function(id, done) {
-    return db_users.get(id, function(err, user) {
-      return done(err, user);
-    });
-  });
+  passport.deserializeUser(Users.deserialize);
 
   authRequired = function(req, res, next) {
     if (req.isAuthenticated()) {
@@ -137,7 +131,7 @@
   });
 
   app.get('/settings', authRequired, function(req, res) {
-    return db_users.getUserSettings(req.user._id, function(err, settings) {
+    return Users.getUserSettings(req.user._id, function(err, settings) {
       if (err) {
         res.status(500);
         return res.send(err);
@@ -149,7 +143,7 @@
   });
 
   app.post('/settings', authRequired, function(req, res) {
-    return db_users.saveUserSettings(req.user._id, req.body, function(err, user) {
+    return Users.saveUserSettings(req.user._id, req.body, function(err, user) {
       if (err) {
         res.status(500);
         return res.send(err);
@@ -175,7 +169,7 @@
 
   app.get("/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", function(req, res) {
     var _this = this;
-    return db_users.findByEmail(req.params[0], function(err, user) {
+    return Users.findByEmail(req.params[0], function(err, user) {
       var toa;
       if (err) {
         res.status(401);
@@ -229,7 +223,7 @@
 
   app.get("/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", function(req, res) {
     var _this = this;
-    return db_users.findByEmail({
+    return Users.findByEmail({
       username: req.params[0]
     }, function(err, user) {
       var stat;
@@ -285,7 +279,7 @@
 
   app.get("/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", function(req, res) {
     var _this = this;
-    return db_users.findByEmail({
+    return Users.findByEmail({
       username: req.params[1]
     }, function(err, user) {
       if (err) {
@@ -309,7 +303,7 @@
       _this = this;
     mailservice = new MailService();
     console.log('Update starting...');
-    db_users.findAll(function(err, users) {
+    Users.findAll(function(err, users) {
       if (err) {
         res.status(err);
         return res.send("Error updating reports");
@@ -329,7 +323,7 @@
     trellos = new Trellos();
     trelloView = new TrelloView();
     return nloop = setInterval(function() {
-      return db_users.subscribedUsers(function(err, users) {
+      return Users.subscribedUsers(function(err, users) {
         return _.each(users, function(user) {
           return trellos.get_all_data(user._id, function(err, all) {
             var mailtext, result;

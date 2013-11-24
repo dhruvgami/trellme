@@ -28,7 +28,7 @@ db_users = new Users()
 # Auth by username(email) and password
 passport.use(new LocalStrategy( (username, password, done) ->
   process.nextTick ->
-    db_users.findByEmail username, (err, user) ->
+    Users.findByEmail username, (err, user) ->
       if err
         return done(err)
       unless user
@@ -41,7 +41,7 @@ passport.use(new LocalStrategy( (username, password, done) ->
 
 passport.use 'api', new LocalStrategy { usernameField : 'email' }, (email, password, done) ->
   process.nextTick ->
-    db_users.findByEmail email, (err, user) ->
+    Users.findByEmail email, (err, user) ->
       if err
         return done(err)
       unless user
@@ -50,12 +50,8 @@ passport.use 'api', new LocalStrategy { usernameField : 'email' }, (email, passw
         return done(null, false, message: "Invalid password")
       done null, user
 
-passport.serializeUser (user, done) ->
-  done(null, user._id.toString())
-
-passport.deserializeUser (id, done) ->
-  db_users.get id, (err, user) ->
-    done err, user
+passport.serializeUser   Users.serialize
+passport.deserializeUser Users.deserialize
 
 # Middleware to use whenever a route requires users to be authenticated.
 authRequired = (req, res, next) ->
@@ -111,7 +107,7 @@ app.get '/me', authRequired, (req, res) ->
 
 # - Retrieve user settings - #
 app.get '/settings', authRequired, (req, res) ->
-  db_users.getUserSettings req.user._id, (err, settings) ->
+  Users.getUserSettings req.user._id, (err, settings) ->
     if err
       res.status 500
       res.send err
@@ -121,7 +117,7 @@ app.get '/settings', authRequired, (req, res) ->
 
 # - Save user settings - #
 app.post '/settings', authRequired, (req, res) ->
-  db_users.saveUserSettings req.user._id, req.body, (err, user) ->
+  Users.saveUserSettings req.user._id, req.body, (err, user) ->
     if err
       res.status 500
       res.send err
@@ -138,6 +134,7 @@ app.post '/settings', authRequired, (req, res) ->
 #   No token is needed for this endpoint
 #   data: email, password, trello_username, tzdiff
 #
+# TODO: Move db_users.add to a class method.
 app.post "/app/users",  (req, res) ->
   db_users.add req.body, (err, result) =>
     if err
@@ -157,7 +154,7 @@ app.post "/app/users",  (req, res) ->
 #  URL param is the user email
 #
 app.get "/app/auths/request/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-  db_users.findByEmail req.params[0], (err, user) =>
+  Users.findByEmail req.params[0], (err, user) =>
     if err
       res.status 401
       res.send "No such user"
@@ -199,7 +196,7 @@ app.get "/app/auths/trello_callback", (req, res) ->
 # Get OAuth result
 #
 app.get "/app/auths/status/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-  db_users.findByEmail {username: req.params[0]}, (err, user)=>
+  Users.findByEmail { username: req.params[0] }, (err, user)=>
     if err
       res.status 401; res.send "No such user"
     else
@@ -248,7 +245,7 @@ app.get "/app/trello/reports", authRequired, (req, res) ->
 # TODO: Refactor this route. There should a route for each of the actions
 #       we want the user to be able to perform.
 app.get "/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", (req, res) ->
-  db_users.findByEmail {username: req.params[1]}, (err, user) =>
+  Users.findByEmail { username: req.params[1] }, (err, user) =>
     if err
       res.status 404
       res.send "No such user"
@@ -266,7 +263,7 @@ app.get "/app/update", (req, res) ->
   # updateservice = new UpdateService()
   mailservice = new MailService()
   console.log('Update starting...')
-  db_users.findAll (err, users) =>
+  Users.findAll (err, users) =>
     if err
       res.status err
       res.send "Error updating reports"
@@ -295,7 +292,7 @@ notificationLoop = () ->
     # * note that this loop will not read from API. Checks only the database
     #   contents.
     #
-    db_users.subscribedUsers (err, users) =>
+    Users.subscribedUsers (err, users) =>
       _.each users, (user) =>
         trellos.get_all_data user._id, (err, all)=>
           result = trelloView.all_card_due_notifications(all, user)
