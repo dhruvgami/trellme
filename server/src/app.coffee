@@ -4,41 +4,25 @@
 # TrellMe
 #
 #
-cluster          = require('cluster')
-express          = require("express")
-http             = require("http")
-passport         = require("passport")
-LocalStrategy    = require("passport-local").Strategy
-_                = require("underscore")
-dbconnection     = require("./models/dbconnection")
-Users            = require("./models/users")
-Tokens           = require("./models/tokens")
-Trellos          = require('./models/trellos')
-TrelloOAuth      = require("./helpers/trello-oauth")
-TrelloApi        = require("./helpers/trello-api")
-MailService      = require("./helpers/mailservice")
-TrelloView       = require("./views/trello-view")
-config           = require(__dirname + '/../config/config.json')
+cluster       = require('cluster')
+express       = require("express")
+http          = require("http")
+passport      = require("passport")
+LocalStrategy = require("passport-local").Strategy
+_             = require("underscore")
+Users         = require("./models/users")
+Tokens        = require("./models/tokens")
+Trellos       = require('./models/trellos')
+TrelloOAuth   = require("./helpers/trello-oauth")
+TrelloApi     = require("./helpers/trello-api")
+MailService   = require("./helpers/mailservice")
+TrelloView    = require("./views/trello-view")
+config        = require(__dirname + '/../config/config.json')
 
 # Database objects
 db_users = new Users()
 
-
 # Maybe move this out of the controller into a model.
-# Auth by username(email) and password
-passport.use(new LocalStrategy( (username, password, done) ->
-  process.nextTick ->
-    Users.findByEmail username, (err, user) ->
-      if err
-        return done(err)
-      unless user
-        return done(null, false, message: "Unknown user with email #{username}")   # don't ever 'return' keyword!
-      unless db_users.verifyPassword(user, password)
-        return done(null, false, message: "Invalid password")   # don't ever 'return' keyword!
-
-      done null, user
-))
-
 passport.use 'api', new LocalStrategy { usernameField : 'email' }, (email, password, done) ->
   process.nextTick ->
     Users.findByEmail email, (err, user) ->
