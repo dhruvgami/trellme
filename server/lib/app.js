@@ -339,7 +339,7 @@
   } else if (cluster.isWorker) {
     console.log("worker(" + cluster.worker.id + ")");
     if (cluster.worker.id === 2) {
-      notificationLoop();
+      //notificationLoop();
     }
   }
 
