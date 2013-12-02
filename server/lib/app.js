@@ -309,7 +309,7 @@
               mailtext = MailService.template({
                 content: result
               });
-              mailservice.send(mailtext, user.email, config.mail.due_notify_subject);
+              // mailservice.send(mailtext, user.email, config.mail.due_notify_subject);
               return console.log("Due notification sent to " + user.email);
             }
           });
