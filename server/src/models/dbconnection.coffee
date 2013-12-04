@@ -3,6 +3,7 @@
 #
 #  The super class for all DB models.
 #
+config      = require(__dirname + '/../../config/config.json')
 MongoClient = require('mongodb').MongoClient
 
 module.exports = class dbconnection
@@ -15,7 +16,7 @@ module.exports = class dbconnection
       fn(null, dbconnection.db)
     else
       # TODO: Retrieve the connection string from an external source!
-      MongoClient.connect 'mongodb://127.0.0.1:27017/trellme', (err, db) =>
+      MongoClient.connect config.db.uri, (err, db) =>
         if err
           throw err
         else

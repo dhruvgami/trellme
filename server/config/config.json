@@ -13,5 +13,8 @@
     "fromAddress"        : "admin@trellme.com",
     "subject"            : "[TrellMe] Updates on your Trello Boards",
     "due_notify_subject" : "[TrellMe] Trello Cards due now!"
+  },
+  "db" : {
+    "uri" : "mongodb://localhost:27017/trellme"
   }
 }
