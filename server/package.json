@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "express"         : "3.x",
-    "underscore"      : "~1.4.4",
+    "underscore"      : "~1.5.2",
     "coffee-script"   : "~1.6.2",
     "connect-mongodb" : "~1.1.5",
     "passport"        : "~0.1.16",
