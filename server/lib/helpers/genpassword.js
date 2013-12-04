@@ -9,21 +9,25 @@
 
     GenPassword.SaltLength = 9;
 
-    GenPassword.prototype.createHash = function(password) {
-      var hash, salt;
-      salt = this.generateSalt(GenPassword.SaltLength);
-      hash = this.md5(password + salt);
-      return salt + hash;
+    GenPassword.md5 = function(string) {
+      return crypto.createHash("md5").update(string).digest("hex");
     };
 
-    GenPassword.prototype.validateHash = function(hash, password) {
+    GenPassword.validateHash = function(hash, password) {
       var salt, validHash;
       salt = hash.substr(0, GenPassword.SaltLength);
       validHash = salt + this.md5(password + salt);
       return hash === validHash;
     };
 
-    GenPassword.prototype.generateSalt = function(len) {
+    GenPassword.createHash = function(password) {
+      var hash, salt;
+      salt = this.generateSalt(GenPassword.SaltLength);
+      hash = this.md5(password + salt);
+      return salt + hash;
+    };
+
+    GenPassword.generateSalt = function(len) {
       var i, p, salt, set, setLen;
       set = "0123456789abcdefghijklmnopqurstuvwxyzABCDEFGHIJKLMNOPQURSTUVWXYZ";
       setLen = set.length;
@@ -35,10 +39,6 @@
         i++;
       }
       return salt;
-    };
-
-    GenPassword.prototype.md5 = function(string) {
-      return crypto.createHash("md5").update(string).digest("hex");
     };
 
     return GenPassword;

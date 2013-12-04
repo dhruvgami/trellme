@@ -9,19 +9,23 @@ module.exports = class GenPassword
     @SaltLength: 9
 
     #
-    createHash: (password) ->
-      salt = @generateSalt(GenPassword.SaltLength)
-      hash = @md5(password + salt)
-      salt + hash
+    @md5: (string) ->
+      crypto.createHash("md5").update(string).digest "hex"
 
     #
-    validateHash: (hash, password) ->
+    @validateHash: (hash, password) ->
       salt = hash.substr(0, GenPassword.SaltLength)
       validHash = salt + @md5(password + salt)
       hash is validHash
 
     #
-    generateSalt: (len) ->
+    @createHash: (password) ->
+      salt = @generateSalt(GenPassword.SaltLength)
+      hash = @md5(password + salt)
+      salt + hash
+
+    #
+    @generateSalt: (len) ->
       set = "0123456789abcdefghijklmnopqurstuvwxyzABCDEFGHIJKLMNOPQURSTUVWXYZ"
       setLen = set.length
       salt = ""
@@ -31,8 +35,3 @@ module.exports = class GenPassword
         salt += set[p]
         i++
       salt
-
-    #
-    md5: (string) ->
-      crypto.createHash("md5").update(string).digest "hex"
-

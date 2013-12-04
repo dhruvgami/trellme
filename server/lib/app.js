@@ -45,7 +45,7 @@
             message: "Unknown user with email " + email
           });
         }
-        if (!db_users.verifyPassword(user, password)) {
+        if (!user.verifyPassword(password)) {
           return done(null, false, {
             message: "Invalid password"
           });
@@ -108,7 +108,7 @@
   });
 
   app.get('/settings', authRequired, function(req, res) {
-    return Users.getUserSettings(req.user._id, function(err, settings) {
+    return req.user.getSettings(function(err, settings) {
       if (err) {
         res.status(500);
         return res.send(err);
@@ -120,7 +120,7 @@
   });
 
   app.post('/settings', authRequired, function(req, res) {
-    return Users.saveUserSettings(req.user._id, req.body, function(err, user) {
+    return req.user.saveSettings(req.body, function(err, user) {
       if (err) {
         res.status(500);
         return res.send(err);
@@ -132,14 +132,13 @@
   });
 
   app.post("/app/users", function(req, res) {
-    var _this = this;
-    return db_users.add(req.body, function(err, result) {
+    return Users.create(req.body, function(err, user) {
       if (err) {
         res.status(err);
         return res.send(result);
       } else {
-        res.status(200);
-        return res.send("OK");
+        res.status(201);
+        return res.json(user);
       }
     });
   });

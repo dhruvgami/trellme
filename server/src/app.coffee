@@ -30,7 +30,7 @@ passport.use 'api', new LocalStrategy { usernameField : 'email' }, (email, passw
         return done(err)
       unless user
         return done(null, false, message: "Unknown user with email #{email}")
-      unless db_users.verifyPassword(user, password)
+      unless user.verifyPassword(password)
         return done(null, false, message: "Invalid password")
       done null, user
 
@@ -91,7 +91,7 @@ app.get '/me', authRequired, (req, res) ->
 
 # - Retrieve user settings - #
 app.get '/settings', authRequired, (req, res) ->
-  Users.getUserSettings req.user._id, (err, settings) ->
+  req.user.getSettings (err, settings) ->
     if err
       res.status 500
       res.send err
@@ -101,7 +101,7 @@ app.get '/settings', authRequired, (req, res) ->
 
 # - Save user settings - #
 app.post '/settings', authRequired, (req, res) ->
-  Users.saveUserSettings req.user._id, req.body, (err, user) ->
+  req.user.saveSettings req.body, (err, user) ->
     if err
       res.status 500
       res.send err
@@ -118,15 +118,14 @@ app.post '/settings', authRequired, (req, res) ->
 #   No token is needed for this endpoint
 #   data: email, password, trello_username, tzdiff
 #
-# TODO: Move db_users.add to a class method.
 app.post "/app/users",  (req, res) ->
-  db_users.add req.body, (err, result) =>
+  Users.create req.body, (err, user) ->
     if err
       res.status err
       res.send result
     else
-      res.status 200
-      res.send "OK"
+      res.status 201
+      res.json user
 
 #=================================================
 #
