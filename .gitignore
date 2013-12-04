@@ -8,3 +8,6 @@
 
 # Ignore dist Trellme JS file.
 /client/trellme.js
+
+# Ignore config file which may include production credentials.
+/server/config/config.json

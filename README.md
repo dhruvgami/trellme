@@ -16,6 +16,13 @@ $ cd client/
 $ make init  # (Required) This is going to install all NodeJS dependencies
 $ make build # (Required) This is going to create the trellme.js dist file.
 ```
+
+Also, make sure that you have a valid configuration file present
+with valid Trello and MongoDB credentials:
+```bash
+$ cp config/config.json{.example,}
+```
+
 ---
 ### Running and accessing the application:
 
