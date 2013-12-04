@@ -6,6 +6,7 @@
 MongoClient = require('mongodb').MongoClient
 
 module.exports = class dbconnection
+  # - Class Methods - #
   @db: null
 
   # Get DB
@@ -13,6 +14,7 @@ module.exports = class dbconnection
     if dbconnection.db isnt null
       fn(null, dbconnection.db)
     else
+      # TODO: Retrieve the connection string from an external source!
       MongoClient.connect 'mongodb://127.0.0.1:27017/trellme', (err, db) =>
         if err
           throw err
@@ -27,3 +29,11 @@ module.exports = class dbconnection
     @get_client (err, client) =>
       return cb(err, null) if err
       client.collection(@colName, cb)
+
+  # - Instance Methods - #
+  constructor: (attrs = {}) ->
+    @[attr] = val for attr, val of attrs
+
+  # Make every child class to implement this function
+  toJSON: ->
+    throw new Error 'Not yet implemented'

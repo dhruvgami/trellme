@@ -5,8 +5,6 @@
   MongoClient = require('mongodb').MongoClient;
 
   module.exports = dbconnection = (function() {
-    function dbconnection() {}
-
     dbconnection.db = null;
 
     dbconnection.get_client = function(fn) {
@@ -36,6 +34,21 @@
         }
         return client.collection(_this.colName, cb);
       });
+    };
+
+    function dbconnection(attrs) {
+      var attr, val;
+      if (attrs == null) {
+        attrs = {};
+      }
+      for (attr in attrs) {
+        val = attrs[attr];
+        this[attr] = val;
+      }
+    }
+
+    dbconnection.prototype.toJSON = function() {
+      throw new Error('Not yet implemented');
     };
 
     return dbconnection;
