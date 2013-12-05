@@ -16,23 +16,32 @@ module.exports = class dbconnection
     @indexes.push field : field, options: options
 
   # Scan all registered indexes for the current collection and create them.
+  # WARNING: This method is supposed to be called independently from a script
+  #          that runs once (hopefully before running the application) because
+  #          this closes the connection to the database in the end.
   @buildIndexes: ->
     if 0 < @indexes?.length
-      @collection (err, col) =>
+      @get_client (err, db) =>
         throw err if err
-        async.each @indexes, (index, asyncCB) =>
-          col.ensureIndex index.field, index.options, (err, indexName) =>
+        async.each(@indexes, (index, asyncCB) =>
+          db.ensureIndex @colName, index.field, index.options, (err, indexName) =>
             if err
               console.log "Error while creating index on field #{index.field} for collection #{@colName}:"
               console.log err
             else
-              console.log "Created index on field #{index.field} for collection #{@colName} with name #{indexName}"
+              console.log "[#{@colName}.#{index.field}] index created with name #{indexName}."
             asyncCB()
+        , =>
+          db.close()
+        )
 
   # Get DB
-  @get_client: (fn) ->
+  # @param callback receives two arguments:
+  #        `error` an error object (if any error happens when connecting to db).
+  #        `database` the database object.
+  @get_client: (cb) ->
     if dbconnection.db isnt null
-      fn(null, dbconnection.db)
+      cb(null, dbconnection.db)
     else
       # TODO: Retrieve the connection string from an external source!
       MongoClient.connect config.db.uri, (err, db) =>
@@ -40,7 +49,7 @@ module.exports = class dbconnection
           throw err
         else
           dbconnection.db = db
-          fn(null, dbconnection.db)
+          cb(null, dbconnection.db)
 
   # Get collection
   @collection: (cb) ->

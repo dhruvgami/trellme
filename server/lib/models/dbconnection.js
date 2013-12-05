@@ -23,36 +23,38 @@
       var _ref,
         _this = this;
       if (0 < ((_ref = this.indexes) != null ? _ref.length : void 0)) {
-        return this.collection(function(err, col) {
+        return this.get_client(function(err, db) {
           if (err) {
             throw err;
           }
           return async.each(_this.indexes, function(index, asyncCB) {
-            return col.ensureIndex(index.field, index.options, function(err, indexName) {
+            return db.ensureIndex(_this.colName, index.field, index.options, function(err, indexName) {
               if (err) {
                 console.log("Error while creating index on field " + index.field + " for collection " + _this.colName + ":");
                 console.log(err);
               } else {
-                console.log("Created index on field " + index.field + " for collection " + _this.colName + " with name " + indexName);
+                console.log("[" + _this.colName + "." + index.field + "] index created with name " + indexName + ".");
               }
               return asyncCB();
             });
+          }, function() {
+            return db.close();
           });
         });
       }
     };
 
-    dbconnection.get_client = function(fn) {
+    dbconnection.get_client = function(cb) {
       var _this = this;
       if (dbconnection.db !== null) {
-        return fn(null, dbconnection.db);
+        return cb(null, dbconnection.db);
       } else {
         return MongoClient.connect(config.db.uri, function(err, db) {
           if (err) {
             throw err;
           } else {
             dbconnection.db = db;
-            return fn(null, dbconnection.db);
+            return cb(null, dbconnection.db);
           }
         });
       }
