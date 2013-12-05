@@ -18,6 +18,10 @@
 
     Actions.colName = 'actions';
 
+    Actions.index('data.board.id');
+
+    Actions.index('user_id');
+
     Actions.findByBoardId = function(boardId, cb) {
       if (boardId instanceof ObjectID) {
         boardId = boardId.toString();

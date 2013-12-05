@@ -7,7 +7,12 @@ Trellos      = require './trellos'
 GenPassword  = require '../helpers/genpassword'
 
 module.exports = class Users extends dbconnection
+  # - Collection Name - #
   @colName: 'users'
+
+  # - Indexes - #
+  @index 'email', unique: true
+  @index 'settings.daily_email'
 
   # - Class Methods - #
   @userFromMongoDocument: (err, document, cb) ->

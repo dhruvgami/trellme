@@ -18,6 +18,10 @@
 
     Cards.colName = 'cards';
 
+    Cards.index('board_id');
+
+    Cards.index('user_id');
+
     Cards.findByBoardId = function(boardId, cb) {
       if (boardId instanceof ObjectID) {
         boardId = boardId.toString();

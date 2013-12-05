@@ -28,6 +28,12 @@
 
     Users.colName = 'users';
 
+    Users.index('email', {
+      unique: true
+    });
+
+    Users.index('settings.daily_email');
+
     Users.userFromMongoDocument = function(err, document, cb) {
       if (err) {
         return cb(err, null);

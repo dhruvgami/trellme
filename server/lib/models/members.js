@@ -18,6 +18,10 @@
 
     Members.colName = 'members';
 
+    Members.index('member_id');
+
+    Members.index('user_id');
+
     Members.findByMemberId = function(memberId, cb) {
       if (memberId instanceof ObjectID) {
         memberId = memberId.toString();

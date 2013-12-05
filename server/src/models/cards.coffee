@@ -2,8 +2,14 @@ ObjectID = require('mongodb').ObjectID
 db       = require './dbconnection'
 
 module.exports = class Cards extends db
+  # - Collection Name - #
   @colName: 'cards'
 
+  # - Indexes - #
+  @index 'board_id'
+  @index 'user_id'
+
+  # - Class Methods - #
   @findByBoardId: (boardId, cb) ->
     boardId = boardId.toString() if boardId instanceof ObjectID
     @collection (err, col) ->

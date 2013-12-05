@@ -2,8 +2,13 @@ ObjectID = require('mongodb').ObjectID
 db       = require './dbconnection'
 
 module.exports = class Boards extends db
+  # - Collection Name - #
   @colName: 'boards'
 
+  # - Indexes - #
+  @index 'user_id'
+
+  # - Class Methods - #
   # Retrieve all boards that belong to a user
   @findByUserId: (userId, cb) ->
     userId = new ObjectID(userId) if typeof userId is 'string'

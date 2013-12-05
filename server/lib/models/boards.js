@@ -18,6 +18,8 @@
 
     Boards.colName = 'boards';
 
+    Boards.index('user_id');
+
     Boards.findByUserId = function(userId, cb) {
       if (typeof userId === 'string') {
         userId = new ObjectID(userId);

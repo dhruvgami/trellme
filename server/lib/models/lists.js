@@ -18,6 +18,10 @@
 
     Lists.colName = 'lists';
 
+    Lists.index('board_id');
+
+    Lists.index('user_id');
+
     Lists.findByBoardId = function(boardId, cb) {
       if (boardId instanceof ObjectID) {
         boardId = boardId.toString();
