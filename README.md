@@ -35,4 +35,4 @@ $ cd server/
 $ node ./lib/app.js
 ```
 
-The application will be running by default under port 300, so access `http://localhost:3000/` from your browser.
+The application will be running by default under port 3000, so access `http://localhost:3000/` from your browser.
