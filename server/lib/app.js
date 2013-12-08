@@ -308,7 +308,7 @@
               mailtext = MailService.template({
                 content: result
               });
-              mailservice.send(mailtext, user.email, config.mail.due_notify_subject);
+              // mailservice.send(mailtext, user.email, config.mail.due_notify_subject);
               return console.log("Due notification sent to " + user.email);
             }
           });
@@ -338,7 +338,7 @@
   } else if (cluster.isWorker) {
     console.log("worker(" + cluster.worker.id + ")");
     if (cluster.worker.id === 2) {
-      notificationLoop();
+      //notificationLoop();
     }
   }
 

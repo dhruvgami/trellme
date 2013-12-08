@@ -1,5 +1,5 @@
 {
-  "api_host"      : "localhost:3000",
+  "api_host"      : "dev.trellme.com:3000",
   "mail_interval" : 86400000,
   "trello"        : {
     "appName"      : "TrellMe",
