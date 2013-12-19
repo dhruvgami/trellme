@@ -6,13 +6,16 @@ module.exports = function(config) {
 
     files: [
       'test/test_helper.js',
-      'vendor/angular/angular.js',
-      'vendor/**/*.js',
-      'src/app/trellme.js',
+      'bower_components/angular/angular.js',
+      'bower_components/angular-route/angular-route.js',
+      'bower_components/angular-mocks/angular-mocks.js',
+      'bower_components/lodash/dist/lodash.min.js',
+      'bower_components/jquery/jquery.min.js',
+      'bower_components/bootstrap/dist/js/bootstrap.js',
       'src/app/reports/reports.js',
       'src/app/user_settings/user_settings.js',
+      'src/app/trellme.js',
       'src/**/*.js',
-      'test/vendor/angular/angular.mocks.js',
       'test/unit/**/*Spec.js'
     ],
 
