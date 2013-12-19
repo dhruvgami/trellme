@@ -1,0 +1,29 @@
+{
+  "name": "trellme-client",
+  "version": "1.0.0",
+  "homepage": "https://github.com/dhruvgami/trellme",
+  "authors": [
+    "Dhruv Gami <dhruvgami@gmail.com>"
+  ],
+  "description": "Trello info mailer",
+  "keywords": [
+    "trello",
+    "mailer"
+  ],
+  "license": "None",
+  "private": true,
+  "dependencies" : {
+    "angular"       : "1.2.3",
+    "angular-route" : "1.2.3",
+    "lodash"        : "2.4.1",
+    "jquery"        : "2.0.3",
+    "bootstrap"     : "3.0.3"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

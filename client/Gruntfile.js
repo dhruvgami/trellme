@@ -4,8 +4,11 @@ module.exports = function(grunt) {
     concat : {
       js : {
         src : [
-          'vendor/angular/angular.js',
-          'vendor/**/*.js',
+          'bower_components/lodash/dist/lodash.min.js',
+          'bower_components/angular/angular.min.js',
+          'bower_components/angular-route/angular-route.min.js',
+          'bower_components/jquery/jquery.min.js',
+          'bower_components/bootstrap/dist/js/bootstrap.min.js',
           'src/app/reports/reports.js',
           'src/app/user_settings/user_settings.js',
           'src/app/trellme.js',
