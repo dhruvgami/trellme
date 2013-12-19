@@ -1,0 +1,58 @@
+<!doctype html>
+<html ng-app="trellme">
+  <head>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/trellme.css">
+    <title>TrellMe - Reporting Tool for your Trello Boards</title>
+  </head>
+  <body ng-controller="AppCtrl">
+    <spinner></spinner>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <b class="brand" style="font-size:3em;">TrellMe</b>
+          <ul class="nav pull-right">
+            <li ng-hide="session.loggedIn"><a href="/#/signin">Sign In</a></li>
+            <li ng-hide="session.loggedIn"><a href="/#/signup">Sign Up</a></li>
+            <li ng-show="session.loggedIn"><a href="/#/reports">Reports</a></li>
+            <li ng-show="session.loggedIn"><a href="/#/settings">Settings</a></li>
+            <li ng-show="session.loggedIn"><a href="/#/" ng-click="signout()">Sign Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row" ng-view>
+      </div><!-- End main AngularJS view. -->
+      <div id="footer">
+        <p>
+          TrellMe is a reporting tool to get snapshots of your Trello Boards on
+          the web and as a daily email. You can see progress on the tool's
+          development on our <a href="https://trello.com/board/trellme-development/51c871f449b009200c000d39">Trello Board</a>
+          and provide feedback on it.
+        </p>
+        <p>
+          <span style="font-size: 10px">
+            &copy; 2013 TrellMe.com. TrellMe is an independent project and not
+            affiliated with Trello or Fog Creek Software in any way.
+          </span>
+        </p>
+      </div>
+
+    </div> <!--container-->
+
+    <script src="trellme.js"></script>
+
+    <!-- TODO: Maybe move this into a directive? -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-41970615-2', 'trellme.com');
+      ga('send', 'pageview');
+    </script>
+  </body>
+</html>
