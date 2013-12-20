@@ -1,102 +1,104 @@
-<div class="manual-sync well" ng-show="userSettings.manualSyncEnabled()">
-  <button class="btn btn-success" ng-click="sync()">Fetch from Trello</button>
-</div>
-
-<h3>Reports</h3>
-<hr />
-
-<h3>Due Today</h3>
-<div ng-hide="reports.due.today.length > 0">
-  No cards due today.
-</div>
-<div class="due-cards due-today" ng-show="reports.due.today.length > 0">
-  <p ng-repeat="card in reports.due.today">
-  <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
-  <span class="list">
-    List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
-  </span>
-  <span>Due: {{card.due}}</span>
-  <span>Assigned To: {{card.assigned_to}}</span>
-  </p>
-</div>
-<hr />
-
-<h3>Due Soon</h3>
-<div ng-hide="reports.due.soon.length > 0">
-  No cards due soon.
-</div>
-<div class="due-cards due-soon" ng-show="reports.due.soon.length > 0">
-  <p ng-repeat="card in reports.due.soon">
-  <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
-  <span class="list">
-    List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
-  </span>
-  <span>Due: {{card.due}}</span>
-  <span>Assigned To: {{card.assigned_to}}</span>
-  </p>
-</div>
-<hr />
-
-
-<h3>Past Due</h3>
-<div ng-hide="reports.due.past.length > 0">
-  No cards past due.
-</div>
-<div class="due-cards due-past" ng-show="reports.due.past.length > 0">
-  <p ng-repeat="card in reports.due.past">
-  <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
-  <span class="list">
-    List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
-  </span>
-  <span>Due: {{card.due}}</span>
-  <span>Assigned To: {{card.assigned_to}}</span>
-  </p>
-</div>
-<hr />
-
-<h3>Recent Activities</h3>
-<div ng-repeat="board in reports.boards">
-  <h4>Board: {{board.organization}} / {{board.name}}</h4>
-
-  <div class="activity" ng-repeat="activity in board.recent_activity">
-    <b>{{activity.full_name}}</b>
-    {{activity.data.text}}
-    {{activity.action}}
-    <br />
-    <span class="date">{{activity.date}}</span>
+<div class="white container">
+  <div class="manual-sync well" ng-show="userSettings.manualSyncEnabled()">
+    <button class="btn btn-success" ng-click="sync()">Fetch from Trello</button>
   </div>
-</div>
 
-<h3>Boards Snapshot</h3>
-<hr />
+  <h3>Reports</h3>
+  <hr />
 
-<div ng-repeat="board in reports.boards">
-  <h4>Board: {{board.organization}} / {{board.name}}</h4>
+  <h3>Due Today</h3>
+  <div ng-hide="reports.due.today.length > 0">
+    No cards due today.
+  </div>
+  <div class="due-cards due-today" ng-show="reports.due.today.length > 0">
+    <p ng-repeat="card in reports.due.today">
+    <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
+    <span class="list">
+      List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
+    </span>
+    <span>Due: {{card.due}}</span>
+    <span>Assigned To: {{card.assigned_to}}</span>
+    </p>
+  </div>
+  <hr />
 
-  <div ng-repeat="list in board.lists">
-    <b>
-      <span>List:</spa>
-      <i>{{list.name}}</i>
-      <span ng-hide="list.cards.length > 0">has no cards.</span>
-    </b>
+  <h3>Due Soon</h3>
+  <div ng-hide="reports.due.soon.length > 0">
+    No cards due soon.
+  </div>
+  <div class="due-cards due-soon" ng-show="reports.due.soon.length > 0">
+    <p ng-repeat="card in reports.due.soon">
+    <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
+    <span class="list">
+      List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
+    </span>
+    <span>Due: {{card.due}}</span>
+    <span>Assigned To: {{card.assigned_to}}</span>
+    </p>
+  </div>
+  <hr />
 
-    <table class="table table-striped table-bordered" ng-show="list.cards.length > 0">
-      <thead>
-        <tr>
-          <th>Card</th>
-          <th>Asignee</th>
-          <th>Due Date</th>
-          <th>Comments</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="card in list.cards">
-          <td>{{card.name}}</td>
-          <td>{{card.asignee}}</td>
-          <td>{{card.due}}</td>
-          <td>{{card.comments_count}} comments</td>
-        </tr>
-      </tbody>
-    </table>
+
+  <h3>Past Due</h3>
+  <div ng-hide="reports.due.past.length > 0">
+    No cards past due.
+  </div>
+  <div class="due-cards due-past" ng-show="reports.due.past.length > 0">
+    <p ng-repeat="card in reports.due.past">
+    <span>Card: <a ng-href="{{card.url}}">{{card.name}}</a></span>
+    <span class="list">
+      List: {{card.org_name}} / <a ng-href="{{card.board_url}}">{{card.board}}</a> / <a ng-href="{{card.list_url}}">{{card.list}}</a>
+    </span>
+    <span>Due: {{card.due}}</span>
+    <span>Assigned To: {{card.assigned_to}}</span>
+    </p>
+  </div>
+  <hr />
+
+  <h3>Recent Activities</h3>
+  <div ng-repeat="board in reports.boards">
+    <h4>Board: {{board.organization}} / {{board.name}}</h4>
+
+    <div class="activity" ng-repeat="activity in board.recent_activity">
+      <b>{{activity.full_name}}</b>
+      {{activity.data.text}}
+      {{activity.action}}
+      <br />
+      <span class="date">{{activity.date}}</span>
+    </div>
+  </div>
+
+  <h3>Boards Snapshot</h3>
+  <hr />
+
+  <div ng-repeat="board in reports.boards">
+    <h4>Board: {{board.organization}} / {{board.name}}</h4>
+
+    <div ng-repeat="list in board.lists">
+      <b>
+        <span>List:</spa>
+        <i>{{list.name}}</i>
+        <span ng-hide="list.cards.length > 0">has no cards.</span>
+      </b>
+
+      <table class="table table-striped table-bordered" ng-show="list.cards.length > 0">
+        <thead>
+          <tr>
+            <th>Card</th>
+            <th>Asignee</th>
+            <th>Due Date</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="card in list.cards">
+            <td>{{card.name}}</td>
+            <td>{{card.asignee}}</td>
+            <td>{{card.due}}</td>
+            <td>{{card.comments_count}} comments</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

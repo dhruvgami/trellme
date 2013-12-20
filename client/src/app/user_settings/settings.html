@@ -1,62 +1,64 @@
-<form class="form-horizontal" ng-submit="save()" novalidate>
-  <legend>Settings</legend>
-  <div class="alert alert-error" ng-show="saveFailed" ng-click="saveFailed = false">
-    Your settings couldn't be saved. Please, try again later.
-  </div>
-
-  <div class="alert alert-success" ng-show="saveSucceeded" ng-click="saveSucceeded = false">
-    Your settings were successfully saved.
-  </div>
-
-  <!-- Daily Email -->
-  <div class="control-group">
-    <div class="controls">
-      <label class="checkbox">
-        <input type="checkbox" ng-model="settings.daily_email">
-        Daily Email
-        <p><small>Receivy a daily email with your Trellme Reports.</small></p>
-      </label>
+<div class="white container">
+  <form class="form-horizontal" ng-submit="save()" novalidate>
+    <legend>Settings</legend>
+    <div class="alert alert-error" ng-show="saveFailed" ng-click="saveFailed = false">
+      Your settings couldn't be saved. Please, try again later.
     </div>
-  </div>
-  <!-- End Daily Email -->
 
-  <!-- Manual Sync -->
-  <div class="control-group">
-    <div class="controls">
-      <label class="checkbox">
-        <input type="checkbox" ng-model="settings.manual_sync">
-        Manual Sync
-        <p>
-          <small>
-            Check this option if you would like to manually fetch your latest
-            Trello boards, cards, activities, etc.
-            <br />
-            <b>Note:</b> This will significantly increase your reports page load
-            speed as Trellme won't pull your information from Trello every time
-            you access the reports page but the information may be out of sync.
-          </small>
-        </p>
-      </label>
+    <div class="alert alert-success" ng-show="saveSucceeded" ng-click="saveSucceeded = false">
+      Your settings were successfully saved.
     </div>
-  </div>
-  <!-- End Manual Sync -->
 
-  <div ng-hide="settings.boards.length === 0">
-    <legend>Which boards would you like to include in your report?</legend>
-
-    <!-- Boards Settings -->
+    <!-- Daily Email -->
     <div class="control-group">
       <div class="controls">
-        <label class="checkbox" ng-repeat="board in settings.boards">
-          <input type="checkbox" ng-model="board.enabled">
-          {{board.name}}
+        <label class="checkbox">
+          <input type="checkbox" ng-model="settings.daily_email">
+          Daily Email
+          <p><small>Receivy a daily email with your Trellme Reports.</small></p>
         </label>
       </div>
     </div>
-    <!-- End Boards Settings -->
-  </div>
+    <!-- End Daily Email -->
 
-  <div class="form-actions">
-    <button type="submit" class="btn btn-large btn-primary">Save</button>
-  </div>
-</form>
+    <!-- Manual Sync -->
+    <div class="control-group">
+      <div class="controls">
+        <label class="checkbox">
+          <input type="checkbox" ng-model="settings.manual_sync">
+          Manual Sync
+          <p>
+            <small>
+              Check this option if you would like to manually fetch your latest
+              Trello boards, cards, activities, etc.
+              <br />
+              <b>Note:</b> This will significantly increase your reports page load
+              speed as Trellme won't pull your information from Trello every time
+              you access the reports page but the information may be out of sync.
+            </small>
+          </p>
+        </label>
+      </div>
+    </div>
+    <!-- End Manual Sync -->
+
+    <div ng-hide="settings.boards.length === 0">
+      <legend>Which boards would you like to include in your report?</legend>
+
+      <!-- Boards Settings -->
+      <div class="control-group">
+        <div class="controls">
+          <label class="checkbox" ng-repeat="board in settings.boards">
+            <input type="checkbox" ng-model="board.enabled">
+            {{board.name}}
+          </label>
+        </div>
+      </div>
+      <!-- End Boards Settings -->
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-large btn-primary">Save</button>
+    </div>
+  </form>
+</div>
