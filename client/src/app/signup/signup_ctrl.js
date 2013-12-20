@@ -29,7 +29,7 @@
                   if ($scope.popup.closed) {
                     $scope.popup = null;
                     clearInterval(checkClose);
-                    $location.path('/signin');
+                    $window.alert('Signed up successfully!');
                   }
                 }
               });
