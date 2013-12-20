@@ -12,7 +12,9 @@
     'directives.spinner'
     ]).
     config(['$routeProvider', function($router) {
-      $router.otherwise({ redirectTo : '/signin' });
+      $router.when('/', {
+        templateUrl : '/src/app/common/views/home.html'
+      });
     }]).
     run(['UserSession', function(UserSession) {
       UserSession.bootstrap();

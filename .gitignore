@@ -11,3 +11,6 @@
 
 # Ignore config file which may include production credentials.
 /server/config/config.json
+
+# Ignore TODO file.
+/TODO
