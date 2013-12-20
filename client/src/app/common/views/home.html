@@ -1,33 +1,5 @@
 <!-- Login Dialog -->
-<div id="login-box" class="login-popup">
-  <a href="#" class="close"><img src="close_pop.png" class="btn_close" title="Close Window" alt="Close" /></a>
-  <form class="signin" name="form" ng-controller="SigninCtrl" ng-submit="signin()" novalidate>
-    <div class="control-group">
-        <label class="control-label username" for="email">
-        <span>Email</span></label>
-        <div class="controls">
-            <input type="email" ng-model="email" ng-required="true" autocomplete="on" placeholder="Enter your email address">
-        </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label password" for="password">
-        <span>Password</span>
-      </label>
-      <div class="controls">
-        <input type="password" ng-model="password" ng-required="true" placeholder="Enter your password" />
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button class="btn btn-primary submit button" type="submit" ng-disabled="form.$invalid || form.$pristine">Sign In</button>
-      <!--
-      <p>
-      <a class="forgot" href="#">Forgot your password?</a>
-      </p>
-      -->
-    </div>
-  </form>
+<div id="login-box" class="login-popup" ng-include="'/src/app/common/views/signin.html'">
 </div>
 <!-- End Login Dialog -->
 
@@ -175,36 +147,11 @@
 <div id="footer">
   <div class="container">
     <div class="row">
-      <div class="span6 contact_us">
-        <h3>Sign Up</h3>
-
-        <form class="form-horizontal">
-          <div class="field">
-            <div class="label_field">
-              <label for="inputEmail">Email</label>
-            </div>
-            <input type="text" id="inputEmail" />
-          </div>
-
-          <div class="field">
-            <div class="label_field">
-              <label for="inputPassword">Password</label>
-            </div>
-            <input type="text" id="inputPassword" />
-            <p><i>This password need not be the same as your Trello credentials</i></p>
-          </div>
-
-          <div class="field">
-            <div class="label_field">
-              <label for="inputTrello">Trello Username</label>
-            </div>
-            <input type="text" id="inputTrello" />
-          </div>
-          <button type="submit" class="btn">Sign Up</button>
-          <br /><br />
-          <p><i>When you hit Sign Up, you'll be redirected to Trello to authorize access to your account information. You will need to allow access for TrellMe to function and provide you reports and notification services.</i></p>
-        </form>
+      <!-- Sign Up Form -->
+      <div class="span6 contact_us" ng-include="'/src/app/common/views/signup.html'">
       </div>
+      <!-- End Sign Up Form -->
+
       <div class="span6">
         <h3>The TrellMe Development Board</h3>
         <div class="blog_post">

@@ -1,0 +1,44 @@
+<h3>Sign Up</h3>
+<form class="form-horizontal" name="form" ng-controller="SignupCtrl" ng-submit="signup()">
+  <div class="field">
+    <div class="label_field">
+      <label for="email">Email</label>
+    </div>
+    <input
+      type="email"
+      name="email"
+      ng-model="user.email"
+      ng-required="true" />
+  </div>
+
+  <div class="field">
+    <div class="label_field">
+      <label for="password">Password</label>
+    </div>
+    <input type="password"
+      name="password"
+      ng-model="user.password"
+      ng-required="true" />
+    <p><i>This password need not be the same as your Trello credentials</i></p>
+  </div>
+
+  <div class="field">
+    <div class="label_field">
+      <label for="trello_username">Trello Username</label>
+    </div>
+    <input type="text"
+      name="trello_username"
+      ng-model="user.trello_username"
+      ng-required="true"/>
+  </div>
+
+  <button
+    type="submit"
+    class="btn"
+    ng-disabled="form.$invalid || form.$pristine">Sign up</button>
+
+  <br />
+  <br />
+
+  <p><i>When you hit Sign Up, you'll be redirected to Trello to authorize access to your account information. You will need to allow access for TrellMe to function and provide you reports and notification services.</i></p>
+</form>

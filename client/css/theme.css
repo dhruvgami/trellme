@@ -507,6 +507,10 @@ input[type="color"]:focus,
 	width: 80px;
 }
 #footer .contact_us .field input[type="text"],
+#footer .contact_us .field input[type="email"],
+#footer .contact_us .field input[type="password"],
+#footer .contact_us .field input[type="number"],
+#footer .contact_us .field input[type="phone"],
 #footer .contact_us .field textarea {
 	background-color: #1a1f26;
 	border: 1px solid #2f3743;
