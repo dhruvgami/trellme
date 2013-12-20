@@ -47,7 +47,7 @@
           $httpBackend.expectDELETE(UserSession.logoutUrl()).respond(200);
           $scope.signout();
           $httpBackend.flush();
-          expect($location.path).toHaveBeenCalledWith('/signin');
+          expect($location.path).toHaveBeenCalledWith('/');
         });
       });
 

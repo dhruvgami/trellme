@@ -8,7 +8,7 @@
         UserSession.
           logout().
           then(function() {
-            $location.path('/signin');
+            $location.path('/');
           }, function(error) {
             $window.alert(error.message);
           });
