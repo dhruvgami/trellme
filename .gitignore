@@ -2,6 +2,9 @@
 /server/node_modules
 /client/node_modules
 
+# Ignore packages installed by bower
+/client/bower_components
+
 # Ignore npm log
 /server/npm-debug.log
 /client/npm-debug.log
