@@ -33,6 +33,9 @@
               <li ng-hide="session.loggedIn"><a href="#" class="scroller" data-section="#features">Features</a></li>
               <li ng-hide="session.loggedIn"><a class="btn-header scroller" href="#" data-section="#footer">Sign up</a></li>
               <li ng-hide="session.loggedIn"><a class="btn-header login-window" href="#login-box">Sign in</a></li>
+              <li ng-show="session.loggedIn"><a class="btn-header" href="/#/reports">Reports</a></li>
+              <li ng-show="session.loggedIn"><a class="btn-header" href="/#/settings">Settings</a></li>
+              <li ng-show="session.loggedIn"><a class="btn-header" href="/#/" ng-click="signout()">Sign Out</a></li>
             </ul>
           </div>
         </div>
