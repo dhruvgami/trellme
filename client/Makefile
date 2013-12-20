@@ -1,7 +1,7 @@
 PATH := ./node_modules/.bin:${PATH}
 
 init:
-	npm install
+	npm install && bower install
 
 build:
 	grunt concat:js

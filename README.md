@@ -6,7 +6,7 @@ Trellme
 ### Setup instructions for the server application:
 ```bash
 $ cd server/
-$ make init  # This is going to install the required NodeJS packages.
+$ make init  # This is going to install the required NodeJS and Bower packages.
 $ make build # This is going to compile the CoffeeScript app into plain Javascript.
 ```
 ---
