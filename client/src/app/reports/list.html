@@ -1,6 +1,7 @@
 <div class="white container">
-  <div class="manual-sync well" ng-show="userSettings.manualSyncEnabled()">
-    <button class="btn btn-success" ng-click="sync()">Fetch from Trello</button>
+  <div class="manual-sync well">
+    <button class="btn btn-success" ng-click="sync()" ng-show="userSettings.manualSyncEnabled()">Fetch from Trello</button>
+    <a class="btn btn-primary" href="/#/reports/advanced">Advanced Reports</a>
   </div>
 
   <h3>Reports</h3>

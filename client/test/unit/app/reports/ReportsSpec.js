@@ -45,7 +45,25 @@
             expect(route.templateUrl).toBe('/src/app/reports/list.html');
           });
         });
+      }); /* End /reports */
+
+      describe('/reports/advanced', function() {
+        beforeEach(function() {
+          route = routes['/reports/advanced'];
+        });
+
+        describe('controller', function() {
+          it('should be AdvancedReportsCtrl', function() {
+            expect(route.controller).toBe('AdvancedReportsCtrl');
+          });
+        });
+
+        describe('templateUrl', function() {
+          it('should be /src/app/reports/advanced.html', function() {
+            expect(route.templateUrl).toBe('/src/app/reports/advanced.html');
+          });
+        });
       });
-    });
+    }); /* End routes */
   });
 }());

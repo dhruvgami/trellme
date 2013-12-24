@@ -1,0 +1,27 @@
+<div class="white container">
+  <form class="form-horizontal" name="form" ng-submit="getReport()" novalidate>
+    <legend>Advanced Reports</legend>
+
+    <div class="control-group">
+      <label class="control-label">From:</label>
+      <div class="controls">
+        <select class="span2" ng-model="from.month" ng-options="m.value as m.name for m in months"></select>
+        <select class="span2" ng-model="from.year" ng-options="year for year in years"></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label">To:</label>
+      <div class="controls">
+        <select class="span2" ng-model="to.month" ng-options="m.value as m.name for m in months"></select>
+        <select class="span2" ng-model="to.year" ng-options="year for year in years"></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="controls">
+        <button class="btn btn-inverse span3" type="submit">Get Report</button>
+      </div>
+    </div>
+  </form>
+</div>

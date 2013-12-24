@@ -31,10 +31,16 @@
         return deferred.promise;
       };
 
-      Report.reports = function() {
-        var deferred = $q.defer();
+      Report.reports = function(params) {
+        var deferred = $q.defer(),
+            opts     = {};
+
+        if (_.isObject(params)) {
+          opts = { params : params };
+        }
+
         $http.
-          get(Report.reportsUrl()).
+          get(Report.reportsUrl(), opts).
           then(function(response) {
             deferred.resolve(response.data);
           }, function(response) {

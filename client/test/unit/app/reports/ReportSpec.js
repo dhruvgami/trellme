@@ -88,6 +88,19 @@
         expect(r).toBeAPromise();
       });
 
+      describe('given extra params "to" and "from" are passed as argument', function() {
+        it('should send it to the server via GET', function() {
+          var params = {
+                from : { year : 2012, month : 12 },
+                to   : { year : 2013, month : 12 }
+              },
+              expectedURL = new RegExp(Report.reportsUrl());
+          $httpBackend.expectGET(expectedURL).respond(200);
+          Report.reports(params);
+          $httpBackend.flush();
+        });
+      });
+
       describe('given the server responds with success', function() {
         it('should resolve the promise with data returned from server', function() {
           var promiseData,
