@@ -253,6 +253,22 @@
     });
   });
 
+  app.get(/^\/app\/trello\/reports\/from\/(\d{4})\/(\d{2})\/(\d{2})\/to\/(\d{4})\/(\d{2})\/(\d{2})$/, authRequired, function(req, res) {
+    var dateRange;
+    dateRange = {
+      from: [req.params[0], req.params[1], req.params[2]].join('-'),
+      to: [req.params[3], req.params[4], req.params[5]].join('-')
+    };
+    return new TrelloView().getReports(req.user._id, dateRange, function(err, result) {
+      if (err) {
+        res.status(500);
+        return res.send(err);
+      } else {
+        return res.json(result);
+      }
+    });
+  });
+
   app.get("/app/trello/((\\w+))/(([A-Za-z0-9_\\.\\-@]+))", function(req, res) {
     var _this = this;
     return Users.findByEmail({
@@ -308,7 +324,7 @@
               mailtext = MailService.template({
                 content: result
               });
-              // mailservice.send(mailtext, user.email, config.mail.due_notify_subject);
+              mailservice.send(mailtext, user.email, config.mail.due_notify_subject);
               return console.log("Due notification sent to " + user.email);
             }
           });
@@ -338,7 +354,7 @@
   } else if (cluster.isWorker) {
     console.log("worker(" + cluster.worker.id + ")");
     if (cluster.worker.id === 2) {
-      //notificationLoop();
+      notificationLoop();
     }
   }
 

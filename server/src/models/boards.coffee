@@ -18,13 +18,26 @@ module.exports = class Boards extends db
         find({ user_id : userId }).
         toArray(cb)
 
-  # Retrieve all boards that belong to a user and that are enabled.
-  @findEnabledByUserId: (userId, cb) ->
-    userId = new ObjectID(userId) if typeof userId is 'string'
+  # Retrieve all boards that belong to a user, that are enabled and that are
+  # in the given date range (if given).
+  @findEnabledByUserId: (userId, dateRange, cb) ->
+    if typeof dateRange is 'function'
+      cb        = dateRange
+      dateRange = {}
+
+    options =
+      user_id : userId
+      enabled : true
+
+    if dateRange.from and dateRange.to
+      options['boards.dateLastActivity'] =
+        $gte : dateRange.from
+        $lte : dateRange.to
+
     @collection (err, col) ->
       return cb(err, null) if err
       col.
-        find({ user_id : userId, enabled : true }).
+        find(options).
         toArray(cb)
 
   # Update a board

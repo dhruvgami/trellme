@@ -16,13 +16,56 @@ Lists        = require './lists'
 Members      = require './members'
 
 module.exports = class Trellos extends dbconnection
+  # - Class Methods - #
+  @getAllData: (userId, dateRange, cb) ->
+    data =
+      actions : []
+      boards  : []
+      cards   : []
+      lists   : []
+      members : []
+    append = (key, val) ->
+      data[key] = _(data[key]).union val if _(val).isArray()
 
-  #
-  # Constructor
-  #
-  constructor: ->
-    super()
+    # We retrieve only those boards the users want in their reports (enabled boards).
+    # Once we've got the enabled boards with us, we need to scope lists, cards,
+    # actions, members and any other information required in the report
+    # scoped to those enabled boards.
+    Boards.findEnabledByUserId userId, dateRange, (err, boards) ->
+      return cb(err, null) if err
+      if boards.length is 0
+        cb null, data
+      else
+        async.each(boards, (board, asyncCB) ->
+          boardId = board.boards.id
+          async.parallel([
+            (callback) ->
+               Actions.findByBoardId boardId, (err, results) ->
+                 append('actions', results)
+                 callback(err)
+            , (callback) ->
+              append('boards', boards)
+              callback null
+            , (callback) ->
+              Cards.findByBoardId boardId, (err, results) ->
+                append('cards', results)
+                callback err
+            , (callback) ->
+              Lists.findByBoardId boardId, (err, results) ->
+                append('lists', results)
+                callback err
+            , (callback) ->
+              Members.findByUserId userId, (err, results) ->
+                append('members', results)
+                callback err
+          ], (err) ->
+            asyncCB err
+          )
+        , (err) ->
+          cb(err, data)
+        )
 
+  # - Instance Methods - #
   #
   # Save member data related to a user
   # user_id: user ID in ObjectID type
@@ -342,53 +385,6 @@ module.exports = class Trellos extends dbconnection
             cursor.toArray (err, items) =>
               fn(err, items)  # items is an array
 
-
-  @getAllData: (userId, cb) ->
-    data =
-      actions : []
-      boards  : []
-      cards   : []
-      lists   : []
-      members : []
-    append = (key, val) ->
-      data[key] = _(data[key]).union val if _(val).isArray()
-    # We retrieve only those boards the users want in their reports (enabled boards).
-    # Once we've got the enabled boards with us, we need to scope lists, cards,
-    # actions, members and any other information required in the report
-    # scoped to those enabled boards.
-    Boards.findEnabledByUserId userId, (err, boards) ->
-      return cb(err, null) if err
-      if boards.length is 0
-        cb null, data
-      else
-        async.each(boards, (board, asyncCB) ->
-          boardId = board.boards.id
-          async.parallel([
-            (callback) ->
-               Actions.findByBoardId boardId, (err, results) ->
-                 append('actions', results)
-                 callback(err)
-            , (callback) ->
-              append('boards', boards)
-              callback null
-            , (callback) ->
-              Cards.findByBoardId boardId, (err, results) ->
-                append('cards', results)
-                callback err
-            , (callback) ->
-              Lists.findByBoardId boardId, (err, results) ->
-                append('lists', results)
-                callback err
-            , (callback) ->
-              Members.findByUserId userId, (err, results) ->
-                append('members', results)
-                callback err
-          ], (err) ->
-            asyncCB err
-          )
-        , (err) ->
-          cb(err, data)
-        )
 
   #
   # Load up all data from DB. This method blocks untill everything is done.

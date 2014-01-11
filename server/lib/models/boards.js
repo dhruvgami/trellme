@@ -34,18 +34,27 @@
       });
     };
 
-    Boards.findEnabledByUserId = function(userId, cb) {
-      if (typeof userId === 'string') {
-        userId = new ObjectID(userId);
+    Boards.findEnabledByUserId = function(userId, dateRange, cb) {
+      var options;
+      if (typeof dateRange === 'function') {
+        cb = dateRange;
+        dateRange = {};
+      }
+      options = {
+        user_id: userId,
+        enabled: true
+      };
+      if (dateRange.from && dateRange.to) {
+        options['boards.dateLastActivity'] = {
+          $gte: dateRange.from,
+          $lte: dateRange.to
+        };
       }
       return this.collection(function(err, col) {
         if (err) {
           return cb(err, null);
         }
-        return col.find({
-          user_id: userId,
-          enabled: true
-        }).toArray(cb);
+        return col.find(options).toArray(cb);
       });
     };
 

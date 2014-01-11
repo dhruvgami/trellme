@@ -421,12 +421,9 @@
       return (sorted.slice(sorted.length - size, len)).reverse();
     };
 
-    TrelloView.prototype.getReports = function(userId, cb) {
+    TrelloView.prototype.getReports = function(userId, dateRange, cb) {
       var _this = this;
-      if (typeof userId === 'string') {
-        userId = new ObjectID(userId);
-      }
-      return Trellos.getAllData(userId, function(err, data) {
+      return Trellos.getAllData(userId, dateRange, function(err, data) {
         var dueCards, reports;
         if (err) {
           return cb(err, null);

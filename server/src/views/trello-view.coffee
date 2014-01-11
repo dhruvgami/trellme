@@ -364,9 +364,8 @@ module.exports = class TrelloView
             size = 5
         (sorted.slice(sorted.length - size, len)).reverse()
 
-    getReports: (userId, cb) ->
-      userId = new ObjectID(userId) if typeof userId is 'string'
-      Trellos.getAllData userId, (err, data) =>
+    getReports: (userId, dateRange, cb) ->
+      Trellos.getAllData userId, dateRange, (err, data) =>
         return cb(err, null) if err
 
         reports =

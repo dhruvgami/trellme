@@ -222,6 +222,35 @@ app.get "/app/trello/reports", authRequired, (req, res) ->
     else
       res.json result
 
+# Returns a JSON representation with the activity in boards given a date range (YYYY-MM-DD)
+# Ex: /app/trello/reports/from/2013/12/10/to/2013/12/24
+# will return activity from 2013-Dic-10 to 2013-Dic-24
+app.get ///
+    ^
+    /app
+    /trello
+    /reports
+    /from
+    /(\d{4})
+    /(\d{2})
+    /(\d{2})
+    /to
+    /(\d{4})
+    /(\d{2})
+    /(\d{2})
+    $
+  ///, authRequired, (req, res) ->
+    dateRange =
+      from : [req.params[0], req.params[1], req.params[2]].join('-')
+      to   : [req.params[3], req.params[4], req.params[5]].join('-')
+
+    new TrelloView().getReports req.user._id, dateRange, (err, result) ->
+      if err
+        res.status 500
+        res.send err
+      else
+        res.json result
+
 # Get Trello stuff of a user
 # First param: boards, lists, cards
 # Second param: username (email)
