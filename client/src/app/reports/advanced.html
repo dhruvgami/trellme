@@ -1,10 +1,11 @@
 <div class="white container">
-  <form class="form-horizontal" name="form" ng-submit="getReport()" novalidate>
+  <form class="form-horizontal" name="form" ng-submit="getReports()" novalidate>
     <legend>Advanced Reports</legend>
 
     <div class="control-group">
       <label class="control-label">From:</label>
       <div class="controls">
+        <select class="span2" ng-model="from.day" ng-options="day for day in days"></select>
         <select class="span2" ng-model="from.month" ng-options="m.value as m.name for m in months"></select>
         <select class="span2" ng-model="from.year" ng-options="year for year in years"></select>
       </div>
@@ -13,6 +14,7 @@
     <div class="control-group">
       <label class="control-label">To:</label>
       <div class="controls">
+        <select class="span2" ng-model="to.day" ng-options="day for day in days"></select>
         <select class="span2" ng-model="to.month" ng-options="m.value as m.name for m in months"></select>
         <select class="span2" ng-model="to.year" ng-options="year for year in years"></select>
       </div>
@@ -20,8 +22,31 @@
 
     <div class="control-group">
       <div class="controls">
-        <button class="btn btn-inverse span3" type="submit">Get Report</button>
+        <button class="btn btn-inverse span3" type="submit">Get Reports</button>
       </div>
     </div>
   </form>
+
+  <hr />
+
+  <div class="reports">
+    <div class="alert alert-warning" ng-show="noRecordsFound">
+      <p><b>No reports found for this date range.</b></p>
+    </div>
+
+    <div class="board" ng-repeat="board in reports.boards">
+      <p>Activity feed for <b>{{board.name}}</b> board:</p>
+      <table class="table table-bordered table-condensed table-striped">
+        <tbody>
+          <tr ng-repeat="activity in board.recent_activity">
+            <td>
+              <b>{{activity.full_name}}</b>
+              &nbsp;{{activity.action}}
+              &nbsp;on {{activity.date}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
