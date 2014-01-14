@@ -1,3 +1,4 @@
+_        = require('underscore')
 ObjectID = require('mongodb').ObjectID
 db       = require './dbconnection'
 
@@ -21,7 +22,7 @@ module.exports = class Boards extends db
   # Retrieve all boards that belong to a user, that are enabled and that are
   # in the given date range (if given).
   @findEnabledByUserId: (userId, dateRange, cb) ->
-    if typeof dateRange is 'function'
+    if _.isFunction dateRange
       cb        = dateRange
       dateRange = {}
 

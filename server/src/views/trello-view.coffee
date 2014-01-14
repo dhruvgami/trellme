@@ -365,6 +365,10 @@ module.exports = class TrelloView
         (sorted.slice(sorted.length - size, len)).reverse()
 
     getReports: (userId, dateRange, cb) ->
+      if _.isFunction dateRange
+        cb        = dateRange
+        dateRange = {}
+
       Trellos.getAllData userId, dateRange, (err, data) =>
         return cb(err, null) if err
 
@@ -422,7 +426,6 @@ module.exports = class TrelloView
 
                 # Due stat
                 wtf = @collect_cards_per_due all.cards, user.tzdiff  # DEBUG
-                #console.log(wtf)
                 htmls.push '<h5><i>Due Today</i></h5>'
                 htmls.push @list_cards_dueform all, wtf.today, user.tzdiff
                 htmls.push '<h5><i>Due Soon</i></h5>'
@@ -474,18 +477,17 @@ module.exports = class TrelloView
     # Checks card due is within limit minutes
     #
     is_due_soon: (card, limit) ->
-        if card.due is null  # If due is null, not need categorization
-            no
+      if card.due is null  # If due is null, not need categorization
+        no
+      else
+        due     = new Date(card.due)
+        now     = new Date()
+        diff    = due.getTime() - now.getTime()  # diff in milli sec
+        minutes = Math.abs(diff / 1000 / 60)
+        if minutes < limit
+          yes
         else
-            due = new Date(card.due)
-            now = new Date()
-            diff = due.getTime() - now.getTime()  # diff in milli sec
-            minutes = Math.abs(diff / 1000 / 60)
-            #console.log(card.name+" minutes diff="+minutes+" due="+due)
-            if minutes < limit
-                yes
-            else
-                no
+          no
 
     #
     # Get html for due now cards for arg lists

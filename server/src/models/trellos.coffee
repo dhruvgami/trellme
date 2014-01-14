@@ -1,12 +1,5 @@
-#
-# trellos.coffee
-#
-#
-#
-mongodb      = require 'mongodb'
-ObjectID     = require('mongodb').ObjectID
-should       = require 'should'
 _            = require 'underscore'
+should       = require 'should'
 async        = require 'async'
 dbconnection = require './dbconnection'
 Actions      = require './actions'
@@ -18,6 +11,10 @@ Members      = require './members'
 module.exports = class Trellos extends dbconnection
   # - Class Methods - #
   @getAllData: (userId, dateRange, cb) ->
+    if _.isFunction dateRange
+      cb        = dateRange
+      dateRange = {}
+
     data =
       actions : []
       boards  : []

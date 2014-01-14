@@ -215,12 +215,11 @@ app.get "/app/trello/view", authRequired, (req, res) ->
 # Get the reports summary JSON.
 # Authentication required as the reports are scoped to the logged in user.
 app.get "/app/trello/reports", authRequired, (req, res) ->
-  new TrelloView().getReports req.user._id, (err, result) ->
+  new TrelloView().getReports req.user._id, (err, reports) ->
     if err
-      res.status 500
-      res.send err
+      res.send 500, err
     else
-      res.json result
+      res.json reports
 
 # Returns a JSON representation with the activity in boards given a date range (YYYY-MM-DD)
 # Ex: /app/trello/reports/from/2013/12/10/to/2013/12/24

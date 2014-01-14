@@ -423,6 +423,10 @@
 
     TrelloView.prototype.getReports = function(userId, dateRange, cb) {
       var _this = this;
+      if (_.isFunction(dateRange)) {
+        cb = dateRange;
+        dateRange = {};
+      }
       return Trellos.getAllData(userId, dateRange, function(err, data) {
         var dueCards, reports;
         if (err) {

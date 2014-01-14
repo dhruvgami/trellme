@@ -243,12 +243,11 @@
   });
 
   app.get("/app/trello/reports", authRequired, function(req, res) {
-    return new TrelloView().getReports(req.user._id, function(err, result) {
+    return new TrelloView().getReports(req.user._id, function(err, reports) {
       if (err) {
-        res.status(500);
-        return res.send(err);
+        return res.send(500, err);
       } else {
-        return res.json(result);
+        return res.json(reports);
       }
     });
   });
