@@ -19,9 +19,6 @@ MailService   = require("./helpers/mailservice")
 TrelloView    = require("./views/trello-view")
 config        = require(__dirname + '/../config/config.json')
 
-# Database objects
-db_users = new Users()
-
 # Maybe move this out of the controller into a model.
 passport.use 'api', new LocalStrategy { usernameField : 'email' }, (email, password, done) ->
   process.nextTick ->
@@ -62,6 +59,9 @@ app.configure ->
 
 app.configure "development", ->
   app.use express.errorHandler()
+
+app.handleError = (error, res) ->
+  res.json(500, { error : error.message })
 
 # # # # # #
 # Routes  #
@@ -108,6 +108,33 @@ app.post '/settings', authRequired, (req, res) ->
     else
       res.status 201
       res.json user.settings
+
+# Password Reset Section
+# - Find a user by its reset_password_token - #
+app.get '/password/reset', (req, res) ->
+  Users.findByResetPasswordToken req.query.token, (err, user) ->
+    return app.handleError(err, res) if err
+    res.status(200).send('OK')
+
+# - Request a new reset password token - #
+app.post '/password/reset', (req, res) ->
+  Users.findByEmail req.body.email, (err, user) ->
+    return app.handleError(err, res) if err
+
+    user.requestPasswordReset (err, result) ->
+      return app.handleError(err, res) if err
+      res.json result
+
+# - Find a user by its reset_password_token and, if found, reset their password. - #
+app.put '/password/reset', (req, res) ->
+  Users.findByResetPasswordToken req.body.token, (err, user) ->
+    return app.handleError(err, res) if err
+
+    user.resetPassword req.body.password, req.body.password_confirmation, (err, user) ->
+      return app.handleError(err, res) if err
+      res.json { "status" : "ok" }
+
+# End Password Reset Section
 
 #=================================================
 # Users API

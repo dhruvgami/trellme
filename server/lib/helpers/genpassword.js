@@ -7,7 +7,7 @@
   module.exports = GenPassword = (function() {
     function GenPassword() {}
 
-    GenPassword.SaltLength = 9;
+    GenPassword.saltLength = 9;
 
     GenPassword.md5 = function(string) {
       return crypto.createHash("md5").update(string).digest("hex");
@@ -15,14 +15,14 @@
 
     GenPassword.validateHash = function(hash, password) {
       var salt, validHash;
-      salt = hash.substr(0, GenPassword.SaltLength);
+      salt = hash.substr(0, GenPassword.saltLength);
       validHash = salt + this.md5(password + salt);
       return hash === validHash;
     };
 
     GenPassword.createHash = function(password) {
       var hash, salt;
-      salt = this.generateSalt(GenPassword.SaltLength);
+      salt = this.generateSalt(GenPassword.saltLength);
       hash = this.md5(password + salt);
       return salt + hash;
     };

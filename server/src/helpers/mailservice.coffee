@@ -4,7 +4,7 @@
 #
 fs         = require 'fs'
 _          = require 'underscore'
-mandrill   = require('node-mandrill')('rOpF3MDFRDN55QV07ypMzA')
+mandrill   = require('node-mandrill')('rOpF3MDFRDN55QV07ypMzA') # TODO: Move MailChimp's API key out of here into config.json file ASAP!
 TrelloApi  = require './trello-api'
 TrelloView = require '../views/trello-view'
 handlebars = require 'handlebars'

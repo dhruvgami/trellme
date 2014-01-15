@@ -5,6 +5,7 @@ dbconnection = require './dbconnection'
 Boards       = require './boards'
 Trellos      = require './trellos'
 GenPassword  = require '../helpers/genpassword'
+config       = require '../../config/config'
 
 module.exports = class Users extends dbconnection
   # - Collection Name - #
@@ -13,11 +14,15 @@ module.exports = class Users extends dbconnection
   # - Indexes - #
   @index 'email', unique: true
   @index 'settings.daily_email'
+  @index 'reset_password_token'
+
+  @emailRegexp : /^[a-zA-Z0-9\\.!#$%&'*+\-/=?\^_{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 
   # - Class Methods - #
-  @userFromMongoDocument: (err, document, cb) ->
-    if err
-      cb(err, null)
+  @userFromMongoDocument: (error, document, cb) ->
+    error = new Error('User not found') if document is null
+    if error
+      cb(error, null)
     else
       cb(null, new Users(document))
 
@@ -45,12 +50,19 @@ module.exports = class Users extends dbconnection
       col.findOne { email: email }, (err, doc) =>
         @userFromMongoDocument err, doc, cb
 
-  #
+  # Find user by email.
+  @findByResetPasswordToken: (token, cb) ->
+    @collection (err, col) =>
+      return cb(err, null) if err
+      col.findOne { reset_password_token: token }, (err, doc) =>
+        @userFromMongoDocument err, doc, cb
+
+
   # Create a user
   # params: email, password, trello_username, tzdiff
   @create: (params = {}, cb) ->
     # Check email address
-    return cb(500, "Invalid email address") if not params.email.match(/^[a-zA-Z0-9\\.!#$%&'*+\-/=?\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)
+    return cb(500, "Invalid email address") if not params.email.match(Users.emailRegexp)
 
     # Check trello username
     return cb(500, "Invalid Trello username") if not params.trello_username.match(/^[a-zA-Z\\.\-0-9_]+$/)
@@ -95,14 +107,23 @@ module.exports = class Users extends dbconnection
     @find(id, done)
 
   # - Instance Methods - #
-
   # Fields to expose through the API.
   toJSON: ->
-    _id             : @_id
-    email           : @email
-    access_token    : @access_token
-    trello_username : @trello_username
-    settings        : @settings
+    _id                  : @_id
+    email                : @email
+    access_token         : @access_token
+    trello_username      : @trello_username
+    settings             : @settings
+    reset_password_token : @reset_password_token
+
+  # Saves a user record.
+  # [Function] `cb` param receives `error` if any or user instance.
+  save: (values, cb) ->
+    return cb(new Error('Document id not present')) unless @_id
+
+    Users.collection (err, col) =>
+      return cb(err, null) if err
+      col.findAndModify({ _id : @_id }, null, { $set : values }, { new : true }, cb)
 
   # Get boards that belong to user.
   getBoards: (cb) ->
@@ -141,6 +162,33 @@ module.exports = class Users extends dbconnection
   # Checks if password matches the user.password
   verifyPassword: (password) ->
     GenPassword.validateHash(@password, password)
+
+  # Sets a token for resetting user's password and sends out an email
+  # with the link so that the user can continue the process.
+  requestPasswordReset: (cb) ->
+    token       = GenPassword.generateSalt(20)
+    resetParams = { reset_password_token : token }
+    @save resetParams, (err, user) =>
+      @sendPasswordResetInstructionsEmail()
+      cb(err, resetParams)
+
+  # Reset user's password and sets reset_password_token field to blank.
+  resetPassword: (password, passwordConfirmation, cb) ->
+    if _.isEmpty password
+      return cb(new Error("Password can't be blank"), null)
+    else if password isnt passwordConfirmation
+      return cb(new Error("Password doesn't match confirmation"), null)
+    else
+      values =
+        password             : GenPassword.createHash(password)
+        reset_password_token : null
+      @save values, cb
+
+  resetPasswordLink: ->
+    "http://#{config.api_host}/password/reset?token=#{@reset_password_token}"
+
+  sendPasswordResetInstructionsEmail: (cb) ->
+    cb() if cb
 
   # Update user document - store token_secret
   # user_id: user ID in string
