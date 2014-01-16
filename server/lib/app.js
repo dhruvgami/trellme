@@ -88,7 +88,9 @@
   });
 
   app.handleError = function(error, res) {
-    return res.json(500, {
+    var errorCode;
+    errorCode = error.code ? error.code : /not found/i.test(error.message) ? 404 : 500;
+    return res.json(errorCode, {
       error: error.message
     });
   };

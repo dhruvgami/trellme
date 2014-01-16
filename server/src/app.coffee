@@ -35,6 +35,7 @@ passport.serializeUser   Users.serialize
 passport.deserializeUser Users.deserialize
 
 # Middleware to use whenever a route requires users to be authenticated.
+# TODO: Scope to app.
 authRequired = (req, res, next) ->
  return next() if req.isAuthenticated()
  res.status 401
@@ -61,7 +62,14 @@ app.configure "development", ->
   app.use express.errorHandler()
 
 app.handleError = (error, res) ->
-  res.json(500, { error : error.message })
+  errorCode =
+    if error.code
+      error.code
+    else if (/not found/i).test(error.message)
+      404
+    else
+      500
+  res.json(errorCode, { error : error.message })
 
 # # # # # #
 # Routes  #

@@ -7,6 +7,7 @@
     'signin',
     'reports',
     'userSettings',
+    'resetPassword',
     'services.userSession',
     'services.httpMonitor',
     'directives.spinner'

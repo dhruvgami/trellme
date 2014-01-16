@@ -14,6 +14,7 @@ module.exports = function(config) {
       'bower_components/bootstrap/dist/js/bootstrap.js',
       'src/app/reports/reports.js',
       'src/app/user_settings/user_settings.js',
+      'src/app/reset_password/reset_password.js',
       'src/app/trellme.js',
       'src/**/*.js',
       'test/unit/**/*Spec.js'

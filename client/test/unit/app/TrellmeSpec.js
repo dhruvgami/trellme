@@ -33,6 +33,10 @@
         expect(app).toDependOn('userSettings');
       });
 
+      it('should depend on resetPassword', function() {
+        expect(app).toDependOn('resetPassword');
+      });
+
       it('should depend on services.userSession', function() {
         expect(app).toDependOn('services.userSession');
       });

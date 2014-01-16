@@ -53,11 +53,11 @@
       <a href="#" class="close"><img src="close_pop.png" class="btn_close" title="Close Window" alt="Close" /></a>
       <form class="signin" name="form" ng-controller="SigninCtrl" ng-submit="signin()" novalidate>
         <div class="control-group">
-            <label class="control-label username" for="email">
-            <span>Email</span></label>
-            <div class="controls">
-              <input type="email" ng-model="email" ng-required="true" autocomplete="on" placeholder="Enter your email address">
-            </div>
+          <label class="control-label username" for="email">
+          <span>Email</span></label>
+          <div class="controls">
+            <input type="email" ng-model="email" ng-required="true" autocomplete="on" placeholder="Enter your email address" />
+          </div>
         </div>
 
         <div class="control-group">
@@ -71,11 +71,7 @@
 
         <div class="form-actions">
           <button class="btn btn-primary submit button" type="submit" ng-disabled="form.$invalid || form.$pristine">Sign In</button>
-          <!--
-          <p>
-          <a class="forgot" href="#">Forgot your password?</a>
-          </p>
-          -->
+          <p><a class="forgot" href="/#/password/reset">Forgot your password?</a></p>
         </div>
       </form>
     </div>
