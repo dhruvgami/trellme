@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  describe('ResetPasswordCtrl', function() {
+  describe('RequestPasswordResetCtrl', function() {
     var $q, $window, $rootScope, $scope, ctrl, Password, deferred;
     beforeEach(module('resetPassword'));
     beforeEach(inject(function($injector) {
@@ -12,7 +12,7 @@
       $rootScope      = $injector.get('$rootScope');
       $scope          = $rootScope.$new();
       deferred        = $q.defer();
-      $controller('ResetPasswordCtrl', {
+      $controller('RequestPasswordResetCtrl', {
         '$scope' : $scope
       });
     }));

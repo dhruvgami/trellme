@@ -7,12 +7,15 @@
 
     <div ng-show="emailSent">
       <div class="alert alert-success">
-        <p>Email sent</p>
+        <p>
+          <b>Email sent</b>
+          <br />
+          <small>
+            An email with instructions for resetting your password has been sent to
+            {{email}}.
+          </small>
+        </p>
       </div>
-      <p>
-        An email with instructions for resetting your password has been sent to
-        {{email}}
-      </p>
     </div>
 
     <div ng-hide="emailSent">

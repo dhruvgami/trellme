@@ -3,7 +3,7 @@
 
   angular.
     module('resetPassword').
-    controller('ResetPasswordCtrl', ['Password', '$window', '$scope', function(Password, $window, $scope) {
+    controller('RequestPasswordResetCtrl', ['Password', '$window', '$scope', function(Password, $window, $scope) {
       $scope.emailSent     = false;
       $scope.emailNotFound = false;
 

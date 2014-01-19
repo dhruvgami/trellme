@@ -26,20 +26,20 @@
         routes = $injector.get('$route').routes;
       }));
 
-      describe('/password/reset', function() {
+      describe('/password/request-reset', function() {
         beforeEach(function() {
-          route = routes['/password/reset'];
+          route = routes['/password/request-reset'];
         });
 
         describe('controller', function() {
           it('should be ResetPasswordCtrl', function() {
-            expect(route.controller).toBe('ResetPasswordCtrl');
+            expect(route.controller).toBe('RequestPasswordResetCtrl');
           });
         });
 
         describe('templateUrl', function() {
-          it('should be /src/app/reset_password/reset_password.html', function() {
-            expect(route.templateUrl).toBe('/src/app/reset_password/reset_password.html');
+          it('should be /src/app/reset_password/request_reset.html', function() {
+            expect(route.templateUrl).toBe('/src/app/reset_password/request_reset.html');
           });
         });
       });
