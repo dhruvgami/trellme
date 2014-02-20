@@ -160,7 +160,7 @@
     });
   });
 
-  app.put('/password/reset', function(req, res) {
+  app.put('/password', function(req, res) {
     return Users.findByResetPasswordToken(req.body.token, function(err, user) {
       if (err) {
         return app.handleError(err, res);

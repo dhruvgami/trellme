@@ -134,7 +134,7 @@ app.post '/password/reset', (req, res) ->
       res.json result
 
 # - Find a user by its reset_password_token and, if found, reset their password. - #
-app.put '/password/reset', (req, res) ->
+app.put '/password', (req, res) ->
   Users.findByResetPasswordToken req.body.token, (err, user) ->
     return app.handleError(err, res) if err
 

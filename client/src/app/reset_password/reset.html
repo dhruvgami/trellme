@@ -1,0 +1,41 @@
+<div class="white container">
+  <div class="alert alert-error" ng-show="invalidToken">
+    <b>Invalid token</b>
+    <p>
+      If you came here via Email link then you should try requesting to reset
+      your password again.
+      <br />
+      If you are manually typing the reset token make your you typed it right.
+    </p>
+  </div>
+
+  <div class="alert alert-error" ng-show="tokenNotFound">
+    Sorry. We couldn't find that token in our system.
+  </div>
+
+  <div class="alert alert-success" ng-show="passwordReset">
+    Your password was successfully reset. You can go ahead and login.
+  </div>
+
+  <form class="form-horizontal" name="form" ng-submit="resetPassword()" ng-show="tokenFound" novalidate>
+    <div class="control-group">
+      <label class="control-label">Password:</label>
+      <div class="controls">
+        <input class="span4" type="password" ng-model="password" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="password" class="control-label">Confirm your password:</label>
+      <div class="controls">
+        <input class="span4" type="password" ng-model="passwordConfirmation" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="controls">
+        <button type="submit" class="btn btn-primary" ng-disabled="form.$invalid || form.$pristine || password !== passwordConfirmation">Reset my password</button>
+      </div>
+    </div>
+  </form>
+</div>

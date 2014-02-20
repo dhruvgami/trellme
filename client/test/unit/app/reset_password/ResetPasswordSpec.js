@@ -32,7 +32,7 @@
         });
 
         describe('controller', function() {
-          it('should be ResetPasswordCtrl', function() {
+          it('should be RequestPasswordResetCtrl', function() {
             expect(route.controller).toBe('RequestPasswordResetCtrl');
           });
         });
@@ -40,6 +40,24 @@
         describe('templateUrl', function() {
           it('should be /src/app/reset_password/request_reset.html', function() {
             expect(route.templateUrl).toBe('/src/app/reset_password/request_reset.html');
+          });
+        });
+      });
+
+      describe('/password/reset', function() {
+        beforeEach(function() {
+          route = routes['/password/reset'];
+        });
+
+        describe('controller', function() {
+          it('should be ResetPasswordCtrl', function() {
+            expect(route.controller).toBe('ResetPasswordCtrl');
+          });
+        });
+
+        describe('templateUrl', function() {
+          it('should be /src/app/reset_password/reset.html', function() {
+            expect(route.templateUrl).toBe('/src/app/reset_password/reset.html');
           });
         });
       });
