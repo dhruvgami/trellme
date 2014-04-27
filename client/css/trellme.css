@@ -76,7 +76,7 @@ body {
 img.btn_close {
     /* Position the close button */
     float: right;
-    margin: -28px -28px 0 0;
+    margin: -6px -6px 0 0;
 }
 
 fieldset {
@@ -115,12 +115,12 @@ form.signin .textbox input {
 
 form.signin input:-moz-placeholder {
     color: #bbb;
-    text-shadow: 0 0 2px #000;
+    /* text-shadow: 0 0 2px #000; */
 }
 
 form.signin input::-webkit-input-placeholder {
     color: #bbb;
-    text-shadow: 0 0 2px #000;
+    /* text-shadow: 0 0 2px #000; */
 }
 
 .button {

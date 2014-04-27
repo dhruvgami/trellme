@@ -17,3 +17,6 @@
 
 # Ignore TODO file.
 /TODO
+
+/dump
+*.bak

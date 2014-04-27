@@ -13,7 +13,7 @@
   \*/
 
   var conn   = new Mongo()
-    , db     = conn.getDB('trellme-prod')
+    , db     = conn.getDB('trellme')
     , users  = db.users.find()
     , boards = db.boards.find();
 

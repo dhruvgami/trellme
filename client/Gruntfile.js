@@ -11,6 +11,7 @@ module.exports = function(grunt) {
           'bower_components/bootstrap/dist/js/bootstrap.min.js',
           'src/app/reports/reports.js',
           'src/app/user_settings/user_settings.js',
+	    'src/theme.js',
           'src/app/trellme.js',
           'src/**/*.js'
         ],

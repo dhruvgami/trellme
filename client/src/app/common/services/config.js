@@ -4,7 +4,7 @@
   angular.module('services.config', []).
     service('Config', [function() {
       return {
-        apiEndpoint : 'http://localhost:3000'
+        apiEndpoint : 'http://dev.trellme.com:3000'
       };
     }]);
 }());
