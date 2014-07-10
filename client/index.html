@@ -70,7 +70,7 @@
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-primary submit button" type="submit" ng-disabled="form.$invalid || form.$pristine">Sign In</button>
+          <button onclick="closeLogin();" class="btn btn-primary submit button" type="submit" ng-disabled="form.$invalid || form.$pristine">Sign In</button>
           <!--
           <p>
           <a class="forgot" href="#">Forgot your password?</a>
@@ -80,6 +80,15 @@
       </form>
     </div>
     <!-- End Login Dialog -->
+
+    <script>
+      function closeLogin() {
+            $('#mask, .login-popup').fadeOut(300, function() {
+                $('#mask').remove();
+            });
+            return true;
+      }
+    </script>
 
     <script src="trellme.js"></script>
   </body>
